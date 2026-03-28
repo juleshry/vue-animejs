@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "vue": "^3.5.31",
+    "animejs": "^4.3.6",
+    "@vueuse/core": "^14.2.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1"
+  }
+}
