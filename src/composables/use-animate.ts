@@ -11,7 +11,7 @@ export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef
   const { stop } = watch(
     watch_target,
     ({ el, opt }) => {
-      animation.value?.cancel()
+      cancel()
 
       if (!el) {
         console.warn("Target element is null or undefined")
@@ -25,16 +25,75 @@ export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef
 
   onUnmounted(() => {
     stop()
-    animation.value?.cancel()
+    cancel()
   })
 
   function play() {
     animation.value?.play()
   }
 
+  function reverse() {
+    animation.value?.reverse()
+  }
+
+  function pause() {
+    animation.value?.pause()
+  }
+
   function restart() {
     animation.value?.restart()
   }
 
-  return { animation, play, restart }
+  function alternate() {
+    animation.value?.alternate()
+  }
+
+  function resume() {
+    animation.value?.resume()
+  }
+
+  function complete() {
+    animation.value?.complete()
+  }
+
+  function cancel() {
+    animation.value?.cancel()
+  }
+
+  function revert() {
+    animation.value?.revert()
+  }
+
+  function reset() {
+    animation.value?.reset()
+  }
+
+  function seek(time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) {
+    animation.value?.seek(time, muteCallbacks, internalRender)
+  }
+
+  function stretch(newDuration: number) {
+    animation.value?.stretch(newDuration)
+  }
+
+  function refresh() {
+    animation.value?.refresh()
+  }
+
+  return {
+    animation,
+    play,
+    reverse,
+    pause,
+    restart,
+    alternate,
+    resume,
+    complete,
+    cancel,
+    revert,
+    reset,
+    seek,
+    stretch,
+    refresh,
+  }
 }

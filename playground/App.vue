@@ -1,13 +1,13 @@
 <script setup lang="ts">
-  import { ref, useTemplateRef } from "vue"
-  import { useAnimate, useTimer } from "@lib"
+  import { onMounted, ref, useTemplateRef } from "vue"
+  import { useAnimate, useTimer, useTimeline } from "@lib"
 
   const box = useTemplateRef("box")
 
   const { restart } = useAnimate(box, {
     translateX: 250,
     rotate: "1turn",
-    backgroundColor: "#FFF",
+    backgroundColor: "#5350ff",
     duration: 2000,
     autoplay: true,
   })
@@ -22,6 +22,43 @@
     onUpdate: self => (time.value = self.currentTime),
     onLoop: self => (count.value = self._currentIteration),
   })
+
+  const timeline_el = useTemplateRef("timeline")
+
+  const { timeline } = useTimeline()
+
+  onMounted(() => {
+    if (!timeline_el.value) return
+    timeline.value
+      .add(timeline_el.value.children[0], {
+        x: 250,
+        rotate: "1turn",
+        backgroundColor: "#dbdaff",
+        duration: 2000,
+      })
+      .add(
+        timeline_el.value.children[1],
+        {
+          x: 250,
+          y: 50,
+          backgroundColor: "#9593ff",
+          duration: 2000,
+        },
+        "<<"
+      )
+      .add(
+        timeline_el.value.children[2],
+        {
+          x: 100,
+          y: -50,
+          width: 50,
+          height: 50,
+          backgroundColor: "#d089ff",
+          duration: 1000,
+        },
+        "<<+20"
+      )
+  })
 </script>
 
 <template>
@@ -33,10 +70,20 @@
       <div ref="box" class="box"></div>
       <button @click="restart">Restart animation</button>
     </div>
+
     <div>
       <h2>Timer</h2>
       <span>Time: {{ time }} ms</span>
       <span>Count: {{ count }}</span>
+    </div>
+
+    <div>
+      <h2>Timeline</h2>
+      <div ref="timeline" class="timeline">
+        <div class="box small"></div>
+        <div class="box small"></div>
+        <div class="box small"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -56,11 +103,21 @@
         width: 100px;
         height: 100px;
         background-color: #ff3e00;
-        margin-top: 20px;
+
+        &.small {
+          width: 20px;
+          height: 20px;
+        }
       }
 
       button {
         width: fit-content;
+      }
+
+      .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
       }
     }
   }

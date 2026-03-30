@@ -1,0 +1,20 @@
+
+html {
+  font-family: Arial, Helvetica, serif;
+}
+
+:root{
+  --vp-c-brand-1: #b3413c;
+  --vp-c-brand-2: #40835d;
+
+}
+
+.VPHero.VPHomeHero{
+  h1{
+    span.name.clip{
+      background: linear-gradient(45deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+}
