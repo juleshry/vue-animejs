@@ -26,17 +26,16 @@
 
   const timeline_el = useTemplateRef("timeline")
 
-  const { timeline } = useTimeline()
+  const { add, play: playTimeline } = useTimeline({ autoplay: false })
 
   onMounted(() => {
     if (!timeline_el.value) return
-    timeline.value
-      .add(timeline_el.value.children[0], {
-        x: 250,
-        rotate: "1turn",
-        backgroundColor: "#dbdaff",
-        duration: 2000,
-      })
+    add(timeline_el.value.children[0], {
+      x: 250,
+      rotate: "1turn",
+      backgroundColor: "#dbdaff",
+      duration: 2000,
+    })
       .add(
         timeline_el.value.children[1],
         {
@@ -89,6 +88,7 @@
         <div class="box small"></div>
         <div class="box small"></div>
       </div>
+      <button @click="playTimeline">Start Timeline</button>
     </div>
   </div>
 </template>

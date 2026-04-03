@@ -19,51 +19,51 @@ export function useTimer(options: MaybeRef<TimerParams> = {}) {
   })
 
   function play() {
-    timer.value?.play()
+    return timer.value?.play()
   }
 
   function reverse() {
-    timer.value?.reverse()
+    return timer.value?.reverse()
   }
 
   function pause() {
-    timer.value?.pause()
+    return timer.value?.pause()
   }
 
   function restart() {
-    timer.value?.restart()
+    return timer.value?.restart()
   }
 
   function alternate() {
-    timer.value?.alternate()
+    return timer.value?.alternate()
   }
 
   function resume() {
-    timer.value?.resume()
+    return timer.value?.resume()
   }
 
   function complete() {
-    timer.value?.complete()
+    return timer.value?.complete()
   }
 
-  function reset() {
-    timer.value?.reset()
+  function reset(softReset?: boolean) {
+    return timer.value?.reset(softReset)
   }
 
   function cancel() {
-    timer.value?.cancel()
+    return timer.value?.cancel()
   }
 
   function revert() {
-    timer.value?.revert()
+    return timer.value?.revert()
   }
 
   function seek(time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) {
-    timer.value?.seek(time, muteCallbacks, internalRender)
+    return timer.value?.seek(time, muteCallbacks, internalRender)
   }
 
   function stretch(newDuration: number) {
-    timer.value?.stretch(newDuration)
+    return timer.value?.stretch(newDuration)
   }
 
   return { timer, play, reverse, pause, restart, alternate, resume, complete, reset, cancel, revert, seek, stretch }

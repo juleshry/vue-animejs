@@ -29,55 +29,55 @@ export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef
   })
 
   function play() {
-    animation.value?.play()
+    return animation.value?.play()
   }
 
   function reverse() {
-    animation.value?.reverse()
+    return animation.value?.reverse()
   }
 
   function pause() {
-    animation.value?.pause()
+    return animation.value?.pause()
   }
 
   function restart() {
-    animation.value?.restart()
+    return animation.value?.restart()
   }
 
   function alternate() {
-    animation.value?.alternate()
+    return animation.value?.alternate()
   }
 
   function resume() {
-    animation.value?.resume()
+    return animation.value?.resume()
   }
 
   function complete() {
-    animation.value?.complete()
+    return animation.value?.complete()
   }
 
   function cancel() {
-    animation.value?.cancel()
+    return animation.value?.cancel()
   }
 
   function revert() {
-    animation.value?.revert()
+    return animation.value?.revert()
   }
 
-  function reset() {
-    animation.value?.reset()
+  function reset(softReset?: boolean) {
+    return animation.value?.reset(softReset)
   }
 
   function seek(time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) {
-    animation.value?.seek(time, muteCallbacks, internalRender)
+    return animation.value?.seek(time, muteCallbacks, internalRender)
   }
 
   function stretch(newDuration: number) {
-    animation.value?.stretch(newDuration)
+    return animation.value?.stretch(newDuration)
   }
 
   function refresh() {
-    animation.value?.refresh()
+    return animation.value?.refresh()
   }
 
   return {
