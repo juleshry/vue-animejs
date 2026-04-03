@@ -28,12 +28,16 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
     cancel()
   })
 
-  function add(a1: TargetsParam, a2: AnimationParams, a3?: TimelinePosition | StaggerFunction<number | string>) {
-    return timeline.value.add(a1, a2, a3)
+  function add(
+    targets: MaybeRef<TargetsParam>,
+    params: AnimationParams,
+    position?: TimelinePosition | StaggerFunction<number | string>
+  ) {
+    return { ...timeline.value.add(unref(targets), params, position), add, set, remove }
   }
 
-  function set(targets: TargetsParam, parameters: AnimationParams, position?: TimelinePosition) {
-    return timeline.value.set(targets, parameters, position)
+  function set(targets: MaybeRef<TargetsParam>, parameters: AnimationParams, position?: TimelinePosition) {
+    return { ...timeline.value.set(unref(targets), parameters, position), add, set, remove }
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {
@@ -44,8 +48,8 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
     return timeline.value.label(labelName, position)
   }
 
-  function remove(targets: TargetsParam, propertyName?: string) {
-    return timeline.value.remove(targets, propertyName)
+  function remove(targets: MaybeRef<TargetsParam>, propertyName?: string) {
+    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove }
   }
 
   function call(callback: Callback<Timer>, position?: TimelinePosition) {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { onMounted, ref, useTemplateRef } from "vue"
-  import { useAnimate, useTimer, useTimeline } from "@lib"
+  import { useAnimate, useTimer, useTimeline, useAnimatable } from "@lib"
+  import { utils } from "animejs"
 
   const box = useTemplateRef("box")
 
@@ -24,20 +25,21 @@
     onLoop: self => (count.value = self._currentIteration),
   })
 
-  const timeline_el = useTemplateRef("timeline")
+  const box1 = useTemplateRef("box1")
+  const box2 = useTemplateRef("box2")
+  const box3 = useTemplateRef("box3")
 
   const { add, play: playTimeline } = useTimeline({ autoplay: false })
 
   onMounted(() => {
-    if (!timeline_el.value) return
-    add(timeline_el.value.children[0], {
+    add(box1, {
       x: 250,
       rotate: "1turn",
       backgroundColor: "#dbdaff",
       duration: 2000,
     })
       .add(
-        timeline_el.value.children[1],
+        box2,
         {
           x: 250,
           y: 50,
@@ -47,7 +49,7 @@
         "<<"
       )
       .add(
-        timeline_el.value.children[2],
+        box3,
         {
           x: 100,
           y: -50,
@@ -58,7 +60,35 @@
         },
         "<<+20"
       )
+
+    if (!animatable_bounds.value) return
+
+    let { left, top, width, height } = animatable_bounds.value.getBoundingClientRect()
+
+    window.addEventListener("scroll", () => {
+      const new_bounds = animatable_bounds.value?.getBoundingClientRect()
+
+      if (!new_bounds) return
+
+      left = new_bounds.left
+      top = new_bounds.top
+      width = new_bounds.width
+      height = new_bounds.height
+    })
+
+    window.addEventListener("mousemove", e => {
+      const new_x = utils.clamp(e.clientX - left - 50 / 2, left - 50, left + width - 50)
+      const new_y = utils.clamp(e.clientY - top - 50 / 2, -50 / 2, height - 50 / 2)
+
+      animatable.value?.x(new_x)
+      animatable.value?.y(new_y)
+    })
   })
+
+  const circle = useTemplateRef("circle")
+  const animatable_bounds = useTemplateRef("animatable_bounds")
+
+  const { animatable } = useAnimatable(circle, { x: 250, y: 250 })
 </script>
 
 <template>
@@ -83,12 +113,19 @@
 
     <div>
       <h2>Timeline</h2>
-      <div ref="timeline" class="timeline">
-        <div class="box small"></div>
-        <div class="box small"></div>
-        <div class="box small"></div>
+      <div class="timeline">
+        <div ref="box1" class="box small"></div>
+        <div ref="box2" class="box small"></div>
+        <div ref="box3" class="box small"></div>
       </div>
       <button @click="playTimeline">Start Timeline</button>
+    </div>
+
+    <div>
+      <h2>Animatable</h2>
+      <div ref="animatable_bounds" class="animatable_bounds">
+        <div ref="circle" class="circle" />
+      </div>
     </div>
   </div>
 </template>
@@ -123,6 +160,23 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+      }
+
+      .animatable_bounds {
+        width: 500px;
+        height: 250px;
+        border: 1px solid #b3b3b3;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.16);
+
+        overflow: hidden;
+
+        & .circle {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background-color: #afaeff;
+        }
       }
     }
   }
