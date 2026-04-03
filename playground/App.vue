@@ -15,10 +15,11 @@
   const time = ref<number>(0)
   const count = ref<number>(0)
 
-  useTimer({
+  const { play, pause } = useTimer({
     duration: 1000,
     loop: true,
     frameRate: 30,
+    autoplay: false,
     onUpdate: self => (time.value = self.currentTime),
     onLoop: self => (count.value = self._currentIteration),
   })
@@ -75,6 +76,10 @@
       <h2>Timer</h2>
       <span>Time: {{ time }} ms</span>
       <span>Count: {{ count }}</span>
+      <div style="display: flex; gap: 10px">
+        <button @click="play">Start timer</button>
+        <button @click="pause">Pause timer</button>
+      </div>
     </div>
 
     <div>

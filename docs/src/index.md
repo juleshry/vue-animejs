@@ -6,6 +6,6 @@ hero:
   name: Vue x Animejs
   text: Animejs implementation for Vuejs.
   image:
-    src: /icon.jpg
+    src: /icon.png
     alt: Vue x Animejs
 ---
