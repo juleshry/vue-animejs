@@ -1,4 +1,4 @@
-import { type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
+import { getCurrentInstance, type MaybeRef, onMounted, onUnmounted, ref, unref, watch } from "vue"
 import {
   type AnimationParams,
   type Callback,
@@ -12,32 +12,83 @@ import {
   type Timer,
 } from "animejs"
 
-export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
-  const timeline = ref<Timeline>(createTimeline(unref(options)))
-  const { stop } = watch(
-    () => unref(options),
-    _options => {
-      cancel()
-      timeline.value = createTimeline(_options)
-    },
-    { flush: "post" }
-  )
+type QueueEntry =
+  | {
+      type: "add"
+      targets: MaybeRef<TargetsParam>
+      params: AnimationParams
+      position?: TimelinePosition | StaggerFunction<number | string>
+    }
+  | { type: "set"; targets: MaybeRef<TargetsParam>; params: AnimationParams; position?: TimelinePosition }
 
-  onUnmounted(() => {
-    stop()
-    cancel()
-  })
+export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
+  let is_mounted = false
+  const instance = getCurrentInstance()
+
+  const queue: QueueEntry[] = []
+
+  const timeline = ref<Timeline>(createTimeline(unref(options)))
+
+  if (instance) {
+    const { stop } = watch(
+      () => unref(options),
+      _options => {
+        cancel()
+        timeline.value = createTimeline(_options)
+      },
+      { flush: "post" }
+    )
+
+    onMounted(() => {
+      is_mounted = true
+
+      queue.forEach(entry => {
+        switch (entry.type) {
+          case "add":
+            add(entry.targets, entry.params, entry.position)
+            break
+          case "set":
+            set(entry.targets, entry.params, entry.position)
+            break
+        }
+      })
+    })
+
+    onUnmounted(() => {
+      stop()
+      cancel()
+    })
+  }
 
   function add(
     targets: MaybeRef<TargetsParam>,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
-    return { ...timeline.value.add(unref(targets), params, position), add, set, remove }
+    if (is_mounted) {
+      return { ...timeline.value.add(unref(targets), params, position), add, set, remove }
+    }
+
+    queue.push({ type: "add", targets, params, position })
+    return { ...timeline.value, add, set, remove }
   }
 
-  function set(targets: MaybeRef<TargetsParam>, parameters: AnimationParams, position?: TimelinePosition) {
-    return { ...timeline.value.set(unref(targets), parameters, position), add, set, remove }
+  function set(targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) {
+    if (is_mounted) {
+      return { ...timeline.value.set(unref(targets), params, position), add, set, remove }
+    }
+
+    queue.push({ type: "set", targets, params, position })
+    return { ...timeline.value, add, set, remove }
+  }
+
+  function remove(targets: MaybeRef<TargetsParam>, propertyName?: string) {
+    if (!is_mounted) {
+      console.warn("Cannot remove from timeline before mount")
+      return { ...timeline.value, add, set, remove }
+    }
+
+    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove }
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {
@@ -46,10 +97,6 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
 
   function label(labelName: string, position?: TimelinePosition) {
     return timeline.value.label(labelName, position)
-  }
-
-  function remove(targets: MaybeRef<TargetsParam>, propertyName?: string) {
-    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove }
   }
 
   function call(callback: Callback<Timer>, position?: TimelinePosition) {

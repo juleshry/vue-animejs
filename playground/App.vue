@@ -31,36 +31,36 @@
 
   const { add, play: playTimeline } = useTimeline({ autoplay: false })
 
-  onMounted(() => {
-    add(box1, {
-      x: 250,
-      rotate: "1turn",
-      backgroundColor: "#dbdaff",
-      duration: 2000,
-    })
-      .add(
-        box2,
-        {
-          x: 250,
-          y: 50,
-          backgroundColor: "#9593ff",
-          duration: 2000,
-        },
-        "<<"
-      )
-      .add(
-        box3,
-        {
-          x: 100,
-          y: -50,
-          width: 50,
-          height: 50,
-          backgroundColor: "#d089ff",
-          duration: 1000,
-        },
-        "<<+20"
-      )
+  add(box1, {
+    x: 250,
+    rotate: "1turn",
+    backgroundColor: "#dbdaff",
+    duration: 2000,
+  })
+    .add(
+      box2,
+      {
+        x: 250,
+        y: 50,
+        backgroundColor: "#9593ff",
+        duration: 2000,
+      },
+      "<<"
+    )
+    .add(
+      box3,
+      {
+        x: 100,
+        y: -50,
+        width: 50,
+        height: 50,
+        backgroundColor: "#d089ff",
+        duration: 1000,
+      },
+      "<<+20"
+    )
 
+  onMounted(() => {
     if (!animatable_bounds.value) return
 
     let { left, top, width, height } = animatable_bounds.value.getBoundingClientRect()
