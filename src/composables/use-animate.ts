@@ -1,32 +1,38 @@
-import { computed, type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
+import { getCurrentInstance, isRef, type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
 import { type JSAnimation, animate, type TargetSelector, type AnimationParams } from "animejs"
 
 export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef<AnimationParams> = {}) {
-  let animation = ref<JSAnimation>()
+  const instance = getCurrentInstance()
 
-  const watch_target = computed<{ el: TargetSelector; opt: AnimationParams }>(() => ({
-    el: unref(_target),
-    opt: unref(_options),
-  }))
-  const { stop } = watch(
-    watch_target,
-    ({ el, opt }) => {
+  const animation = ref<JSAnimation>()
+
+  if (instance) {
+    const { stop } = watch(
+      [() => unref(_target), () => unref(_options)],
+      ([el, opt]) => {
+        createAnimation(el, opt)
+      },
+      { flush: "post", immediate: !isRef(_target) }
+    )
+
+    onUnmounted(() => {
+      stop()
       cancel()
+    })
+  } else {
+    createAnimation(unref(_target), unref(_options))
+  }
 
-      if (!el) {
-        console.warn("Target element is null or undefined")
-        return
-      }
-
-      animation.value = animate(el, opt)
-    },
-    { immediate: true, flush: "post" }
-  )
-
-  onUnmounted(() => {
-    stop()
+  function createAnimation(el: TargetSelector, opt: AnimationParams) {
     cancel()
-  })
+
+    if (!el) {
+      console.warn("Target element is null or undefined")
+      return
+    }
+
+    animation.value = animate(el, opt)
+  }
 
   function play() {
     return animation.value?.play()
