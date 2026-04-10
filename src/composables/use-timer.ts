@@ -1,10 +1,26 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
-import { getCurrentInstance, type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
+import { getCurrentInstance, type MaybeRef, type ShallowRef, onUnmounted, shallowRef, unref, watch } from "vue"
 
-export function useTimer(options: MaybeRef<TimerParams> = {}) {
+export interface UseTimerReturn {
+  timer: ShallowRef<Timer>
+  play: () => Timer
+  reverse: () => Timer
+  pause: () => Timer
+  restart: () => Timer
+  alternate: () => Timer
+  resume: () => Timer
+  complete: () => Timer
+  reset: (softReset?: boolean) => Timer
+  cancel: () => Timer
+  revert: () => Timer
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timer
+  stretch: (newDuration: number) => Timer
+}
+
+export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
   const instance = getCurrentInstance()
 
-  const timer = ref<Timer>(createTimer(unref(options)))
+  const timer = shallowRef<Timer>(createTimer(unref(options)))
 
   if (instance) {
     const { stop } = watch(

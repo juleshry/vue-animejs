@@ -1,10 +1,27 @@
-import { getCurrentInstance, isRef, type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
+import { getCurrentInstance, isRef, type MaybeRef, type ShallowRef, onUnmounted, shallowRef, unref, watch } from "vue"
 import { type JSAnimation, animate, type TargetSelector, type AnimationParams } from "animejs"
 
-export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef<AnimationParams> = {}) {
+export interface UseAnimateReturn {
+  animation: ShallowRef<JSAnimation | undefined>
+  play: () => JSAnimation | undefined
+  reverse: () => JSAnimation | undefined
+  pause: () => JSAnimation | undefined
+  restart: () => JSAnimation | undefined
+  alternate: () => JSAnimation | undefined
+  resume: () => JSAnimation | undefined
+  complete: () => JSAnimation | undefined
+  cancel: () => JSAnimation | undefined
+  revert: () => JSAnimation | undefined
+  reset: (softReset?: boolean) => JSAnimation | undefined
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => JSAnimation | undefined
+  stretch: (newDuration: number) => JSAnimation | undefined
+  refresh: () => JSAnimation | undefined
+}
+
+export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef<AnimationParams> = {}): UseAnimateReturn {
   const instance = getCurrentInstance()
 
-  const animation = ref<JSAnimation>()
+  const animation = shallowRef<JSAnimation>()
 
   if (instance) {
     const { stop } = watch(

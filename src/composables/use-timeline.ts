@@ -1,4 +1,13 @@
-import { getCurrentInstance, type MaybeRef, onMounted, onUnmounted, ref, unref, watch } from "vue"
+import {
+  getCurrentInstance,
+  type MaybeRef,
+  type ShallowRef,
+  onMounted,
+  onUnmounted,
+  shallowRef,
+  unref,
+  watch,
+} from "vue"
 import {
   type AnimationParams,
   type Callback,
@@ -21,13 +30,51 @@ type QueueEntry =
     }
   | { type: "set"; targets: MaybeRef<TargetsParam>; params: AnimationParams; position?: TimelinePosition }
 
-export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
+export type TimelineChain = Timeline & {
+  add: (
+    targets: MaybeRef<TargetsParam>,
+    params: AnimationParams,
+    position?: TimelinePosition | StaggerFunction<number | string>
+  ) => TimelineChain
+  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+}
+
+export interface UseTimelineReturn {
+  timeline: ShallowRef<Timeline>
+  add: (
+    targets: MaybeRef<TargetsParam>,
+    params: AnimationParams,
+    position?: TimelinePosition | StaggerFunction<number | string>
+  ) => TimelineChain
+  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  sync: (synced?: Tickable, position?: TimelinePosition) => Timeline
+  label: (labelName: string, position?: TimelinePosition) => Timeline
+  call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline
+  init: (internalRender?: boolean) => Timeline
+  play: () => Timeline
+  reverse: () => Timeline
+  pause: () => Timeline
+  restart: () => Timeline
+  alternate: () => Timeline
+  resume: () => Timeline
+  complete: () => Timeline
+  reset: (softReset?: boolean) => Timeline
+  cancel: () => Timeline
+  revert: () => Timeline
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline
+  stretch: (newDuration: number) => Timeline
+  refresh: () => Timeline
+}
+
+export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
   let is_mounted = false
   const instance = getCurrentInstance()
 
   const queue: QueueEntry[] = []
 
-  const timeline = ref<Timeline>(createTimeline(unref(options)))
+  const timeline = shallowRef<Timeline>(createTimeline(unref(options)))
 
   if (instance) {
     const { stop } = watch(
@@ -52,6 +99,8 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
             break
         }
       })
+
+      queue.length = 0
     })
 
     onUnmounted(() => {
@@ -66,29 +115,29 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}) {
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
     if (is_mounted) {
-      return { ...timeline.value.add(unref(targets), params, position), add, set, remove }
+      return { ...timeline.value.add(unref(targets), params, position), add, set, remove } as TimelineChain
     }
 
     queue.push({ type: "add", targets, params, position })
-    return { ...timeline.value, add, set, remove }
+    return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
   function set(targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) {
     if (is_mounted) {
-      return { ...timeline.value.set(unref(targets), params, position), add, set, remove }
+      return { ...timeline.value.set(unref(targets), params, position), add, set, remove } as TimelineChain
     }
 
     queue.push({ type: "set", targets, params, position })
-    return { ...timeline.value, add, set, remove }
+    return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
   function remove(targets: MaybeRef<TargetsParam>, propertyName?: string) {
     if (!is_mounted) {
       console.warn("Cannot remove from timeline before mount")
-      return { ...timeline.value, add, set, remove }
+      return { ...timeline.value, add, set, remove } as TimelineChain
     }
 
-    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove }
+    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove } as TimelineChain
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {
