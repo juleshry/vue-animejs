@@ -109,10 +109,16 @@ const { animatable } = useAnimatable(el, {
 - [Anime.js](https://animejs.com/) by [Julian Garnier](https://github.com/juliangarnier) — the animation engine powering this library
 - [VueUse](https://vueuse.org/) by [Anthony Fu](https://github.com/antfu) — inspiration for composable conventions and element ref patterns
 
-## 🧱 TODO
+## 🧱 Contributing
+
+See the [Contributing Guide](./CONTRIBUTING.md).
+
+## 🗺️ TODO
 
 - [ ] Improve exports for `useAnimatable`
 - [ ] Allow reactive refs inside option objects
+- [ ] Publish the first version to `npm`
+- [ ] Deploy the docs website
 
 ## 📄 License
 
