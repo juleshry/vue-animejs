@@ -1,8 +1,9 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
-import { getCurrentInstance, type MaybeRef, type ShallowRef, onUnmounted, shallowRef, unref, watch } from "vue"
+import { type MaybeRef, type ShallowRef, shallowRef, unref, watch, DeepReadonly, readonly } from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
 
 export interface UseTimerReturn {
-  timer: ShallowRef<Timer>
+  timer: DeepReadonly<ShallowRef<Timer>>
   play: () => Timer
   reverse: () => Timer
   pause: () => Timer
@@ -18,25 +19,21 @@ export interface UseTimerReturn {
 }
 
 export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
-  const instance = getCurrentInstance()
-
   const timer = shallowRef<Timer>(createTimer(unref(options)))
 
-  if (instance) {
-    const { stop } = watch(
-      () => unref(options),
-      options => {
-        cancel()
-        timer.value = createTimer(options)
-      },
-      { deep: 1 }
-    )
-
-    onUnmounted(() => {
-      stop()
+  const { stop } = watch(
+    () => unref(options),
+    options => {
       cancel()
-    })
-  }
+      timer.value = createTimer(options)
+    },
+    { deep: 1 }
+  )
+
+  tryOnUnmounted(() => {
+    stop()
+    cancel()
+  })
 
   function play() {
     return timer.value.play()
@@ -86,5 +83,19 @@ export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
     return timer.value.stretch(newDuration)
   }
 
-  return { timer, play, reverse, pause, restart, alternate, resume, complete, reset, cancel, revert, seek, stretch }
+  return {
+    timer: readonly(timer),
+    play,
+    reverse,
+    pause,
+    restart,
+    alternate,
+    resume,
+    complete,
+    reset,
+    cancel,
+    revert,
+    seek,
+    stretch,
+  }
 }
