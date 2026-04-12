@@ -199,6 +199,31 @@ async function shuffle() {
 </template>
 ```
 
+When you mutate the DOM directly with `classList.toggle`, the change is synchronous — no `nextTick` needed:
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useLayout } from 'vue-animejs'
+
+const container = useTemplateRef<HTMLElement>('container')
+const { update } = useLayout(container, {})
+
+function toggleLayout() {
+  update(() => {
+    container.value!.classList.toggle('grid')
+  }, { duration: 600 })
+}
+</script>
+
+<template>
+  <div ref="container" class="grid">
+    <div v-for="i in 6" :key="i" class="item" />
+  </div>
+  <button @click="toggleLayout">Toggle layout</button>
+</template>
+```
+
 ## 👨‍🚀 Contributors
 
 <a href="https://github.com/juleshry/vue-animejs/graphs/contributors">
