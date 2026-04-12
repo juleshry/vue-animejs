@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { onMounted, ref, useTemplateRef } from "vue"
   import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable } from "@lib"
-  import { utils } from "animejs"
+  import { clamp } from "animejs"
 
   const box = useTemplateRef("box")
 
@@ -77,8 +77,8 @@
     })
 
     window.addEventListener("mousemove", e => {
-      const new_x = utils.clamp(e.clientX - left - 50 / 2, left - 50, left + width - 50)
-      const new_y = utils.clamp(e.clientY - top - 50 / 2, -50 / 2, height - 50 / 2)
+      const new_x = clamp(e.clientX - left - 50 / 2, left - 50, left + width - 50)
+      const new_y = clamp(e.clientY - top - 50 / 2, -50 / 2, height - 50 / 2)
 
       animatable.value?.x(new_x)
       animatable.value?.y(new_y)

@@ -185,9 +185,14 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Improve exports for `useAnimatable`
+- [ ] Add useLayout
+- [ ] Add useScope
+- [ ] Add useSVG
+- [ ] Add useText
+- [ ] Add useWAAPI
 - [ ] Allow reactive refs inside option objects
 - [ ] Publish the first version to `npm`
+- [ ] Write Doc
 - [ ] Deploy the docs website
 
 ## 📄 License
