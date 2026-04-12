@@ -1,13 +1,4 @@
-import {
-  getCurrentInstance,
-  type MaybeRef,
-  type ShallowRef,
-  onMounted,
-  onUnmounted,
-  shallowRef,
-  unref,
-  watch,
-} from "vue"
+import { type MaybeRef, type ShallowRef, shallowRef, unref, watch, type DeepReadonly, readonly } from "vue"
 import {
   type AnimationParams,
   type Callback,
@@ -20,6 +11,7 @@ import {
   type TimelinePosition,
   type Timer,
 } from "animejs"
+import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
 
 type QueueEntry =
   | {
@@ -41,7 +33,7 @@ export type TimelineChain = Timeline & {
 }
 
 export interface UseTimelineReturn {
-  timeline: ShallowRef<Timeline>
+  timeline: DeepReadonly<ShallowRef<Timeline>>
   add: (
     targets: MaybeRef<TargetsParam>,
     params: AnimationParams,
@@ -70,44 +62,41 @@ export interface UseTimelineReturn {
 
 export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
   let is_mounted = false
-  const instance = getCurrentInstance()
 
   const queue: QueueEntry[] = []
 
   const timeline = shallowRef<Timeline>(createTimeline(unref(options)))
 
-  if (instance) {
-    const { stop } = watch(
-      () => unref(options),
-      _options => {
-        cancel()
-        timeline.value = createTimeline(_options)
-      },
-      { flush: "post" }
-    )
-
-    onMounted(() => {
-      is_mounted = true
-
-      queue.forEach(entry => {
-        switch (entry.type) {
-          case "add":
-            add(entry.targets, entry.params, entry.position)
-            break
-          case "set":
-            set(entry.targets, entry.params, entry.position)
-            break
-        }
-      })
-
-      queue.length = 0
-    })
-
-    onUnmounted(() => {
-      stop()
+  const { stop } = watch(
+    () => unref(options),
+    _options => {
       cancel()
+      timeline.value = createTimeline(_options)
+    },
+    { flush: "post", deep: 1 }
+  )
+
+  tryOnMounted(() => {
+    is_mounted = true
+
+    queue.forEach(entry => {
+      switch (entry.type) {
+        case "add":
+          add(entry.targets, entry.params, entry.position)
+          break
+        case "set":
+          set(entry.targets, entry.params, entry.position)
+          break
+      }
     })
-  }
+
+    queue.length = 0
+  })
+
+  tryOnUnmounted(() => {
+    stop()
+    cancel()
+  })
 
   function add(
     targets: MaybeRef<TargetsParam>,
@@ -209,7 +198,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   }
 
   return {
-    timeline,
+    timeline: readonly(timeline),
     add,
     set,
     sync,

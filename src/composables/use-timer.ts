@@ -1,5 +1,5 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
-import { type MaybeRef, type ShallowRef, shallowRef, unref, watch, DeepReadonly, readonly } from "vue"
+import { type MaybeRef, type ShallowRef, shallowRef, unref, watch, type DeepReadonly, readonly } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 
 export interface UseTimerReturn {
