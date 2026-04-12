@@ -1,8 +1,9 @@
-import { getCurrentInstance, isRef, type MaybeRef, type ShallowRef, onUnmounted, shallowRef, unref, watch } from "vue"
+import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly } from "vue"
 import { type JSAnimation, animate, type TargetSelector, type AnimationParams } from "animejs"
+import { type MaybeComputedElementRef, tryOnMounted, tryOnUnmounted, unrefElement } from "@vueuse/core"
 
 export interface UseAnimateReturn {
-  animation: ShallowRef<JSAnimation | undefined>
+  animation: DeepReadonly<ShallowRef<JSAnimation | undefined>>
   play: () => JSAnimation | undefined
   reverse: () => JSAnimation | undefined
   pause: () => JSAnimation | undefined
@@ -18,27 +19,32 @@ export interface UseAnimateReturn {
   refresh: () => JSAnimation | undefined
 }
 
-export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef<AnimationParams> = {}): UseAnimateReturn {
-  const instance = getCurrentInstance()
-
+export function useAnimate(
+  _target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
+  _options: MaybeRef<AnimationParams> = {}
+): UseAnimateReturn {
   const animation = shallowRef<JSAnimation>()
 
-  if (instance) {
-    const { stop } = watch(
-      [() => unref(_target), () => unref(_options)],
-      ([el, opt]) => {
-        createAnimation(el, opt)
-      },
-      { flush: "post", immediate: !isRef(_target) }
-    )
-
-    onUnmounted(() => {
-      stop()
-      cancel()
-    })
-  } else {
-    createAnimation(unref(_target), unref(_options))
+  function resolveTarget() {
+    return unrefElement(_target as MaybeComputedElementRef) ?? unref(_target as MaybeRef<TargetSelector>)
   }
+
+  const { stop } = watch(
+    [resolveTarget, () => unref(_options)],
+    ([el, opt]) => {
+      createAnimation(el, opt)
+    },
+    { flush: "post" }
+  )
+
+  tryOnMounted(() => {
+    createAnimation(resolveTarget(), unref(_options))
+  })
+
+  tryOnUnmounted(() => {
+    stop()
+    cancel()
+  })
 
   function createAnimation(el: TargetSelector, opt: AnimationParams) {
     cancel()
@@ -104,7 +110,7 @@ export function useAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef
   }
 
   return {
-    animation,
+    animation: readonly(animation),
     play,
     reverse,
     pause,
