@@ -73,6 +73,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `useTimeline`   | Sequence multiple animations on a shared timeline |
 | `useAnimatable` | Create a reactive animatable object               |
 | `useDraggable`  | Make a DOM element draggable with full control    |
+| `useLayout`     | Animate DOM layout changes (reorder, add, remove) |
 
 ## 🚀 Usage
 
@@ -165,6 +166,36 @@ const { disable, enable } = useDraggable(el, {
   <div ref="el" />
   <button @click="disable">Disable</button>
   <button @click="enable">Enable</button>
+</template>
+```
+
+### `useLayout`
+
+> **Note:** Vue's DOM updates are asynchronous. Use `await nextTick()` between the state change and `animate()` so Anime.js reads the updated positions.
+
+```vue
+<script setup lang="ts">
+import { nextTick, ref, useTemplateRef } from 'vue'
+import { useLayout } from 'vue-animejs'
+
+const list = useTemplateRef<HTMLElement>('list')
+const { record, animate } = useLayout(list, {})
+
+const items = ref([1, 2, 3, 4, 5])
+
+async function shuffle() {
+  record()
+  items.value = [...items.value].sort(() => Math.random() - 0.5)
+  await nextTick()
+  animate({ duration: 600 })
+}
+</script>
+
+<template>
+  <ul ref="list">
+    <li v-for="item in items" :key="item">{{ item }}</li>
+  </ul>
+  <button @click="shuffle">Shuffle</button>
 </template>
 ```
 
