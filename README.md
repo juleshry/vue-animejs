@@ -185,7 +185,6 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add useLayout
 - [ ] Add useScope
 - [ ] Add useSVG
 - [ ] Add useText

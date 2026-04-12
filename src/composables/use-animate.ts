@@ -47,6 +47,7 @@ export function useAnimate(
 
     if (!el) {
       console.warn("Target element is null or undefined")
+      animation.value = undefined
       return
     }
 

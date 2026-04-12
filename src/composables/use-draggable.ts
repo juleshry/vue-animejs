@@ -29,12 +29,13 @@ export function useDraggable(
 
       if (!el) {
         console.warn("Targets element is null or undefined")
+        draggable.value = undefined
         return
       }
 
       draggable.value = createDraggable(el, opt)
     },
-    {  flush: "post", immediate: !isRef(targets) }
+    { flush: "post", immediate: !isRef(targets) }
   )
 
   tryOnUnmounted(() => {

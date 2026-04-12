@@ -35,6 +35,7 @@ export function useAnimatable(
 
       if (!el) {
         console.warn("Targets element is null or undefined")
+        animatable.value = undefined
         return
       }
 
