@@ -1,6 +1,6 @@
-import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly } from "vue"
+import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly, isRef } from "vue"
 import { type JSAnimation, animate, type TargetSelector, type AnimationParams } from "animejs"
-import { type MaybeComputedElementRef, tryOnMounted, tryOnUnmounted, unrefElement } from "@vueuse/core"
+import { type MaybeComputedElementRef, tryOnUnmounted, unrefElement } from "@vueuse/core"
 
 export interface UseAnimateReturn {
   animation: DeepReadonly<ShallowRef<JSAnimation | undefined>>
@@ -34,12 +34,8 @@ export function useAnimate(
     ([el, opt]) => {
       createAnimation(el, opt)
     },
-    { flush: "post" }
+    { flush: "post", immediate: !isRef(_target) }
   )
-
-  tryOnMounted(() => {
-    createAnimation(resolveTarget(), unref(_options))
-  })
 
   tryOnUnmounted(() => {
     stop()

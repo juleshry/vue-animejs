@@ -1,16 +1,38 @@
-import { Animatable, type AnimatableParams, createAnimatable, type TargetsParam } from "animejs"
-import { computed, type MaybeRef, onUnmounted, ref, unref, watch } from "vue"
+import { type AnimatableObject, type AnimatableParams, createAnimatable, type TargetsParam } from "animejs"
+import {
+  computed,
+  type DeepReadonly,
+  isRef,
+  type MaybeRef,
+  readonly,
+  type ShallowRef,
+  shallowRef,
+  unref,
+  watch,
+} from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
 
-export function useAnimatable(_targets: MaybeRef<TargetsParam>, _options: MaybeRef<AnimatableParams> = {}) {
-  const animatable = ref<Animatable>()
+export interface UseAnimatableReturn {
+  animatable: DeepReadonly<ShallowRef<AnimatableObject | undefined>>
+  revert: () => AnimatableObject | undefined
+}
+
+export function useAnimatable(
+  targets: MaybeRef<TargetsParam>,
+  options: MaybeRef<AnimatableParams> = {}
+): UseAnimatableReturn {
+  const animatable = shallowRef<AnimatableObject>()
 
   const watch_target = computed<{ el: TargetsParam; opt: AnimatableParams }>(() => ({
-    el: unref(_targets),
-    opt: unref(_options),
+    el: unref(targets),
+    opt: unref(options),
   }))
+
   const { stop } = watch(
     watch_target,
     ({ el, opt }) => {
+      revert()
+
       if (!el) {
         console.warn("Targets element is null or undefined")
         return
@@ -18,16 +40,20 @@ export function useAnimatable(_targets: MaybeRef<TargetsParam>, _options: MaybeR
 
       animatable.value = createAnimatable(el, opt)
     },
-    { immediate: true, flush: "post" }
+    { flush: "post", immediate: !isRef(targets) }
   )
 
-  onUnmounted(() => {
+  tryOnUnmounted(() => {
     stop()
+    revert()
   })
 
   function revert() {
     return animatable.value?.revert()
   }
 
-  return { animatable, revert }
+  return { animatable: readonly(animatable), revert }
+}
+function revert() {
+  throw new Error("Function not implemented.")
 }

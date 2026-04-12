@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { onMounted, ref, useTemplateRef } from "vue"
-  import { useAnimate, useTimer, useTimeline, useAnimatable } from "@lib"
+  import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable } from "@lib"
   import { utils } from "animejs"
 
   const box = useTemplateRef("box")
@@ -89,6 +89,10 @@
   const animatable_bounds = useTemplateRef("animatable_bounds")
 
   const { animatable } = useAnimatable(circle, { x: 250, y: 250 })
+
+  const draggable = useTemplateRef("draggable")
+
+  useDraggable(draggable, { container: ".draggable_bounds" })
 </script>
 
 <template>
@@ -125,6 +129,15 @@
       <h2>Animatable</h2>
       <div ref="animatable_bounds" class="animatable_bounds">
         <div ref="circle" class="circle" />
+      </div>
+    </div>
+
+    <div>
+      <h2>Draggable</h2>
+      <div class="draggable_bounds">
+        <div ref="draggable" class="circle">
+          <p v-for="i in 3">···</p>
+        </div>
       </div>
     </div>
   </div>
@@ -176,6 +189,34 @@
           height: 50px;
           border-radius: 50%;
           background-color: #afaeff;
+        }
+      }
+
+      .draggable_bounds {
+        width: 500px;
+        height: 250px;
+        border: 1px solid #b3b3b3;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.16);
+
+        overflow: hidden;
+
+        & .circle {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background-color: #afaeff;
+
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 0;
+
+          & p {
+            margin: 0;
+            line-height: 5px;
+          }
         }
       }
     }
