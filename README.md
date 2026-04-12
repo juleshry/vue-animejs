@@ -12,6 +12,52 @@
 
 **vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target or option and the animation updates automatically. Lifecycle cleanup is handled for you.
 
+**Before** — raw Anime.js in a Vue component:
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef, onMounted, onUnmounted } from 'vue'
+import { animate } from 'animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+let animation
+
+onMounted(() => {
+  if (!el.value) {
+    console.warn('Targets element is null or undefined')
+    return
+  }
+  
+  animation = animate(el.value, { translateX: 250, duration: 800 })
+})
+
+onUnmounted(() => {
+  animation?.cancel()
+})
+</script>
+
+<template>
+  <div ref="el" />
+</template>
+```
+
+**After** — with vue-animejs:
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useAnimate } from 'vue-animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+useAnimate(el, { translateX: 250, duration: 800 })
+</script>
+
+<template>
+  <div ref="el" />
+</template>
+```
+
 ## 📦 Requirements
 
 - Vue 3.5+
@@ -26,6 +72,7 @@
 | `useTimer`      | Drive a timer with full playback control          |
 | `useTimeline`   | Sequence multiple animations on a shared timeline |
 | `useAnimatable` | Create a reactive animatable object               |
+| `useDraggable`  | Make a DOM element draggable with full control    |
 
 ## 🚀 Usage
 
@@ -96,6 +143,29 @@ const { animatable } = useAnimatable(el, {
   opacity: 1,
 })
 </script>
+```
+
+### `useDraggable`
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useDraggable } from 'vue-animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+const { disable, enable } = useDraggable(el, {
+  onGrab: () => console.log('grabbed'),
+  onDrag: () => console.log('dragging'),
+  onRelease: () => console.log('released'),
+})
+</script>
+
+<template>
+  <div ref="el" />
+  <button @click="disable">Disable</button>
+  <button @click="enable">Enable</button>
+</template>
 ```
 
 ## 👨‍🚀 Contributors
