@@ -7,4 +7,5 @@ export { useDraggable, type UseDraggableReturn } from "./composables/use-draggab
 export { useLayout, type UseLayoutReturn } from "./composables/use-layout.ts"
 export { useSvg, type UseSvgReturn } from "./composables/use-svg.ts"
 export { useText, type UseTextReturn } from "./composables/use-text.ts"
+export { useWaapi, type UseWaapiReturn } from "./composables/use-waapi.ts"
 //export { useScope, type UseScopeReturn } from "./composables/use-scope.ts"

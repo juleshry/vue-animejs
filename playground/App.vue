@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { nextTick, onMounted, ref, useTemplateRef, watch } from "vue"
-  import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable, useLayout, useText } from "@lib"
+  import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable, useLayout, useText, useWaapi } from "@lib"
   import { clamp, stagger, Target } from "animejs"
 
   const box = useTemplateRef("box")
@@ -128,6 +128,21 @@
     delay: stagger(200),
     ease: "inOut(3)",
   })
+
+  const waapi_box = useTemplateRef("waapi_box")
+
+  const {
+    play: playWaapi,
+    pause: pauseWaapi,
+    restart: restartWaapi,
+  } = useWaapi(waapi_box, {
+    translateX: 250,
+    rotate: "1turn",
+    backgroundColor: "#5350ff",
+    duration: 2000,
+    loop: true,
+    alternate: true,
+  })
 </script>
 
 <template>
@@ -191,6 +206,16 @@
         テキストスプリッター<br />
         Ceci est un text
       </p>
+    </div>
+
+    <div>
+      <h2>WAAPI</h2>
+      <div ref="waapi_box" class="box"></div>
+      <div style="display: flex; gap: 10px">
+        <button @click="playWaapi">Play</button>
+        <button @click="pauseWaapi">Pause</button>
+        <button @click="restartWaapi">Restart</button>
+      </div>
     </div>
   </div>
 </template>
