@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { nextTick, ref, useTemplateRef } from "vue"
   import { useLayout } from "@lib"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const layout_root = useTemplateRef("layout_root")
   const { record, animate: animateLayout } = useLayout(layout_root, {})
@@ -23,8 +24,8 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Layout</h2>
+  <SectionWrapper>
+    <template #title>Layout</template>
     <div ref="layout_root" class="layout_grid">
       <div
         v-for="item in layout_items"
@@ -34,16 +35,10 @@
       />
     </div>
     <button @click="shuffleLayout">Shuffle</button>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .layout_grid {
     display: flex;
     flex-wrap: wrap;

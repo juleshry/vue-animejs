@@ -2,6 +2,7 @@
   import { useTemplateRef } from "vue"
   import { useAnimate, useText } from "@lib"
   import { stagger, type Target } from "animejs"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const text = useTemplateRef("text")
 
@@ -21,23 +22,17 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Text</h2>
+  <SectionWrapper>
+    <template #title>Text</template>
     <p ref="text" class="text">
       All-in-one text splitter<br />
       テキストスプリッター<br />
       Ceci est un text
     </p>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .text {
     color: #afaeff;
   }

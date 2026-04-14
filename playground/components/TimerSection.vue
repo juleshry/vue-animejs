@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref } from "vue"
   import { useTimer } from "@lib"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const time = ref<number>(0)
   const count = ref<number>(0)
@@ -16,24 +17,18 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Timer</h2>
+  <SectionWrapper>
+    <template #title>Timer</template>
     <span>Time: {{ time }} ms</span>
     <span>Count: {{ count }}</span>
     <div class="controls">
       <button @click="play">Start timer</button>
       <button @click="pause">Pause timer</button>
     </div>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .controls {
     display: flex;
     gap: 10px;

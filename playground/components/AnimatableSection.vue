@@ -2,6 +2,7 @@
   import { onMounted, useTemplateRef } from "vue"
   import { useAnimatable } from "@lib"
   import { clamp } from "animejs"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const circle = useTemplateRef("circle")
   const bounds = useTemplateRef("bounds")
@@ -33,21 +34,15 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Animatable</h2>
+  <SectionWrapper>
+    <template #title>Animatable</template>
     <div ref="bounds" class="bounds">
       <div ref="circle" class="circle" />
     </div>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .bounds {
     width: 500px;
     height: 250px;

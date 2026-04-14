@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
   import { useDraggable } from "@lib"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const draggable = useTemplateRef("draggable")
 
@@ -8,23 +9,17 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Draggable</h2>
+  <SectionWrapper>
+    <template #title>Draggable</template>
     <div class="draggable_bounds">
       <div ref="draggable" class="circle">
         <p v-for="i in 3" :key="i">···</p>
       </div>
     </div>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .draggable_bounds {
     width: 500px;
     height: 250px;

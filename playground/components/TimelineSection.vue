@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
   import { useTimeline } from "@lib"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const box1 = useTemplateRef("box1")
   const box2 = useTemplateRef("box2")
@@ -14,24 +15,18 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Timeline</h2>
+  <SectionWrapper>
+    <template #title>Timeline</template>
     <div class="timeline">
       <div ref="box1" class="box" />
       <div ref="box2" class="box" />
       <div ref="box3" class="box" />
     </div>
     <button @click="playTimeline">Start Timeline</button>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .timeline {
     display: flex;
     flex-direction: column;

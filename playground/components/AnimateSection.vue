@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
   import { useAnimate } from "@lib"
+  import SectionWrapper from "./SectionWrapper.vue"
 
   const box = useTemplateRef("box")
 
@@ -14,20 +15,14 @@
 </script>
 
 <template>
-  <div class="section">
-    <h2>Animation</h2>
+  <SectionWrapper>
+    <template #title>Animation</template>
     <div ref="box" class="box" />
     <button @click="restart">Restart animation</button>
-  </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
-  .section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
   .box {
     width: 100px;
     height: 100px;
