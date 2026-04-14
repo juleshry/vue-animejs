@@ -1,4 +1,4 @@
-import { tryOnUnmounted } from "@vueuse/core"
+import { type MaybeComputedElementRef, tryOnUnmounted, unrefElement } from "@vueuse/core"
 import {
   type WAAPIAnimationParams,
   type DOMTargetsParam,
@@ -26,13 +26,16 @@ export interface UseWaapiReturn {
 }
 
 export function useWaapi(
-  targets: MaybeRef<DOMTargetsParam>,
+  targets: MaybeRef<DOMTargetsParam> | MaybeComputedElementRef,
   options: MaybeRef<WAAPIAnimationParams> = {}
 ): UseWaapiReturn {
   const animation = shallowRef<WAAPIAnimation | undefined>()
 
   const { stop } = watch(
-    [() => unref(targets), () => unref(options)],
+    [
+      () => unrefElement(targets as MaybeComputedElementRef) ?? unref(targets as MaybeRef<DOMTargetsParam>),
+      () => unref(options),
+    ],
     ([el, opt]) => {
       animation.value = waapi.animate(el, opt)
     },

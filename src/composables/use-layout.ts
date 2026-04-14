@@ -1,4 +1,4 @@
-import { tryOnUnmounted } from "@vueuse/core"
+import { type MaybeComputedElementRef, tryOnUnmounted, unrefElement } from "@vueuse/core"
 import {
   type AutoLayout,
   type AutoLayoutParams,
@@ -17,11 +17,17 @@ export interface UseLayoutReturn {
   revert: () => void
 }
 
-export function useLayout(root: MaybeRef<DOMTargetSelector>, params: MaybeRef<AutoLayoutParams>): UseLayoutReturn {
+export function useLayout(
+  root: MaybeRef<DOMTargetSelector> | MaybeComputedElementRef,
+  params: MaybeRef<AutoLayoutParams>
+): UseLayoutReturn {
   const layout = shallowRef<AutoLayout | undefined>()
 
   const { stop } = watch(
-    [() => unref(root), () => unref(params)],
+    [
+      () => unrefElement(root as MaybeComputedElementRef) ?? unref(root as MaybeRef<DOMTargetSelector>),
+      () => unref(params),
+    ],
     ([el, opt]) => {
       revert()
 

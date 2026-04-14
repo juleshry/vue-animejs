@@ -269,12 +269,12 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add useWAAPI
 - [ ] Add useScope
 - [ ] Allow reactive refs inside option objects
 - [ ] Publish the first version to `npm`
 - [ ] Write Doc
 - [ ] Deploy the docs website
+- [ ] Add tests
 
 ## 📄 License
 

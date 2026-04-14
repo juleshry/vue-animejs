@@ -2,7 +2,7 @@
   import { RouterLink } from "vue-router"
   import { routes } from "../router"
 
-  const nav_routes = routes.filter(r => r.meta?.label)
+  const nav_routes = routes.filter((r): r is typeof r & { meta: { label: string } } => !!r.meta?.label)
 </script>
 
 <template>

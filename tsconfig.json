@@ -9,7 +9,6 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "types": ["node"],
-    "baseUrl": ".",
     "paths": {
       "@lib": ["./src/index.ts"]
     }
