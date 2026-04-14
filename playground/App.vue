@@ -1,7 +1,7 @@
 <script setup lang="ts">
-  import { nextTick, onMounted, ref, useTemplateRef } from "vue"
-  import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable, useLayout } from "@lib"
-  import { clamp } from "animejs"
+  import { nextTick, onMounted, ref, useTemplateRef, watch } from "vue"
+  import { useAnimate, useTimer, useTimeline, useAnimatable, useDraggable, useLayout, useText } from "@lib"
+  import { clamp, stagger, Target } from "animejs"
 
   const box = useTemplateRef("box")
 
@@ -112,6 +112,22 @@
     await nextTick()
     animateLayout({ duration: 250 })
   }
+
+  const text = useTemplateRef("text")
+
+  const { words } = useText(text, {
+    words: { wrap: "clip" },
+    chars: true,
+  })
+
+  useAnimate(words, {
+    y: [($el: Target) => (+$el.dataset.line % 2 ? "100%" : "-100%"), "0%"],
+    loop: true,
+    duration: 500,
+    alternate: true,
+    delay: stagger(200),
+    ease: "inOut(3)",
+  })
 </script>
 
 <template>
@@ -155,7 +171,7 @@
       <h2>Draggable</h2>
       <div class="draggable_bounds">
         <div ref="draggable" class="circle">
-          <p v-for="i in 3">···</p>
+          <p v-for="i in 3" :key="i">···</p>
         </div>
       </div>
     </div>
@@ -166,6 +182,15 @@
         <div v-for="item in layout_items" :key="item.id" class="layout_item" :style="{ backgroundColor: item.color }" />
       </div>
       <button @click="shuffleLayout">Shuffle</button>
+    </div>
+
+    <div>
+      <h2>Text</h2>
+      <p ref="text" style="color: #afaeff">
+        All-in-one text splitter<br />
+        テキストスプリッター<br />
+        Ceci est un text
+      </p>
     </div>
   </div>
 </template>

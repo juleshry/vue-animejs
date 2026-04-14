@@ -6,4 +6,5 @@ export { useAnimatable, type UseAnimatableReturn } from "./composables/use-anima
 export { useDraggable, type UseDraggableReturn } from "./composables/use-draggable.ts"
 export { useLayout, type UseLayoutReturn } from "./composables/use-layout.ts"
 export { useSvg, type UseSvgReturn } from "./composables/use-svg.ts"
+export { useText, type UseTextReturn } from "./composables/use-text.ts"
 //export { useScope, type UseScopeReturn } from "./composables/use-scope.ts"

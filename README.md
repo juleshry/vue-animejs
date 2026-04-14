@@ -74,6 +74,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `useAnimatable` | Create a reactive animatable object               |
 | `useDraggable`  | Make a DOM element draggable with full control    |
 | `useLayout`     | Animate DOM layout changes (reorder, add, remove) |
+| `useText`       | Split text into animatable lines, words, and chars |
 
 ## 🚀 Usage
 
@@ -224,6 +225,33 @@ function toggleLayout() {
 </template>
 ```
 
+### `useText`
+
+> **Note:** `words`, `chars`, and `lines` are `ComputedRef<HTMLElement[]>` — they populate after mount and can be passed directly to `useAnimate`.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useAnimate, useText } from 'vue-animejs'
+import { stagger } from 'animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+const { words, chars } = useText(el, { words: true, chars: true })
+
+// words and chars are ComputedRef<HTMLElement[]> — pass them directly as targets
+useAnimate(words, {
+  y: ['100%', '0%'],
+  duration: 600,
+  delay: stagger(50),
+})
+</script>
+
+<template>
+  <p ref="el">Hello, world!</p>
+</template>
+```
+
 ## 👨‍🚀 Contributors
 
 <a href="https://github.com/juleshry/vue-animejs/graphs/contributors">
@@ -241,7 +269,6 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add useText
 - [ ] Add useWAAPI
 - [ ] Add useScope
 - [ ] Allow reactive refs inside option objects
