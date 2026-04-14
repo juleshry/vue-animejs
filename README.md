@@ -241,10 +241,9 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add useScope
-- [ ] Add useSVG
 - [ ] Add useText
 - [ ] Add useWAAPI
+- [ ] Add useScope
 - [ ] Allow reactive refs inside option objects
 - [ ] Publish the first version to `npm`
 - [ ] Write Doc
