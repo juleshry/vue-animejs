@@ -52,6 +52,33 @@ pnpm install && pnpm run docs:dev
 yarn install && yarn docs:dev
 ```
 
+## Tests
+
+Unit tests live in the `tests/` folder and run with Vitest:
+
+```bash
+# using bun
+bun run test
+# using npm
+npm run test
+# using pnpm
+pnpm run test
+# using yarn
+yarn test
+```
+
+Watch mode:
+
+```bash
+bun run test:watch
+```
+
+Coverage report:
+
+```bash
+bun run test:coverage
+```
+
 ## Adding a composable
 
 1. Create `src/composables/use-my-feature.ts`
