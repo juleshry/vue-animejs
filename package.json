@@ -13,7 +13,10 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.json"
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "peerDependencies": {
     "@vueuse/core": ">=14",
@@ -21,13 +24,17 @@
     "vue": ">=3.5"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vue/test-utils": "^2.4.6",
     "@vueuse/core": ">=14",
     "animejs": ">=4",
-    "vue": ">=3.5",
-    "@types/node": "^22.0.0",
+    "happy-dom": "^20.9.0",
     "prettier": "^3.8.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.8",
+    "vitest": "^4.1.4",
+    "vue": ">=3.5",
     "vue-tsc": "^3.2.6"
   }
 }
