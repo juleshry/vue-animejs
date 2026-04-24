@@ -110,3 +110,16 @@ export function makeTextSplitterMock() {
     refresh: vi.fn(),
   }
 }
+
+export function makeScopeMock() {
+  const mock = {
+    add: vi.fn(),
+    addOnce: vi.fn(),
+    execute: vi.fn(),
+    revert: vi.fn(),
+    refresh: vi.fn(),
+    keepTime: vi.fn(),
+  }
+  mock.execute.mockImplementation((cb: (s: typeof mock) => unknown) => cb(mock))
+  return mock
+}
