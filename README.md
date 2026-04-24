@@ -269,12 +269,11 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add useScope
 - [ ] Allow reactive refs inside option objects
 - [ ] Publish the first version to `npm`
 - [ ] Write Doc
 - [ ] Deploy the docs website
-- [ ] Add tests
+- [ ] Move from Prettier to OXC
 
 ## 📄 License
 

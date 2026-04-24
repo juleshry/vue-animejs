@@ -7,6 +7,7 @@ import DraggableSection from "./components/DraggableSection.vue"
 import LayoutSection from "./components/LayoutSection.vue"
 import TextSection from "./components/TextSection.vue"
 import WaapiSection from "./components/WaapiSection.vue"
+import ScopeSection from "./components/ScopeSection.vue"
 
 export const routes = [
   { path: "/animate", component: AnimateSection, meta: { label: "Animation" } },
@@ -17,6 +18,7 @@ export const routes = [
   { path: "/layout", component: LayoutSection, meta: { label: "Layout" } },
   { path: "/text", component: TextSection, meta: { label: "Text" } },
   { path: "/waapi", component: WaapiSection, meta: { label: "WAAPI" } },
+  { path: "/scope", component: ScopeSection, meta: { label: "Scope" } },
   { path: "/", redirect: "/animate" },
 ]
 
