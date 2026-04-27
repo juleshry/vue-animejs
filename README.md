@@ -273,7 +273,6 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 - [ ] Publish the first version to `npm`
 - [ ] Write Doc
 - [ ] Deploy the docs website
-- [ ] Move from Prettier to OXC
 
 ## 📄 License
 
