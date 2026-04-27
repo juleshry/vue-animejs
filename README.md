@@ -74,6 +74,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `useAnimatable` | Create a reactive animatable object               |
 | `useDraggable`  | Make a DOM element draggable with full control    |
 | `useLayout`     | Animate DOM layout changes (reorder, add, remove) |
+| `useScope`      | Create an Anime.js scope with lifecycle management |
 | `useText`       | Split text into animatable lines, words, and chars |
 
 ## 🚀 Usage
@@ -222,6 +223,30 @@ function toggleLayout() {
     <div v-for="i in 6" :key="i" class="item" />
   </div>
   <button @click="toggleLayout">Toggle layout</button>
+</template>
+```
+
+### `useScope`
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useAnimate, useScope } from 'vue-animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+const { add, revert } = useScope({ mediaQuery: '(prefers-reduced-motion: no-preference)' })
+
+// Animations added via add() are automatically reverted when the scope reverts
+// or when the component unmounts
+add(scope => {
+  useAnimate(el, { translateX: 250, duration: 800 })
+})
+</script>
+
+<template>
+  <div ref="el" />
+  <button @click="revert">Revert</button>
 </template>
 ```
 
