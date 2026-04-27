@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { vi } from "vitest"
 
 export function makeAnimationMock() {
   return {
@@ -103,9 +103,9 @@ export function makeAnimatableMock() {
 
 export function makeTextSplitterMock() {
   return {
-    lines: [document.createElement('div')] as HTMLElement[],
-    words: [document.createElement('span')] as HTMLElement[],
-    chars: [document.createElement('span'), document.createElement('span')] as HTMLElement[],
+    lines: [document.createElement("div")] as HTMLElement[],
+    words: [document.createElement("span")] as HTMLElement[],
+    chars: [document.createElement("span"), document.createElement("span")] as HTMLElement[],
     revert: vi.fn(),
     refresh: vi.fn(),
   }

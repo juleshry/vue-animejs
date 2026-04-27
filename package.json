@@ -1,27 +1,25 @@
 {
   "name": "vue-animejs",
   "version": "0.1.0",
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
-  "files": [
-    "dist"
-  ],
-  "sideEffects": false,
   "scripts": {
     "build": "vite build && vue-tsc -p tsconfig.build.json",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
-  },
-  "peerDependencies": {
-    "@vueuse/core": ">=14",
-    "animejs": ">=4",
-    "vue": ">=3.5"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -30,11 +28,17 @@
     "@vueuse/core": ">=14",
     "animejs": ">=4",
     "happy-dom": "^20.9.0",
-    "prettier": "^3.8.1",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^1.62.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.8",
     "vitest": "^4.1.4",
     "vue": ">=3.5",
     "vue-tsc": "^3.2.6"
+  },
+  "peerDependencies": {
+    "@vueuse/core": ">=14",
+    "animejs": ">=4",
+    "vue": ">=3.5"
   }
 }

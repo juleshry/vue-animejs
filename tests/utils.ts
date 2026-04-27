@@ -1,5 +1,5 @@
-import { defineComponent, h } from 'vue'
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { defineComponent, h } from "vue"
+import { mount, type VueWrapper } from "@vue/test-utils"
 
 export function withSetup<T>(setup: () => T): [T, VueWrapper] {
   let result!: T
@@ -7,7 +7,7 @@ export function withSetup<T>(setup: () => T): [T, VueWrapper] {
     defineComponent({
       setup() {
         result = setup()
-        return () => h('div')
+        return () => h("div")
       },
     })
   )

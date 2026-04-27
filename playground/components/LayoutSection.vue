@@ -27,12 +27,7 @@
   <SectionWrapper>
     <template #title>Layout</template>
     <div ref="layout_root" class="layout_grid">
-      <div
-        v-for="item in layout_items"
-        :key="item.id"
-        class="layout_item"
-        :style="{ backgroundColor: item.color }"
-      />
+      <div v-for="item in layout_items" :key="item.id" class="layout_item" :style="{ backgroundColor: item.color }" />
     </div>
     <button @click="shuffleLayout">Shuffle</button>
   </SectionWrapper>

@@ -28,9 +28,9 @@
   <SectionWrapper>
     <template #title>Scope</template>
     <p :class="$style.hint">Resize below 768px to see the scope refresh with different values.</p>
-    <p :class="$style.mqState"
-      >isNarrow: <code>{{ is_narrow }}</code></p
-    >
+    <p :class="$style.mqState">
+      isNarrow: <code>{{ is_narrow }}</code>
+    </p>
     <div :class="$style.boxes">
       <div ref="box1" :class="$style.box" />
       <div ref="box2" :class="$style.box" />
