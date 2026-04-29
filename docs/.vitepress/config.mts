@@ -8,10 +8,18 @@ export default defineConfig({
   srcDir: "src",
 
   themeConfig: {
+    logo: "/icon.png",
+
+    search: {
+      provider: "local",
+    },
+
     sidebar: [
       {
         text: "Guide",
-        items: [],
+        items: [
+          { text: "Getting Started", link: "/guide/getting-started" },
+        ],
       },
     ],
   },

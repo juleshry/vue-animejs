@@ -5,6 +5,9 @@ html {
 :root {
   --vp-c-brand-1: #b3413c;
   --vp-c-brand-2: #40835d;
+
+  --vp-home-hero-image-background-image: linear-gradient(-45deg, #40835d80 30%, #b3413c80);
+  --vp-home-hero-image-filter: blur(44px);
 }
 
 .VPHero.VPHomeHero {
@@ -14,5 +17,10 @@ html {
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+  }
+
+  .VPButton.brand {
+    background: linear-gradient(45deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+    border-color: transparent;
   }
 }
