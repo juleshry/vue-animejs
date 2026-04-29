@@ -10,6 +10,10 @@ export default defineConfig({
   themeConfig: {
     logo: "/icon.png",
 
+    socialLinks: [
+      { icon: "github", link: "https://github.com/juleshry/vue-animejs" },
+    ],
+
     search: {
       provider: "local",
     },

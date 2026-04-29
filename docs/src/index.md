@@ -15,7 +15,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/jhery/vue-animejs
+      link: https://github.com/juleshry/vue-animejs
 
 features:
   - icon: 🎬
