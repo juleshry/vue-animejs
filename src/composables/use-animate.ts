@@ -3,22 +3,42 @@ import { type JSAnimation, animate, type TargetSelector, type AnimationParams } 
 import { type MaybeComputedElementRef, tryOnUnmounted, unrefElement } from "@vueuse/core"
 
 export interface UseAnimateReturn {
+  /** The underlying Anime.js animation instance. `undefined` until the target is available. */
   animation: DeepReadonly<ShallowRef<JSAnimation | undefined>>
+  /** Starts or resumes the animation. */
   play: () => JSAnimation | undefined
+  /** Reverses playback direction. */
   reverse: () => JSAnimation | undefined
+  /** Pauses the animation at the current position. */
   pause: () => JSAnimation | undefined
+  /** Restarts the animation from the beginning. */
   restart: () => JSAnimation | undefined
+  /** Toggles between forward and reverse direction. */
   alternate: () => JSAnimation | undefined
+  /** Resumes from a paused state. */
   resume: () => JSAnimation | undefined
+  /** Jumps immediately to the end of the animation. */
   complete: () => JSAnimation | undefined
+  /** Stops the animation and removes it from the Anime.js engine. */
   cancel: () => JSAnimation | undefined
+  /** Cancels the animation and restores all animated properties to their original values. */
   revert: () => JSAnimation | undefined
+  /** Resets the animation to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
   reset: (softReset?: boolean) => JSAnimation | undefined
+  /** Seeks to a specific time (in ms). */
   seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => JSAnimation | undefined
+  /** Rescales the animation to a new total duration. */
   stretch: (newDuration: number) => JSAnimation | undefined
+  /** Re-reads the current values of animated properties from the DOM. */
   refresh: () => JSAnimation | undefined
 }
 
+/**
+ * Wraps Anime.js `animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
+ *
+ * @param _target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param _options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ */
 export function useAnimate(
   _target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
   _options: MaybeRef<AnimationParams> = {}
@@ -43,7 +63,7 @@ export function useAnimate(
   })
 
   function createAnimation(el: TargetSelector, opt: AnimationParams) {
-    cancel()
+    revert()
 
     if (!el) {
       console.warn("Target element is null or undefined")
