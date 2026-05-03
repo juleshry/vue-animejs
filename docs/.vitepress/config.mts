@@ -36,7 +36,10 @@ export default defineConfig({
       },
       {
         text: "Composables",
-        items: [{ text: "useAnimate", link: "/composables/use-animate" }],
+        items: [
+          { text: "useAnimate", link: "/composables/use-animate" },
+          { text: "useTimer", link: "/composables/use-timer" },
+        ],
       },
     ],
   },
