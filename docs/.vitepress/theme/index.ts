@@ -4,6 +4,7 @@ import type { Theme } from "vitepress"
 import Layout from "./components/Layout.vue"
 import UseAnimateDemo from "./components/UseAnimateDemo.vue"
 import UseTimerDemo from "./components/UseTimerDemo.vue"
+import UseTimelineDemo from "./components/UseTimelineDemo.vue"
 import "./style.css"
 
 export default {
@@ -12,5 +13,6 @@ export default {
   enhanceApp({ app }) {
     app.component("UseAnimateDemo", UseAnimateDemo)
     app.component("UseTimerDemo", UseTimerDemo)
+    app.component("UseTimelineDemo", UseTimelineDemo)
   },
 } satisfies Theme

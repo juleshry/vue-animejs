@@ -137,4 +137,60 @@ describe("useTimeline", () => {
     await nextTick()
     expect(mock_createTimeline).toHaveBeenCalledWith({ loop: true })
   })
+
+  it("reverts the timeline before recreating on options change", async () => {
+    const options = ref({ loop: false })
+    withSetup(() => useTimeline(options))
+    mock_timeline.revert.mockClear()
+    options.value = { loop: true }
+    await nextTick()
+    expect(mock_timeline.revert).toHaveBeenCalled()
+  })
+
+  it("replays queued add calls on the new timeline when options change", async () => {
+    const el = document.createElement("div")
+    const options = ref({ loop: false })
+    mount(
+      defineComponent({
+        setup() {
+          const tl = useTimeline(options)
+          tl.add(el, { opacity: 1 })
+          return () => h("div")
+        },
+      })
+    )
+    mock_timeline.add.mockClear()
+    options.value = { loop: true }
+    await nextTick()
+    expect(mock_timeline.add).toHaveBeenCalledWith(el, { opacity: 1 }, undefined)
+  })
+
+  it("replays queued set calls on the new timeline when options change", async () => {
+    const el = document.createElement("div")
+    const options = ref({ loop: false })
+    mount(
+      defineComponent({
+        setup() {
+          const tl = useTimeline(options)
+          tl.set(el, { opacity: 0 })
+          return () => h("div")
+        },
+      })
+    )
+    mock_timeline.set.mockClear()
+    options.value = { loop: true }
+    await nextTick()
+    expect(mock_timeline.set).toHaveBeenCalledWith(el, { opacity: 0 }, undefined)
+  })
+
+  it("replays add calls made after mount when options change", async () => {
+    const el = document.createElement("div")
+    const options = ref({ loop: false })
+    const [result] = withSetup(() => useTimeline(options))
+    result.add(el, { translateX: 100 })
+    mock_timeline.add.mockClear()
+    options.value = { loop: true }
+    await nextTick()
+    expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
+  })
 })

@@ -23,43 +23,72 @@ type QueueEntry =
   | { type: "set"; targets: MaybeRef<TargetsParam>; params: AnimationParams; position?: TimelinePosition }
 
 export type TimelineChain = Timeline & {
+  /** Adds an animation to the timeline and returns a chainable object. */
   add: (
     targets: MaybeRef<TargetsParam>,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
+  /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
   set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
   remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
 }
 
 export interface UseTimelineReturn {
+  /** The underlying Anime.js timeline instance. */
   timeline: DeepReadonly<ShallowRef<Timeline>>
+  /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: MaybeRef<TargetsParam>,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
+  /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
   set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
   remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
   sync: (synced?: Tickable, position?: TimelinePosition) => Timeline
+  /** Adds a named label at a position so it can be referenced by `.add()` or `.seek()`. */
   label: (labelName: string, position?: TimelinePosition) => Timeline
+  /** Inserts a callback function at a specific point in the timeline. */
   call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline
+  /** Renders the timeline once without playing it. */
   init: (internalRender?: boolean) => Timeline
+  /** Starts or resumes the timeline. */
   play: () => Timeline
+  /** Reverses playback direction. */
   reverse: () => Timeline
+  /** Pauses the timeline at the current position. */
   pause: () => Timeline
+  /** Restarts the timeline from the beginning. */
   restart: () => Timeline
+  /** Toggles between forward and reverse direction. */
   alternate: () => Timeline
+  /** Resumes from a paused state. */
   resume: () => Timeline
+  /** Jumps immediately to the end of the timeline. */
   complete: () => Timeline
+  /** Resets the timeline to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
   reset: (softReset?: boolean) => Timeline
+  /** Stops the timeline and removes it from the Anime.js engine. */
   cancel: () => Timeline
+  /** Cancels the timeline and restores all animated properties to their original values. */
   revert: () => Timeline
+  /** Seeks to a specific time (in ms). */
   seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline
+  /** Rescales the timeline to a new total duration. */
   stretch: (newDuration: number) => Timeline
+  /** Re-reads the current values of all animated properties from the DOM. */
   refresh: () => Timeline
 }
 
+/**
+ * Wraps Anime.js `createTimeline()` into a Vue composable. Reactively re-creates the timeline when options change, and cancels it automatically on unmount.
+ *
+ * @param options - Anime.js timeline parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ */
 export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
   let is_mounted = false
 
@@ -67,30 +96,29 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
   const timeline = shallowRef<Timeline>(createTimeline(unref(options)))
 
+  function replayQueue() {
+    for (const entry of queue) {
+      if (entry.type === "add") {
+        timeline.value.add(unref(entry.targets), entry.params, entry.position)
+      } else {
+        timeline.value.set(unref(entry.targets), entry.params, entry.position)
+      }
+    }
+  }
+
   const { stop } = watch(
     () => unref(options),
     _options => {
-      cancel()
+      revert()
       timeline.value = createTimeline(_options)
+      replayQueue()
     },
     { flush: "post", deep: 1 }
   )
 
   tryOnMounted(() => {
     is_mounted = true
-
-    queue.forEach(entry => {
-      switch (entry.type) {
-        case "add":
-          add(entry.targets, entry.params, entry.position)
-          break
-        case "set":
-          set(entry.targets, entry.params, entry.position)
-          break
-      }
-    })
-
-    queue.length = 0
+    replayQueue()
   })
 
   tryOnUnmounted(() => {
@@ -103,20 +131,22 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
+    queue.push({ type: "add", targets, params, position })
+
     if (is_mounted) {
       return { ...timeline.value.add(unref(targets), params, position), add, set, remove } as TimelineChain
     }
 
-    queue.push({ type: "add", targets, params, position })
     return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
   function set(targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) {
+    queue.push({ type: "set", targets, params, position })
+
     if (is_mounted) {
       return { ...timeline.value.set(unref(targets), params, position), add, set, remove } as TimelineChain
     }
 
-    queue.push({ type: "set", targets, params, position })
     return { ...timeline.value, add, set, remove } as TimelineChain
   }
 

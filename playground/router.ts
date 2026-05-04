@@ -3,6 +3,7 @@ import AnimateSection from "./components/AnimateSection.vue"
 import ReactiveAnimateSection from "./components/ReactiveAnimateSection.vue"
 import TimerSection from "./components/TimerSection.vue"
 import TimelineSection from "./components/TimelineSection.vue"
+import ReactiveTimelineSection from "./components/ReactiveTimelineSection.vue"
 import AnimatableSection from "./components/AnimatableSection.vue"
 import DraggableSection from "./components/DraggableSection.vue"
 import LayoutSection from "./components/LayoutSection.vue"
@@ -15,6 +16,7 @@ export const routes = [
   { path: "/reactive-animate", component: ReactiveAnimateSection, meta: { label: "Reactive Animation" } },
   { path: "/timer", component: TimerSection, meta: { label: "Timer" } },
   { path: "/timeline", component: TimelineSection, meta: { label: "Timeline" } },
+  { path: "/reactive-timeline", component: ReactiveTimelineSection, meta: { label: "Reactive Timeline" } },
   { path: "/animatable", component: AnimatableSection, meta: { label: "Animatable" } },
   { path: "/draggable", component: DraggableSection, meta: { label: "Draggable" } },
   { path: "/layout", component: LayoutSection, meta: { label: "Layout" } },
