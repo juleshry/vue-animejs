@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useTemplateRef } from "vue"
-import { useAnimate } from "vue-animejs"
+  import { useTemplateRef } from "vue"
+  import { useAnimate } from "vue-animejs"
 
-const box = useTemplateRef("box")
+  const box = useTemplateRef("box")
 
-const { play, pause, restart } = useAnimate(box, {
-  translateX: 220,
-  duration: 1000,
-  easing: "easeInOutQuad",
-  autoplay: false,
-})
+  const { play, pause, restart } = useAnimate(box, {
+    translateX: 220,
+    duration: 1000,
+    easing: "easeInOutQuad",
+    autoplay: false,
+  })
 </script>
 
 <template>
@@ -26,46 +26,48 @@ const { play, pause, restart } = useAnimate(box, {
 </template>
 
 <style scoped>
-.demo {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
-  padding: 24px;
-  margin: 24px 0;
-}
+  .demo {
+    border: 1px solid var(--vp-c-divider);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 24px 0;
+  }
 
-.demo-stage {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-}
+  .demo-stage {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
 
-.demo-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-  flex-shrink: 0;
-}
+  .demo-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
+    flex-shrink: 0;
+  }
 
-.demo-controls {
-  display: flex;
-  gap: 8px;
-}
+  .demo-controls {
+    display: flex;
+    gap: 8px;
+  }
 
-.demo-btn {
-  padding: 6px 16px;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
-  font-size: 14px;
-  cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
-}
+  .demo-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--vp-c-divider);
+    background: var(--vp-c-bg-soft);
+    color: var(--vp-c-text-1);
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background 0.2s;
+  }
 
-.demo-btn:hover {
-  border-color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg-mute);
-}
+  .demo-btn:hover {
+    border-color: var(--vp-c-brand-1);
+    background: var(--vp-c-bg-mute);
+  }
 </style>

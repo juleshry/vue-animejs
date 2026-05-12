@@ -2,15 +2,22 @@
   "name": "vue-animejs",
   "version": "0.1.0",
   "description": "Vue 3 composables for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
-  "keywords": ["vue", "vue3", "animejs", "animation", "composable", "composables"],
-  "license": "MIT",
+  "keywords": [
+    "animation",
+    "animejs",
+    "composable",
+    "composables",
+    "vue",
+    "vue3"
+  ],
   "homepage": "https://github.com/juleshry/vue-animejs#readme",
+  "bugs": {
+    "url": "https://github.com/juleshry/vue-animejs/issues"
+  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/juleshry/vue-animejs.git"
-  },
-  "bugs": {
-    "url": "https://github.com/juleshry/vue-animejs/issues"
   },
   "files": [
     "dist"
