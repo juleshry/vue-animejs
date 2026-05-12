@@ -49,6 +49,7 @@ describe("useRawAnimate", () => {
   })
 
   it("warns when target is falsy", () => {
+    // oxlint-disable-next-line typescript/no-explicit-any
     useRawAnimate(null as any)
 
     expect(console.warn).toHaveBeenCalledWith("Target is undefined")

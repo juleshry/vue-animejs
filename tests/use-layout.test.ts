@@ -37,6 +37,7 @@ describe("useLayout", () => {
   })
 
   it("warns and leaves layout undefined when target is null", async () => {
+    // oxlint-disable-next-line typescript/no-explicit-any
     const [result] = withSetup(() => useLayout(null as any, {}))
     await nextTick()
     expect(console.warn).toHaveBeenCalledWith("Target element is null or undefined")

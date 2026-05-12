@@ -36,6 +36,7 @@ describe("useAnimate", () => {
   })
 
   it("warns and leaves animation undefined when target is null", async () => {
+    // oxlint-disable-next-line typescript/no-explicit-any
     const [result] = withSetup(() => useAnimate(null as any))
     await nextTick()
     expect(console.warn).toHaveBeenCalledWith("Target element is null or undefined")

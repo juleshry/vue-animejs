@@ -55,6 +55,3 @@ export function useAnimatable(
 
   return { animatable: readonly(animatable), revert }
 }
-function revert() {
-  throw new Error("Function not implemented.")
-}

@@ -36,6 +36,7 @@ describe("useDraggable", () => {
   })
 
   it("warns and leaves draggable undefined when target is null", async () => {
+    // oxlint-disable-next-line typescript/no-explicit-any
     const [result] = withSetup(() => useDraggable(null as any))
     await nextTick()
     expect(console.warn).toHaveBeenCalledWith("Targets element is null or undefined")
