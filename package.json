@@ -38,7 +38,8 @@
     "lint": "oxlint .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepare": "cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

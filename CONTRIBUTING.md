@@ -89,15 +89,4 @@ bun run test:coverage
 
 ## Code style
 
-Prettier handles formatting. Run before committing:
-
-```bash
-# using bun
-bun run prettier --write .
-# using npm
-npm run prettier --write .
-# using pnpm
-pnpm run prettier --write .
-# using yarn
-yarn prettier --write .
-```
+Formatting is handled by `oxfmt` and runs automatically via a pre-commit hook installed by `bun install` (the `prepare` script). No manual step needed.
