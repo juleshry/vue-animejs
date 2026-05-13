@@ -101,4 +101,72 @@ describe("useWaapi", () => {
     await nextTick()
     expect(mock_waapi.animate).toHaveBeenCalledWith(el, { opacity: 1 })
   })
+
+  it("delegates resume to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.resume()
+    expect(mock_animation.resume).toHaveBeenCalledOnce()
+  })
+
+  it("delegates alternate to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.alternate()
+    expect(mock_animation.alternate).toHaveBeenCalledOnce()
+  })
+
+  it("delegates reverse to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.reverse()
+    expect(mock_animation.reverse).toHaveBeenCalledOnce()
+  })
+
+  it("delegates restart to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.restart()
+    expect(mock_animation.restart).toHaveBeenCalledOnce()
+  })
+
+  it("delegates commitStyles to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.commitStyles()
+    expect(mock_animation.commitStyles).toHaveBeenCalledOnce()
+  })
+
+  it("delegates complete to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.complete()
+    expect(mock_animation.complete).toHaveBeenCalledOnce()
+  })
+
+  it("delegates revert to the animation instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useWaapi(el))
+    await nextTick()
+    result.revert()
+    expect(mock_animation.revert).toHaveBeenCalledOnce()
+  })
+
+  it("stops the watcher on unmount", async () => {
+    const el = document.createElement("div")
+    const options = ref({ opacity: 0 })
+    const [, wrapper] = withSetup(() => useWaapi(el, options))
+    await nextTick()
+    wrapper.unmount()
+    mock_waapi.animate.mockClear()
+    options.value = { opacity: 1 }
+    await nextTick()
+    expect(mock_waapi.animate).not.toHaveBeenCalled()
+  })
 })

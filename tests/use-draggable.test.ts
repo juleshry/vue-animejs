@@ -90,4 +90,44 @@ describe("useDraggable", () => {
     wrapper.unmount()
     expect(mock_draggable.revert).toHaveBeenCalled()
   })
+
+  it("delegates animateInView to the draggable instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el))
+    await nextTick()
+    result.animateInView(500, 20)
+    expect(mock_draggable.animateInView).toHaveBeenCalledWith(500, 20, undefined)
+  })
+
+  it("delegates scrollInView to the draggable instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el))
+    await nextTick()
+    result.scrollInView(300)
+    expect(mock_draggable.scrollInView).toHaveBeenCalledWith(300, undefined, undefined)
+  })
+
+  it("delegates stop to the draggable instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el))
+    await nextTick()
+    result.stop()
+    expect(mock_draggable.stop).toHaveBeenCalledOnce()
+  })
+
+  it("delegates reset to the draggable instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el))
+    await nextTick()
+    result.reset()
+    expect(mock_draggable.reset).toHaveBeenCalledOnce()
+  })
+
+  it("delegates refresh to the draggable instance", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el))
+    await nextTick()
+    result.refresh()
+    expect(mock_draggable.refresh).toHaveBeenCalledOnce()
+  })
 })

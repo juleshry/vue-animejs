@@ -134,4 +134,27 @@ describe("useScope", () => {
     await nextTick()
     expect(mock_createScope).not.toHaveBeenCalled()
   })
+
+  it("registerMethod() called after mount delegates to scope.add immediately", () => {
+    const method = vi.fn()
+    const [result] = withSetup(() => useScope({}))
+    mock_scope.add.mockClear()
+    result.registerMethod("myMethod", method)
+    expect(mock_scope.add).toHaveBeenCalledWith("myMethod", method)
+  })
+
+  it("addOnce() called after mount delegates to scope.addOnce immediately", () => {
+    const method = vi.fn()
+    const [result] = withSetup(() => useScope({}))
+    mock_scope.addOnce.mockClear()
+    result.addOnce(method)
+    expect(mock_scope.addOnce).toHaveBeenCalledWith(method)
+  })
+
+  it("keepTime() delegates to scope.keepTime", () => {
+    const [result] = withSetup(() => useScope({}))
+    const factory = vi.fn()
+    result.keepTime(factory)
+    expect(mock_scope.keepTime).toHaveBeenCalledWith(factory)
+  })
 })

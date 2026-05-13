@@ -97,4 +97,14 @@ describe("useText", () => {
     wrapper.unmount()
     expect(result.splitter.value).toBeUndefined()
   })
+
+  it("skips splitText when element resolves to null", async () => {
+    const el_ref = ref<HTMLElement | null>(null)
+    const params = ref({})
+    const [result] = withSetup(() => useText(el_ref, params))
+    params.value = { lines: true }
+    await nextTick()
+    expect(mock_splitText).not.toHaveBeenCalled()
+    expect(result.splitter.value).toBeUndefined()
+  })
 })

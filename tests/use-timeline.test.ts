@@ -193,4 +193,97 @@ describe("useTimeline", () => {
     await nextTick()
     expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
   })
+
+  it("delegates set directly when already mounted", () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useTimeline())
+    result.set(el, { opacity: 0 })
+    expect(mock_timeline.set).toHaveBeenCalledWith(el, { opacity: 0 }, undefined)
+  })
+
+  it("delegates remove after mount to the timeline instance", () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useTimeline())
+    result.remove(el)
+    expect(mock_timeline.remove).toHaveBeenCalledWith(el, undefined)
+  })
+
+  it("delegates reverse to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.reverse()
+    expect(mock_timeline.reverse).toHaveBeenCalledOnce()
+  })
+
+  it("delegates restart to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.restart()
+    expect(mock_timeline.restart).toHaveBeenCalledOnce()
+  })
+
+  it("delegates alternate to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.alternate()
+    expect(mock_timeline.alternate).toHaveBeenCalledOnce()
+  })
+
+  it("delegates resume to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.resume()
+    expect(mock_timeline.resume).toHaveBeenCalledOnce()
+  })
+
+  it("delegates complete to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.complete()
+    expect(mock_timeline.complete).toHaveBeenCalledOnce()
+  })
+
+  it("delegates reset with arg to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.reset(true)
+    expect(mock_timeline.reset).toHaveBeenCalledWith(true)
+  })
+
+  it("delegates revert directly to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.revert()
+    expect(mock_timeline.revert).toHaveBeenCalledOnce()
+  })
+
+  it("delegates stretch to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.stretch(2000)
+    expect(mock_timeline.stretch).toHaveBeenCalledWith(2000)
+  })
+
+  it("delegates refresh to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.refresh()
+    expect(mock_timeline.refresh).toHaveBeenCalledOnce()
+  })
+
+  it("delegates sync to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.sync(undefined, 0)
+    expect(mock_timeline.sync).toHaveBeenCalledWith(undefined, 0)
+  })
+
+  it("delegates label to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.label("start", 0)
+    expect(mock_timeline.label).toHaveBeenCalledWith("start", 0)
+  })
+
+  it("delegates call to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    const cb = vi.fn()
+    result.call(cb, 0)
+    expect(mock_timeline.call).toHaveBeenCalledWith(cb, 0)
+  })
+
+  it("delegates init to the timeline instance", () => {
+    const [result] = withSetup(() => useTimeline())
+    result.init()
+    expect(mock_timeline.init).toHaveBeenCalledOnce()
+  })
 })
