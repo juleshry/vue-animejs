@@ -295,7 +295,6 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 ## 🗺️ TODO
 
 - [ ] Allow reactive refs inside option objects
-- [ ] Publish the first version to `npm`
 - [ ] Write Doc
 - [ ] Deploy the docs website
 
