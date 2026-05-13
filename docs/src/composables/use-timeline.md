@@ -15,7 +15,7 @@ Chain animations on multiple elements sequentially using `add`.
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useTimeline } from "vue-animejs"
+import { useTimeline } from "@juleshry/vue-animejs"
 
 const box1 = useTemplateRef<HTMLDivElement>("box1")
 const box2 = useTemplateRef<HTMLDivElement>("box2")
@@ -41,7 +41,7 @@ Pass a position string to `add` to offset when each animation starts relative to
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useTimeline } from "vue-animejs"
+import { useTimeline } from "@juleshry/vue-animejs"
 
 const box1 = useTemplateRef<HTMLDivElement>("box1")
 const box2 = useTemplateRef<HTMLDivElement>("box2")
@@ -70,7 +70,7 @@ Use `set` to pin a property to a value at a specific point in the timeline witho
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useTimeline } from "vue-animejs"
+import { useTimeline } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef<HTMLDivElement>("box")
 
@@ -94,7 +94,7 @@ Pass a `ref` or `computed` as the argument to control timeline-level parameters 
 <script setup lang="ts">
 import { ref, computed } from "vue"
 import { useTemplateRef } from "vue"
-import { useTimeline } from "vue-animejs"
+import { useTimeline } from "@juleshry/vue-animejs"
 
 const box1 = useTemplateRef<HTMLDivElement>("box1")
 const box2 = useTemplateRef<HTMLDivElement>("box2")

@@ -13,7 +13,7 @@ Wraps Anime.js [`createTimer()`](https://animejs.com/documentation/timer) into a
 ```vue
 <script setup lang="ts">
 import { ref } from "vue"
-import { useTimer } from "vue-animejs"
+import { useTimer } from "@juleshry/vue-animejs"
 
 const elapsed = ref(0)
 
@@ -45,7 +45,7 @@ Changing options cancels the current timer and recreates it with the new paramet
 ```vue
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { useTimer } from "vue-animejs"
+import { useTimer } from "@juleshry/vue-animejs"
 
 const duration = ref(2000)
 const count = ref(0)

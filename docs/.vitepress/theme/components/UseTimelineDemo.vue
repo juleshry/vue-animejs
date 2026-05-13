@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
-  import { useTimeline } from "vue-animejs"
+  import { useTimeline } from "@juleshry/vue-animejs"
 
   const box1 = useTemplateRef("box1")
   const box2 = useTemplateRef("box2")

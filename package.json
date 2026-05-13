@@ -1,5 +1,5 @@
 {
-  "name": "vue-animejs",
+  "name": "@juleshry/vue-animejs",
   "version": "0.1.0",
   "description": "Vue 3 composables for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
   "keywords": [

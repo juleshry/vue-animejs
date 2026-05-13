@@ -6,7 +6,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "vue-animejs": resolve(__dirname, "../../src/index.ts"),
+        "@juleshry/vue-animejs": resolve(__dirname, "../../src/index.ts"),
       },
     },
   },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref } from "vue"
-  import { useTimer } from "vue-animejs"
+  import { useTimer } from "@juleshry/vue-animejs"
 
   const elapsed = ref(0)
   const progress = ref(0)

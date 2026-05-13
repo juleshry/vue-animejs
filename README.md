@@ -46,7 +46,7 @@ onUnmounted(() => {
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimate } from 'vue-animejs'
+import { useAnimate } from '@juleshry/vue-animejs'
 
 const el = useTemplateRef<HTMLElement>('el')
 
@@ -84,7 +84,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimate } from 'vue-animejs'
+import { useAnimate } from '@juleshry/vue-animejs'
 
 const el = useTemplateRef<HTMLElement>('el')
 
@@ -106,7 +106,7 @@ const { play, pause } = useAnimate(el, {
 
 ```vue
 <script setup lang="ts">
-import { useTimer } from 'vue-animejs'
+import { useTimer } from '@juleshry/vue-animejs'
 
 const { play, pause } = useTimer({
   duration: 3000,
@@ -120,7 +120,7 @@ const { play, pause } = useTimer({
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useTimeline } from 'vue-animejs'
+import { useTimeline } from '@juleshry/vue-animejs'
 
 const box = useTemplateRef<HTMLElement>('box')
 
@@ -137,7 +137,7 @@ play()
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimatable } from 'vue-animejs'
+import { useAnimatable } from '@juleshry/vue-animejs'
 
 const el = useTemplateRef<HTMLElement>('el')
 
@@ -153,7 +153,7 @@ const { animatable } = useAnimatable(el, {
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useDraggable } from 'vue-animejs'
+import { useDraggable } from '@juleshry/vue-animejs'
 
 const el = useTemplateRef<HTMLElement>('el')
 
@@ -178,7 +178,7 @@ const { disable, enable } = useDraggable(el, {
 ```vue
 <script setup lang="ts">
 import { nextTick, ref, useTemplateRef } from 'vue'
-import { useLayout } from 'vue-animejs'
+import { useLayout } from '@juleshry/vue-animejs'
 
 const list = useTemplateRef<HTMLElement>('list')
 const { record, animate } = useLayout(list, {})
@@ -206,7 +206,7 @@ When you mutate the DOM directly with `classList.toggle`, the change is synchron
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useLayout } from 'vue-animejs'
+import { useLayout } from '@juleshry/vue-animejs'
 
 const container = useTemplateRef<HTMLElement>('container')
 const { update } = useLayout(container, {})
@@ -231,7 +231,7 @@ function toggleLayout() {
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimate, useScope } from 'vue-animejs'
+import { useAnimate, useScope } from '@juleshry/vue-animejs'
 
 const el = useTemplateRef<HTMLElement>('el')
 
@@ -257,7 +257,7 @@ add(scope => {
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimate, useText } from 'vue-animejs'
+import { useAnimate, useText } from '@juleshry/vue-animejs'
 import { stagger } from 'animejs'
 
 const el = useTemplateRef<HTMLElement>('el')

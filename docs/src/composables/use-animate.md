@@ -13,7 +13,7 @@ Wraps Anime.js [`animate()`](https://animejs.com/documentation/animation) into a
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useAnimate } from "vue-animejs"
+import { useAnimate } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 
@@ -45,7 +45,7 @@ Changing options recreates the animation from scratch with the new parameters.
 ```vue
 <script setup lang="ts">
 import { useTemplateRef, ref, computed } from "vue"
-import { useAnimate } from "vue-animejs"
+import { useAnimate } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 const distance = ref(100)
@@ -75,7 +75,7 @@ You can pass any valid Anime.js `TargetSelector` directly instead of a template 
 
 ```vue
 <script setup lang="ts">
-import { useAnimate } from "vue-animejs"
+import { useAnimate } from "@juleshry/vue-animejs"
 
 const { play } = useAnimate(".box", {
   rotate: 360,

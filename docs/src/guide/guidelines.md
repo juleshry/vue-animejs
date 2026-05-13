@@ -13,7 +13,7 @@ DOM targets should always be declared with `useTemplateRef`:
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useAnimate } from "vue-animejs"
+import { useAnimate } from "@juleshry/vue-animejs"
 
 const el = useTemplateRef("el")
 
@@ -79,7 +79,7 @@ The `animation` property (where exposed) is a `DeepReadonly<ShallowRef<...>>`. D
 The library is written in strict TypeScript and ships with full type declarations. All public API types are re-exported from the main entry point:
 
 ```ts
-import type { UseAnimateReturn } from "vue-animejs"
+import type { UseAnimateReturn } from "@juleshry/vue-animejs"
 ```
 
 Anime.js types (`AnimationParams`, `TargetSelector`, etc.) come from the `animejs` package itself and are passed through without wrapping.

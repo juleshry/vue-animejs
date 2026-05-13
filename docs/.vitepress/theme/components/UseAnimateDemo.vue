@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
-  import { useAnimate } from "vue-animejs"
+  import { useAnimate } from "@juleshry/vue-animejs"
 
   const box = useTemplateRef("box")
 

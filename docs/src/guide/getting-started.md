@@ -11,19 +11,19 @@ npm and bun install peer dependencies automatically. pnpm and yarn require you t
 ::: code-group
 
 ```sh [npm]
-npm install vue-animejs
+npm install @juleshry/vue-animejs
 ```
 
 ```sh [pnpm]
-pnpm add vue-animejs animejs @vueuse/core
+pnpm add @juleshry/vue-animejs animejs @vueuse/core
 ```
 
 ```sh [yarn]
-yarn add vue-animejs animejs @vueuse/core
+yarn add @juleshry/vue-animejs animejs @vueuse/core
 ```
 
 ```sh [bun]
-bun add vue-animejs
+bun add @juleshry/vue-animejs
 ```
 
 :::
@@ -47,7 +47,7 @@ Animate a DOM element by passing a template ref and animation options to `useAni
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from "vue"
-import { useAnimate } from "vue-animejs"
+import { useAnimate } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 
