@@ -36,6 +36,10 @@ useAnimate(".box", { translateX: 200 })
 useAnimate(document.querySelector(".box"), { translateX: 200 })
 ```
 
+::: warning
+Avoid CSS selectors inside reusable components. If the component is rendered more than once, the selector matches all instances and triggers the animation on every matching element simultaneously. Use `useTemplateRef` instead to scope the animation to the component's own element. Page-level components rendered only once are not affected.
+:::
+
 ## Reactive Options
 
 All composables accept a `Ref` or `computed` as their options argument. When the options change, the composable reacts automatically:

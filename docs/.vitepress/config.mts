@@ -56,6 +56,7 @@ export default defineConfig({
           { text: "useRawAnimate", link: "/composables/use-raw-animate" },
           { text: "useTimer", link: "/composables/use-timer" },
           { text: "useTimeline", link: "/composables/use-timeline" },
+          { text: "useWaapi", link: "/composables/use-waapi" },
         ],
       },
     ],

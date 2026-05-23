@@ -8,6 +8,7 @@ html {
   --vp-c-brand-1: #b3413c;
   --vp-c-brand-2: #40835d;
 
+  --vp-c-bg: #f6f6f7;
   --vp-c-bg-logo: #f6f6f7;
 
   --vp-custom-block-details-bg: rgba(142, 150, 170, 0.07);
@@ -16,8 +17,9 @@ html {
   --vp-home-hero-image-filter: blur(44px);
 }
 
-.dark {
+.dark:root {
   --vp-custom-block-details-bg: rgba(101, 117, 133, 0.08);
+  --vp-c-bg: #1b1b1f;
 }
 
 .vp-doc h2 {

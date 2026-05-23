@@ -6,6 +6,7 @@ import UseAnimateDemo from "./components/UseAnimateDemo.vue"
 import UseTimerDemo from "./components/UseTimerDemo.vue"
 import UseTimelineDemo from "./components/UseTimelineDemo.vue"
 import UseRawAnimateDemo from "./components/UseRawAnimateDemo.vue"
+import UseWaapiDemo from "./components/UseWaapiDemo.vue"
 import "./style.css"
 
 export default {
@@ -16,5 +17,6 @@ export default {
     app.component("UseTimerDemo", UseTimerDemo)
     app.component("UseTimelineDemo", UseTimelineDemo)
     app.component("UseRawAnimateDemo", UseRawAnimateDemo)
+    app.component("UseWaapiDemo", UseWaapiDemo)
   },
 } satisfies Theme

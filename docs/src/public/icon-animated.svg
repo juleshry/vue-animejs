@@ -31,8 +31,8 @@
       .a-circle   { fill: #000; }
       .dot-border { stroke: #000; }
       @media (prefers-color-scheme: dark) {
-        .a-circle   { fill: #fff; }
-        .dot-border { stroke: #fff; }
+        .a-circle   { fill: #f6f6f7; }
+        .dot-border { stroke: #f6f6f7; }
       }
     </style>
 
@@ -56,7 +56,7 @@
   <g class="a-group">
     <circle class="a-circle" cx="220" cy="110.4" r="110.4" mask="url(#aMask)"/>
     <g class="dot-group">
-      <g transform="translate(103,-47) scale(2.4)">
+      <g transform="translate(98,-47) scale(2.4)">
         <path class="dot" d="M67.982 50.6 70.571 33h22.776l-2.459 17.6z"/>
         <path class="dot-border" d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
       </g>
