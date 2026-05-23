@@ -24,10 +24,16 @@
         0%, 27.3%   { fill: #42b883; }
         36.4%, 100% { fill: #fb4749; }
       }
-      .v-group   { animation: moveV 5.5s linear infinite; }
-      .a-group   { transform-origin: 220px 110.4px; animation: growA 5.5s linear infinite; }
-      .dot-group { transform-box: fill-box; transform-origin: center; animation: growDot 5.5s linear infinite; }
-      .dot       { animation: dotColor 5.5s ease-in-out infinite; }
+      .v-group    { animation: moveV 5.5s linear infinite; }
+      .a-group    { transform-origin: 220px 110.4px; animation: growA 5.5s linear infinite; }
+      .dot-group  { transform-box: fill-box; transform-origin: center; animation: growDot 5.5s linear infinite; }
+      .dot        { animation: dotColor 5.5s ease-in-out infinite; }
+      .a-circle   { fill: #000; }
+      .dot-border { stroke: #000; }
+      @media (prefers-color-scheme: dark) {
+        .a-circle   { fill: #fff; }
+        .dot-border { stroke: #fff; }
+      }
     </style>
 
     <!-- Mask: white circle with black "a" cut out → reveals V underneath -->
@@ -48,11 +54,11 @@
 
   <!-- Anime.js: circle + dot, scale in/out from circle center -->
   <g class="a-group">
-    <circle cx="220" cy="110.4" r="110.4" fill="#000" mask="url(#aMask)"/>
+    <circle class="a-circle" cx="220" cy="110.4" r="110.4" mask="url(#aMask)"/>
     <g class="dot-group">
       <g transform="translate(103,-47) scale(2.4)">
         <path class="dot" d="M67.982 50.6 70.571 33h22.776l-2.459 17.6z"/>
-        <path d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke="#000" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+        <path class="dot-border" d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
       </g>
     </g>
   </g>
