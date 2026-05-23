@@ -1,0 +1,4 @@
+[build]
+base = "docs"
+command = "bun run docs:build"
+publish = ".vitepress/dist"
