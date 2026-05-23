@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./docs/src/public/icon.png" alt="vue-animejs" width="120" />
+  <img src="./docs/src/public/icon-animated.svg" alt="vue-animejs" width="120" />
 
   <h1 align="center">vue-animejs</h1>
   <p align="center">Vue 3 composables for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 335 221" width="120" height="120">
+  <defs>
+    <style>
+      @keyframes colorCycle {
+        0%, 100% { fill: #fb4749; }
+        50%       { fill: #42b883; }
+      }
+      .dot { animation: colorCycle 2s ease-in-out infinite; }
+    </style>
+
+    <!-- Mask: white circle with black "a" cut out → reveals V underneath -->
+    <mask id="aMask">
+      <circle cx="220" cy="110.4" r="110.4" fill="white"/>
+      <g transform="translate(135,-15) scale(2.0)">
+        <path d="M27.659 92.035q-9.964 0-15.724-1.423-5.758-1.424-8.347-4.66Q1 82.718 1 77.153q0-2.457.388-4.917l.388-2.847q1.036-7.247 4.012-11 2.977-3.753 9.318-5.306t18.118-1.553h2.588q9.188 0 14.364 1.36 5.177 1.358 7.506 4.464h.389l.647-6.082q.258-2.33.258-2.977.001-3.105-1.294-4.53-1.293-1.422-3.947-1.876-2.652-.453-7.83-.453h-2.587q-6.083 0-9.253.583-3.17.582-4.4 1.811t-1.618 3.43l-.13.388H6.436l.26-1.941q1.035-7.377 4.723-11.13 3.687-3.752 11.647-5.24 7.96-1.49 22.84-1.489h3.107q12.294 0 19.088 1.618 6.794 1.616 9.965 5.888 3.17 4.27 3.17 12.553 0 3.364-.906 10.223L75.671 91H53.282l1.165-6.988h-.259q-2.718 3.105-5.306 4.788-2.588 1.682-6.858 2.459-4.272.776-11.648.776zm12.035-13.847q6.989 0 10.353-.582 3.365-.582 4.659-1.941t1.682-4.077l.26-1.035q.128-.646.128-1.812 0-1.812-1.164-2.782-1.165-.97-4.336-1.359-3.17-.388-9.382-.388h-1.423q-6.99 0-10.418.647t-4.724 2.006q-1.293 1.359-1.682 4.076l-.13 1.035-.129 1.295q0 1.94 1.424 3.04t4.594 1.489 8.994.388z" fill="black"/>
+      </g>
+    </mask>
+  </defs>
+
+  <!-- Vue.js V (native paths from Vue logo) -->
+  <path d="M204.8 0H256L128 220.8 0 0h97.92L128 51.2 157.44 0z" fill="#41b883"/>
+  <path d="m0 0 128 220.8L256 0h-51.2L128 132.48 50.56 0z" fill="#41b883"/>
+  <path d="M50.56 0 128 133.12 204.8 0h-47.36L128 51.2 97.92 0z" fill="#35495e"/>
+
+  <!-- Anime.js: black circle with "a" cut through (V visible inside the letterform) -->
+  <circle cx="220" cy="110.4" r="110.4" fill="#000" mask="url(#aMask)"/>
+
+  <!-- Animated dot drawn on top (bigger + higher, with left+bottom black border) -->
+  <g transform="translate(103,-47) scale(2.4)">
+    <path class="dot" d="M67.982 50.6 70.571 33h22.776l-2.459 17.6z"/>
+    <path d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke="#000" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+  </g>
+</svg>
