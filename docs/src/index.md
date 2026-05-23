@@ -7,7 +7,7 @@ hero:
   text: Animejs implementation for Vuejs.
   tagline: Reactive, lifecycle-aware animation composables for Vue 3 — powered by Anime.js v4.
   image:
-    src: /icon.png
+    src: /icon-animated.svg
     alt: Vue x Animejs
   actions:
     - theme: brand

@@ -5,6 +5,7 @@ import Layout from "./components/Layout.vue"
 import UseAnimateDemo from "./components/UseAnimateDemo.vue"
 import UseTimerDemo from "./components/UseTimerDemo.vue"
 import UseTimelineDemo from "./components/UseTimelineDemo.vue"
+import UseRawAnimateDemo from "./components/UseRawAnimateDemo.vue"
 import "./style.css"
 
 export default {
@@ -14,5 +15,6 @@ export default {
     app.component("UseAnimateDemo", UseAnimateDemo)
     app.component("UseTimerDemo", UseTimerDemo)
     app.component("UseTimelineDemo", UseTimelineDemo)
+    app.component("UseRawAnimateDemo", UseRawAnimateDemo)
   },
 } satisfies Theme
