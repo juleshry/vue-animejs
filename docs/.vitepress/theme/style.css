@@ -3,6 +3,8 @@ html {
 }
 
 :root {
+  --vp-layout-top-height: 37px;
+
   --vp-c-brand-1: #b3413c;
   --vp-c-brand-2: #40835d;
 
@@ -29,6 +31,10 @@ html {
 
 .shiki span[style*="#6A737D"] {
   font-style: italic;
+}
+
+.VPNav {
+  background-color: var(--vp-c-bg);
 }
 
 .VPNavBarTitle .logo {

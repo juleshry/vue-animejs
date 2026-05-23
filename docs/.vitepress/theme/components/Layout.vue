@@ -6,6 +6,30 @@
 
 <template>
   <Layout>
-    <template #navbar-content-before>Test blablu</template>
+    <template #layout-top>
+      <div :class="$style.warningBanner">
+        ⚠️ This library is a work in progress. The API is not stable and may change at any time.
+      </div>
+    </template>
   </Layout>
 </template>
+
+<style module>
+  .warningBanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: calc(var(--vp-z-index-nav) + 1);
+    text-align: center;
+    padding: 8px 16px;
+    background: #fef3c7;
+    color: var(--vp-custom-block-warning-text);
+    font-size: 14px;
+    border-bottom: 1px solid var(--vp-custom-block-warning-border);
+  }
+
+  :global(.dark) .warningBanner {
+    background: #2d2004;
+  }
+</style>
