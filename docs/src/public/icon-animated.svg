@@ -1,11 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 335 221" width="120" height="120">
   <defs>
     <style>
-      @keyframes colorCycle {
-        0%, 100% { fill: #fb4749; }
-        50%       { fill: #42b883; }
+      @keyframes moveV {
+        0%    { transform: translateX(39.5px); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        18.2% { transform: translateX(0px); }
+        72.7% { transform: translateX(0px); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        90.9%, 100% { transform: translateX(39.5px); }
       }
-      .dot { animation: colorCycle 2s ease-in-out infinite; }
+      @keyframes growA {
+        0%    { transform: scale(0); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        18.2% { transform: scale(1); }
+        72.7% { transform: scale(1); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        90.9%, 100% { transform: scale(0); }
+      }
+      @keyframes growDot {
+        0%    { transform: scale(0); }
+        18.2% { transform: scale(0); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        27.3% { transform: scale(1); }
+        72.7% { transform: scale(1); animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1); }
+        90.9%, 100% { transform: scale(0); }
+      }
+      @keyframes dotColor {
+        0%, 27.3%   { fill: #42b883; }
+        36.4%, 100% { fill: #fb4749; }
+      }
+      .v-group   { animation: moveV 5.5s linear infinite; }
+      .a-group   { transform-origin: 220px 110.4px; animation: growA 5.5s linear infinite; }
+      .dot-group { transform-box: fill-box; transform-origin: center; animation: growDot 5.5s linear infinite; }
+      .dot       { animation: dotColor 5.5s ease-in-out infinite; }
     </style>
 
     <!-- Mask: white circle with black "a" cut out → reveals V underneath -->
@@ -17,17 +39,21 @@
     </mask>
   </defs>
 
-  <!-- Vue.js V (native paths from Vue logo) -->
-  <path d="M204.8 0H256L128 220.8 0 0h97.92L128 51.2 157.44 0z" fill="#41b883"/>
-  <path d="m0 0 128 220.8L256 0h-51.2L128 132.48 50.56 0z" fill="#41b883"/>
-  <path d="M50.56 0 128 133.12 204.8 0h-47.36L128 51.2 97.92 0z" fill="#35495e"/>
+  <!-- Vue.js V: starts centered, slides left as A appears -->
+  <g class="v-group">
+    <path d="M204.8 0H256L128 220.8 0 0h97.92L128 51.2 157.44 0z" fill="#41b883"/>
+    <path d="m0 0 128 220.8L256 0h-51.2L128 132.48 50.56 0z" fill="#41b883"/>
+    <path d="M50.56 0 128 133.12 204.8 0h-47.36L128 51.2 97.92 0z" fill="#35495e"/>
+  </g>
 
-  <!-- Anime.js: black circle with "a" cut through (V visible inside the letterform) -->
-  <circle cx="220" cy="110.4" r="110.4" fill="#000" mask="url(#aMask)"/>
-
-  <!-- Animated dot drawn on top (bigger + higher, with left+bottom black border) -->
-  <g transform="translate(103,-47) scale(2.4)">
-    <path class="dot" d="M67.982 50.6 70.571 33h22.776l-2.459 17.6z"/>
-    <path d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke="#000" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+  <!-- Anime.js: circle + dot, scale in/out from circle center -->
+  <g class="a-group">
+    <circle cx="220" cy="110.4" r="110.4" fill="#000" mask="url(#aMask)"/>
+    <g class="dot-group">
+      <g transform="translate(103,-47) scale(2.4)">
+        <path class="dot" d="M67.982 50.6 70.571 33h22.776l-2.459 17.6z"/>
+        <path d="M70.571,33 L67.982,50.6 L90.888,50.6" fill="none" stroke="#000" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"/>
+      </g>
+    </g>
   </g>
 </svg>
