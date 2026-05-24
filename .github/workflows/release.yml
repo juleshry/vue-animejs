@@ -8,7 +8,7 @@ permissions: {}
 
 jobs:
   test:
-    uses: ./.github/workflows/reusable/test.yml
+    uses: ./.github/workflows/test.yml
 
   publish:
     if: github.actor == 'jhery'
