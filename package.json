@@ -39,7 +39,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "prepare": "cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
+    "prepare": "[ -d .git/hooks ] && cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit || true"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
