@@ -3,6 +3,8 @@
 
   <h1 align="center">vue-animejs</h1>
   <p align="center">Vue 3 composables for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>
+  <p align="center"><a href="https://vue-animejs.juleshry.dev">📖 Documentation</a></p>
+  <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" /></a></p>
 </div>
 
 > [!WARNING]
@@ -295,8 +297,8 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 ## 🗺️ TODO
 
 - [ ] Allow reactive refs inside option objects
-- [ ] Write Doc
-- [ ] Deploy the docs website
+- [ ] Finish doc website
+- [ ] Add components and directives
 
 ## 📄 License
 

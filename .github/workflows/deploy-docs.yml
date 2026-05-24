@@ -1,0 +1,12 @@
+name: Deploy docs
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build
+        run: curl -s -X POST ${{ secrets.NETLIFY_BUILD_HOOK }}
