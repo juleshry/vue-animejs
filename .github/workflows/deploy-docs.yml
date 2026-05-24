@@ -4,8 +4,11 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   deploy:
+    if: github.actor == 'jhery'
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Netlify build
