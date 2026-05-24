@@ -74,6 +74,8 @@ const { play } = useTimer(options)
 
 ## Type Declarations
 
+For all available options, see the [Anime.js timer documentation](https://animejs.com/documentation/timer).
+
 ::: details Show Type Declarations
 
 ```ts

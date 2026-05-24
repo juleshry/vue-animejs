@@ -91,6 +91,8 @@ const { play } = useAnimate(".box", {
 
 ## Type Declarations
 
+For all available options, see the [Anime.js animation documentation](https://animejs.com/documentation/animation).
+
 ::: details Show Type Declarations
 
 ```ts

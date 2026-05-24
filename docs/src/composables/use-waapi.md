@@ -121,6 +121,8 @@ const { play } = useWaapi(".box", {
 
 ## Type Declarations
 
+For all available options, see the [Anime.js WAAPI documentation](https://animejs.com/documentation/web-animations-api).
+
 ::: details Show Type Declarations
 
 ```ts

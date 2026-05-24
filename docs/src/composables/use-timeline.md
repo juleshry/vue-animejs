@@ -119,6 +119,8 @@ add(box1, { translateX: 200, duration: 600, easing: "easeOutExpo" })
 
 ## Type Declarations
 
+For all available options, see the [Anime.js timeline documentation](https://animejs.com/documentation/timeline).
+
 ::: details Show Type Declarations
 
 ```ts
