@@ -26,6 +26,7 @@
     background: #fef3c7;
     color: var(--vp-custom-block-warning-text);
     font-size: 14px;
+    line-height: 1.4;
     border-bottom: 1px solid var(--vp-custom-block-warning-border);
   }
 

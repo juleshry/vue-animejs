@@ -21,6 +21,24 @@ html {
 .dark:root {
   --vp-custom-block-details-bg: rgba(101, 117, 133, 0.08);
   --vp-c-bg: #1b1b1f;
+  --vp-code-block-bg: #161618;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --vp-layout-top-height: 56px;
+  }
+
+  .VPSidebar {
+    top: 0 !important;
+    padding-top: var(--vp-layout-top-height) !important;
+  }
+
+  .vp-doc div[class*="language-"] {
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: 8px;
+  }
 }
 
 .vp-doc h2 {
@@ -38,6 +56,16 @@ html {
 
 .VPNav {
   background-color: var(--vp-c-bg);
+}
+
+.VPNavBarTitle.has-sidebar .title {
+  border-bottom: none;
+}
+
+.vp-code-group .tabs {
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 8px 8px 0 0;
 }
 
 .VPNavBarTitle .logo {
