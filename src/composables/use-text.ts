@@ -1,6 +1,6 @@
 import { splitText, type TextSplitter, type TextSplitterParams } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import {
   computed,
   isRef,

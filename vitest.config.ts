@@ -9,6 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@lib": fileURLToPath(new URL("./src/index.ts", import.meta.url)),
+      "@src": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
 })

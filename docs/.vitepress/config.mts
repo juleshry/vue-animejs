@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress"
 import { resolve } from "path"
+import { fileURLToPath, URL } from "node:url"
 
 // https://vitepress.dev/reference/site-config
 const HOSTNAME = "https://vue-animejs.juleshry.dev"
@@ -10,6 +11,7 @@ export default defineConfig({
     resolve: {
       alias: {
         "@juleshry/vue-animejs": resolve(__dirname, "../../src/index.ts"),
+        "@src": fileURLToPath(new URL("../../src", import.meta.url)),
       },
     },
   },

@@ -11,7 +11,7 @@ import {
   watch,
 } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseAnimatableReturn {
   /** The underlying Anime.js animatable instance. `undefined` until the target is available. */

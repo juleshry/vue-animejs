@@ -11,7 +11,7 @@ import {
   type Timer,
 } from "animejs"
 import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 type QueueEntry =
   | {

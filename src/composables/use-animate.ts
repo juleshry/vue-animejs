@@ -1,7 +1,7 @@
 import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly, isRef } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
