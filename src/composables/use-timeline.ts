@@ -4,7 +4,6 @@ import {
   type Callback,
   createTimeline,
   type StaggerFunction,
-  type TargetsParam,
   type Tickable,
   type Timeline,
   type TimelineParams,
@@ -12,27 +11,28 @@ import {
   type Timer,
 } from "animejs"
 import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
 
 type QueueEntry =
   | {
       type: "add"
-      targets: MaybeRef<TargetsParam>
+      targets: AnimationTargets
       params: AnimationParams
       position?: TimelinePosition | StaggerFunction<number | string>
     }
-  | { type: "set"; targets: MaybeRef<TargetsParam>; params: AnimationParams; position?: TimelinePosition }
+  | { type: "set"; targets: AnimationTargets; params: AnimationParams; position?: TimelinePosition }
 
 export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
-    targets: MaybeRef<TargetsParam>,
+    targets: AnimationTargets,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
-  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
-  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
 }
 
 export interface UseTimelineReturn {
@@ -40,14 +40,14 @@ export interface UseTimelineReturn {
   timeline: DeepReadonly<ShallowRef<Timeline>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
-    targets: MaybeRef<TargetsParam>,
+    targets: AnimationTargets,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
-  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
-  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
   /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
   sync: (synced?: Tickable, position?: TimelinePosition) => Timeline
   /** Adds a named label at a position so it can be referenced by `.add()` or `.seek()`. */
@@ -99,9 +99,9 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   function replayQueue() {
     for (const entry of queue) {
       if (entry.type === "add") {
-        timeline.value.add(unref(entry.targets), entry.params, entry.position)
+        timeline.value.add(resolveTarget(entry.targets), entry.params, entry.position)
       } else {
-        timeline.value.set(unref(entry.targets), entry.params, entry.position)
+        timeline.value.set(resolveTarget(entry.targets), entry.params, entry.position)
       }
     }
   }
@@ -127,36 +127,36 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   })
 
   function add(
-    targets: MaybeRef<TargetsParam>,
+    targets: AnimationTargets,
     params: AnimationParams,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
     queue.push({ type: "add", targets, params, position })
 
     if (is_mounted) {
-      return { ...timeline.value.add(unref(targets), params, position), add, set, remove } as TimelineChain
+      return { ...timeline.value.add(resolveTarget(targets), params, position), add, set, remove } as TimelineChain
     }
 
     return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
-  function set(targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) {
+  function set(targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) {
     queue.push({ type: "set", targets, params, position })
 
     if (is_mounted) {
-      return { ...timeline.value.set(unref(targets), params, position), add, set, remove } as TimelineChain
+      return { ...timeline.value.set(resolveTarget(targets), params, position), add, set, remove } as TimelineChain
     }
 
     return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
-  function remove(targets: MaybeRef<TargetsParam>, propertyName?: string) {
+  function remove(targets: AnimationTargets, propertyName?: string) {
     if (!is_mounted) {
       console.warn("Cannot remove from timeline before mount")
       return { ...timeline.value, add, set, remove } as TimelineChain
     }
 
-    return { ...timeline.value.remove(unref(targets), propertyName), add, set, remove } as TimelineChain
+    return { ...timeline.value.remove(resolveTarget(targets), propertyName), add, set, remove } as TimelineChain
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {

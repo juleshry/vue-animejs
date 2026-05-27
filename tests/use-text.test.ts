@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { mount } from "@vue/test-utils"
 import { useText } from "@lib"
 import { withSetup } from "./utils"
 import { makeTextSplitterMock } from "./mocks"
@@ -106,5 +107,20 @@ describe("useText", () => {
     await nextTick()
     expect(mock_splitText).not.toHaveBeenCalled()
     expect(result.splitter.value).toBeUndefined()
+  })
+
+  it("resolves a Vue component ref to its $el", async () => {
+    const ChildComp = defineComponent({ render: () => h("p", "Hello world") })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const child_ref = ref<ComponentPublicInstance | null>(null)
+          useText(child_ref)
+          return () => h(ChildComp, { ref: child_ref })
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_splitText).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, undefined)
   })
 })

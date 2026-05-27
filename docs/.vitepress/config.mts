@@ -59,6 +59,7 @@ export default defineConfig({
           { text: "useWaapi", link: "/composables/use-waapi" },
           { text: "useAnimatable", link: "/composables/use-animatable" },
           { text: "useDraggable", link: "/composables/use-draggable" },
+          { text: "useScope", link: "/composables/use-scope" },
         ],
       },
     ],

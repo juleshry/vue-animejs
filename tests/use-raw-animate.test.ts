@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { ref } from "vue"
+import { defineComponent, h, ref } from "vue"
+import { mount } from "@vue/test-utils"
 import { useRawAnimate } from "@lib"
 import { makeAnimationMock } from "./mocks"
 import { animate } from "animejs"
@@ -60,5 +61,15 @@ describe("useRawAnimate", () => {
     useRawAnimate(el)
 
     expect(mock_animate).toHaveBeenCalledWith(el, {})
+  })
+
+  it("resolves a Vue component ref to its $el", () => {
+    const ChildComp = defineComponent({ render: () => h("div") })
+    const child_wrapper = mount(ChildComp)
+
+    // oxlint-disable-next-line typescript/no-explicit-any
+    useRawAnimate(ref(child_wrapper.vm) as any, { opacity: [0, 1] })
+
+    expect(mock_animate).toHaveBeenCalledWith(child_wrapper.element, { opacity: [0, 1] })
   })
 })

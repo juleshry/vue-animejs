@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { defineComponent, h, nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useTimeline } from "@lib"
 import { withSetup } from "./utils"
@@ -285,5 +285,54 @@ describe("useTimeline", () => {
     const [result] = withSetup(() => useTimeline())
     result.init()
     expect(mock_timeline.init).toHaveBeenCalledOnce()
+  })
+
+  describe("with a Vue component ref", () => {
+    it("resolves $el in add when flushing the queue on mount", () => {
+      const ChildComp = defineComponent({ render: () => h("div") })
+      const wrapper = mount(
+        defineComponent({
+          setup() {
+            const child_ref = ref<ComponentPublicInstance | null>(null)
+            const tl = useTimeline()
+            tl.add(child_ref, { opacity: 1 })
+            return () => h(ChildComp, { ref: child_ref })
+          },
+        })
+      )
+      expect(mock_timeline.add).toHaveBeenCalledWith(
+        wrapper.findComponent(ChildComp).element,
+        { opacity: 1 },
+        undefined
+      )
+    })
+
+    it("resolves $el in set when flushing the queue on mount", () => {
+      const ChildComp = defineComponent({ render: () => h("div") })
+      const wrapper = mount(
+        defineComponent({
+          setup() {
+            const child_ref = ref<ComponentPublicInstance | null>(null)
+            const tl = useTimeline()
+            tl.set(child_ref, { opacity: 0 })
+            return () => h(ChildComp, { ref: child_ref })
+          },
+        })
+      )
+      expect(mock_timeline.set).toHaveBeenCalledWith(
+        wrapper.findComponent(ChildComp).element,
+        { opacity: 0 },
+        undefined
+      )
+    })
+
+    it("resolves $el in remove after mount", () => {
+      const ChildComp = defineComponent({ render: () => h("div") })
+      const child_wrapper = mount(ChildComp)
+      const child_ref = ref(child_wrapper.vm)
+      const [result] = withSetup(() => useTimeline())
+      result.remove(child_ref)
+      expect(mock_timeline.remove).toHaveBeenCalledWith(child_wrapper.element, undefined)
+    })
   })
 })

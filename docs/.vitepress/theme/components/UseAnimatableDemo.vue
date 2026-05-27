@@ -3,9 +3,10 @@
   import { useEventListener } from "@vueuse/core"
   import { utils } from "animejs"
   import { useAnimatable } from "@juleshry/vue-animejs"
+  import DemoSquare from "./DemoSquare.vue"
 
   const stage = useTemplateRef("stage")
-  const box = useTemplateRef("box")
+  const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
 
   const { animatable } = useAnimatable(box, {
     x: 500,
@@ -34,7 +35,7 @@
 <template>
   <div class="demo">
     <div ref="stage" class="demo-stage" @vue:mounted="refreshBounds">
-      <div ref="box" class="demo-box" />
+      <DemoSquare ref="box" style="pointer-events: none" />
     </div>
     <div class="demo-label">Move cursor around</div>
   </div>
@@ -54,14 +55,6 @@
     align-items: center;
     justify-content: center;
     background: var(--vp-c-bg-soft);
-  }
-
-  .demo-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 20%;
-    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-    pointer-events: none;
   }
 
   .demo-label {

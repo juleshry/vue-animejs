@@ -1,10 +1,11 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
   import { useTimeline } from "@juleshry/vue-animejs"
+  import DemoSquare from "./DemoSquare.vue"
 
-  const box1 = useTemplateRef("box1")
-  const box2 = useTemplateRef("box2")
-  const box3 = useTemplateRef("box3")
+  const box1 = useTemplateRef<InstanceType<typeof DemoSquare>>("box1")
+  const box2 = useTemplateRef<InstanceType<typeof DemoSquare>>("box2")
+  const box3 = useTemplateRef<InstanceType<typeof DemoSquare>>("box3")
 
   const { add, play, pause, restart } = useTimeline({ autoplay: false })
 
@@ -16,15 +17,9 @@
 <template>
   <div class="demo">
     <div class="demo-stage">
-      <div class="demo-track">
-        <div ref="box1" class="demo-box box-1" />
-      </div>
-      <div class="demo-track">
-        <div ref="box2" class="demo-box box-2" />
-      </div>
-      <div class="demo-track">
-        <div ref="box3" class="demo-box box-3" />
-      </div>
+      <DemoSquare ref="box1" :variant="0" />
+      <DemoSquare ref="box2" :variant="1" />
+      <DemoSquare ref="box3" :variant="2" />
     </div>
     <div class="demo-controls">
       <button class="demo-btn" @click="play">Play</button>
@@ -47,33 +42,6 @@
     flex-direction: column;
     gap: 10px;
     margin-bottom: 16px;
-  }
-
-  .demo-track {
-    height: 44px;
-    display: flex;
-    align-items: center;
-  }
-
-  .demo-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .box-1 {
-    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-  }
-
-  .box-2 {
-    background: linear-gradient(135deg, var(--vp-c-brand-2), var(--vp-c-brand-3));
-    opacity: 0.85;
-  }
-
-  .box-3 {
-    background: linear-gradient(135deg, var(--vp-c-brand-3), var(--vp-c-brand-1));
-    opacity: 0.7;
   }
 
   .demo-controls {

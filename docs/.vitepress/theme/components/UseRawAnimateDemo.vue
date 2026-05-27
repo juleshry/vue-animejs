@@ -1,12 +1,13 @@
 <script setup lang="ts">
   import { onMounted, useTemplateRef } from "vue"
-  import { useRawAnimate } from "@juleshry/vue-animejs"
+  import { useRawAnimate, type UseRawAnimateReturn } from "@juleshry/vue-animejs"
+  import DemoSquare from "./DemoSquare.vue"
 
-  const box = useTemplateRef<HTMLElement>("box")
-  let animation: ReturnType<typeof useRawAnimate> | null = null
+  const box_ref = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
+  let animation: UseRawAnimateReturn
 
   onMounted(() => {
-    animation = useRawAnimate(box.value!, {
+    animation = useRawAnimate(box_ref, {
       translateX: 220,
       duration: 1000,
       easing: "easeInOutQuad",
@@ -30,7 +31,7 @@
 <template>
   <div class="demo">
     <div class="demo-stage">
-      <div ref="box" class="demo-box" />
+      <DemoSquare ref="box" />
     </div>
     <div class="demo-controls">
       <button class="demo-btn" @click="play">Play</button>
@@ -53,14 +54,6 @@
     display: flex;
     align-items: center;
     margin-bottom: 16px;
-  }
-
-  .demo-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-    flex-shrink: 0;
   }
 
   .demo-controls {

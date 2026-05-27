@@ -1,12 +1,22 @@
-import { animate, AnimationParams, TargetSelector } from "animejs"
-import { MaybeRef, unref } from "vue"
+import { animate, type AnimationParams, type JSAnimation } from "animejs"
+import { type MaybeRef, unref } from "vue"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
 
-export interface UseRawAnimateReturn {
-  animate: (target: TargetSelector, options: AnimationParams) => void
-}
+/** The Anime.js `JSAnimation` instance returned by `useRawAnimate`. */
+export type UseRawAnimateReturn = JSAnimation
 
-export function useRawAnimate(_target: MaybeRef<TargetSelector>, _options: MaybeRef<AnimationParams> = {}) {
-  const target = unref(_target)
+/**
+ * Thin wrapper around Anime.js `animate()`. Resolves the target (unwrapping refs and Vue component
+ * refs via `.$el`) and immediately starts the animation.
+ *
+ * @param _target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param _options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ */
+export function useRawAnimate(
+  _target: AnimationTargets,
+  _options: MaybeRef<AnimationParams> = {}
+): UseRawAnimateReturn {
+  const target = resolveTarget(_target)
 
   if (!target) {
     console.warn("Target is undefined")

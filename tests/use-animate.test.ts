@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { mount } from "@vue/test-utils"
 import { useAnimate } from "@lib"
 import { withSetup } from "./utils"
 import { makeAnimationMock } from "./mocks"
@@ -187,5 +188,20 @@ describe("useAnimate", () => {
     await nextTick()
     result.refresh()
     expect(mock_animation.refresh).toHaveBeenCalledOnce()
+  })
+
+  it("resolves a Vue component ref to its $el", async () => {
+    const ChildComp = defineComponent({ render: () => h("div") })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const child_ref = ref<ComponentPublicInstance | null>(null)
+          useAnimate(child_ref, { opacity: [0, 1] })
+          return () => h(ChildComp, { ref: child_ref })
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, { opacity: [0, 1] })
   })
 })

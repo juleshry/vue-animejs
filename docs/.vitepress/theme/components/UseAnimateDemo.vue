@@ -1,8 +1,9 @@
 <script setup lang="ts">
-  import { useTemplateRef } from "vue"
+  import { computed, useTemplateRef } from "vue"
   import { useAnimate } from "@juleshry/vue-animejs"
+  import DemoSquare from "./DemoSquare.vue"
 
-  const box = useTemplateRef("box")
+  const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
 
   const { play, pause, restart } = useAnimate(box, {
     translateX: 220,
@@ -15,7 +16,7 @@
 <template>
   <div class="demo">
     <div class="demo-stage">
-      <div ref="box" class="demo-box" />
+      <DemoSquare ref="box" />
     </div>
     <div class="demo-controls">
       <button class="demo-btn" @click="play">Play</button>
@@ -38,14 +39,6 @@
     display: flex;
     align-items: center;
     margin-bottom: 16px;
-  }
-
-  .demo-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
-    flex-shrink: 0;
   }
 
   .demo-controls {

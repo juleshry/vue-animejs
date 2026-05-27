@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { mount } from "@vue/test-utils"
 import { useWaapi } from "@lib"
 import { withSetup } from "./utils"
 import { makeWaapiAnimationMock } from "./mocks"
@@ -168,5 +169,20 @@ describe("useWaapi", () => {
     options.value = { opacity: 1 }
     await nextTick()
     expect(mock_waapi.animate).not.toHaveBeenCalled()
+  })
+
+  it("resolves a Vue component ref to its $el", async () => {
+    const ChildComp = defineComponent({ render: () => h("div") })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const child_ref = ref<ComponentPublicInstance | null>(null)
+          useWaapi(child_ref, { opacity: [0, 1] })
+          return () => h(ChildComp, { ref: child_ref })
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_waapi.animate).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, { opacity: [0, 1] })
   })
 })

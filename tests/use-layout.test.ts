@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { mount } from "@vue/test-utils"
 import { useLayout } from "@lib"
 import { withSetup } from "./utils"
 import { makeLayoutMock } from "./mocks"
@@ -84,5 +85,20 @@ describe("useLayout", () => {
     mock_layout.revert.mockClear()
     wrapper.unmount()
     expect(mock_layout.revert).toHaveBeenCalled()
+  })
+
+  it("resolves a Vue component ref to its $el", async () => {
+    const ChildComp = defineComponent({ render: () => h("div") })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const child_ref = ref<ComponentPublicInstance | null>(null)
+          useLayout(child_ref, {})
+          return () => h(ChildComp, { ref: child_ref })
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_createLayout).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, {})
   })
 })

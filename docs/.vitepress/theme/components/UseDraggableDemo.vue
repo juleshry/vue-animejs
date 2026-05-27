@@ -1,8 +1,9 @@
 <script setup lang="ts">
   import { computed, useTemplateRef } from "vue"
   import { useDraggable } from "@juleshry/vue-animejs"
+  import DemoSquare from "./DemoSquare.vue"
 
-  const box = useTemplateRef<HTMLDivElement>("box")
+  const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
   const container = useTemplateRef<HTMLDivElement>("container")
 
   const options = computed(() => ({
@@ -16,7 +17,7 @@
 <template>
   <div class="demo">
     <div ref="container" class="demo-stage">
-      <div ref="box" class="demo-box" />
+      <DemoSquare ref="box" />
     </div>
     <div class="demo-controls">
       <button class="demo-btn" @click="enable">Enable</button>
@@ -43,13 +44,6 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-  }
-
-  .demo-box {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    background: linear-gradient(135deg, var(--vp-c-brand-1), var(--vp-c-brand-2));
   }
 
   .demo-controls {

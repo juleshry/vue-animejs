@@ -1,11 +1,15 @@
 <script setup lang="ts">
   import DefaultTheme from "vitepress/theme"
+  import { useData } from "vitepress"
+  import BareLayout from "../layouts/BareLayout.vue"
 
   const { Layout } = DefaultTheme
+  const { frontmatter } = useData()
 </script>
 
 <template>
-  <Layout>
+  <BareLayout v-if="frontmatter.layout === 'bare'" />
+  <Layout v-else>
     <template #layout-top>
       <div :class="$style.warningBanner">
         ⚠️ This library is a work in progress. The API is not stable and may change at any time.

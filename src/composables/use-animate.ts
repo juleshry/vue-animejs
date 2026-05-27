@@ -1,6 +1,7 @@
 import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly, isRef } from "vue"
-import { type JSAnimation, animate, type TargetSelector, type AnimationParams } from "animejs"
-import { type MaybeComputedElementRef, tryOnUnmounted, unrefElement } from "@vueuse/core"
+import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
+import { tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
@@ -39,18 +40,11 @@ export interface UseAnimateReturn {
  * @param _target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param _options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
-export function useAnimate(
-  _target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
-  _options: MaybeRef<AnimationParams> = {}
-): UseAnimateReturn {
+export function useAnimate(_target: AnimationTargets, _options: MaybeRef<AnimationParams> = {}): UseAnimateReturn {
   const animation = shallowRef<JSAnimation>()
 
-  function resolveTarget() {
-    return unrefElement(_target as MaybeComputedElementRef) ?? unref(_target as MaybeRef<TargetSelector>)
-  }
-
   const { stop } = watch(
-    [resolveTarget, () => unref(_options)],
+    [() => resolveTarget(_target), () => unref(_options)],
     ([el, opt]) => {
       createAnimation(el, opt)
     },
@@ -62,7 +56,7 @@ export function useAnimate(
     cancel()
   })
 
-  function createAnimation(el: TargetSelector, opt: AnimationParams) {
+  function createAnimation(el: TargetsParam, opt: AnimationParams) {
     revert()
 
     if (!el) {
