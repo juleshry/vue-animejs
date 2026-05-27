@@ -58,4 +58,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Netlify build
-        run: curl -s -X POST ${{ secrets.NETLIFY_BUILD_HOOK }}
+        run: curl --fail -X POST ${{ secrets.NETLIFY_BUILD_HOOK }}
