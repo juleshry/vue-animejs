@@ -51,8 +51,3 @@ jobs:
       - run: bun install
       - run: bun run build
       - run: npm publish
-
-  deploy:
-    needs: publish
-    uses: ./.github/workflows/deploy-docs.yml
-    secrets: inherit
