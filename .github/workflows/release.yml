@@ -10,29 +10,9 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
 
-  bump-version:
-    if: github.actor == 'juleshry'
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: main
-      - name: Update package.json version
-        run: npm pkg set version="${GITHUB_REF_NAME#v}"
-      - name: Commit and push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json
-          git diff --staged --quiet || git commit -m "chore: bump version to ${GITHUB_REF_NAME#v}"
-          git push
-
   publish:
     if: github.actor == 'juleshry'
-    needs: bump-version
+    needs: test
     runs-on: ubuntu-latest
     environment: npm
     permissions:
@@ -43,6 +23,11 @@ jobs:
         with:
           ref: main
       - uses: oven-sh/setup-bun@v2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
