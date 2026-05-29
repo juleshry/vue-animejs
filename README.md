@@ -68,16 +68,19 @@ useAnimate(el, { translateX: 250, duration: 800 })
 
 ## 🦄 Composables
 
-| Composable      | Description                                       |
-|-----------------|---------------------------------------------------|
-| `useAnimate`    | Animate a DOM target with reactive params         |
-| `useTimer`      | Drive a timer with full playback control          |
-| `useTimeline`   | Sequence multiple animations on a shared timeline |
-| `useAnimatable` | Create a reactive animatable object               |
-| `useDraggable`  | Make a DOM element draggable with full control    |
-| `useLayout`     | Animate DOM layout changes (reorder, add, remove) |
-| `useScope`      | Create an Anime.js scope with lifecycle management |
-| `useText`       | Split text into animatable lines, words, and chars |
+| Composable       | Description                                       |
+|------------------|---------------------------------------------------|
+| `useAnimate`     | Animate a DOM target with reactive params         |
+| `useRawAnimate`  | Thin wrapper around Anime.js `animate()` with ref unwrapping |
+| `useTimer`       | Drive a timer with full playback control          |
+| `useTimeline`    | Sequence multiple animations on a shared timeline |
+| `useWaapi`       | Animate via the Web Animations API (WAAPI)        |
+| `useAnimatable`  | Create a reactive animatable object               |
+| `useDraggable`   | Make a DOM element draggable with full control    |
+| `useLayout`      | Animate DOM layout changes (reorder, add, remove) |
+| `useScope`       | Create an Anime.js scope with lifecycle management |
+| `useSvg`         | SVG utilities: morph, drawable stroke, motion path |
+| `useText`        | Split text into animatable lines, words, and chars |
 
 ## 🚀 Usage
 
@@ -134,6 +137,24 @@ play()
 </script>
 ```
 
+### `useRawAnimate`
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useRawAnimate } from '@juleshry/vue-animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+// Returns the raw Anime.js JSAnimation instance directly
+const animation = useRawAnimate(el, { translateX: 250, duration: 800 })
+</script>
+
+<template>
+  <div ref="el" />
+</template>
+```
+
 ### `useAnimatable`
 
 ```vue
@@ -147,6 +168,50 @@ const { animatable } = useAnimatable(el, {
   x: 0,
   opacity: 1,
 })
+</script>
+```
+
+### `useWaapi`
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useWaapi } from '@juleshry/vue-animejs'
+
+const el = useTemplateRef<HTMLElement>('el')
+
+const { play, pause } = useWaapi(el, {
+  translateX: 250,
+  duration: 800,
+  easing: 'easeInOutQuad',
+})
+</script>
+
+<template>
+  <div ref="el" />
+  <button @click="play">Play</button>
+  <button @click="pause">Pause</button>
+</template>
+```
+
+### `useSvg`
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from 'vue'
+import { useAnimate, useSvg } from '@juleshry/vue-animejs'
+
+const path = useTemplateRef<SVGPathElement>('path')
+const target = useTemplateRef<SVGPathElement>('target')
+
+const { morphTo, createDrawable } = useSvg()
+
+// Animate a path morph
+useAnimate(path, { d: morphTo(target), duration: 1000 })
+
+// Animate a drawable stroke
+const drawable = createDrawable(path)
+useAnimate(drawable, { strokeDashoffset: [1, 0], duration: 1200 })
 </script>
 ```
 
@@ -298,7 +363,8 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 - [ ] Allow reactive refs inside option objects
 - [ ] Finish doc website
-- [ ] Add components and directives
+- [ ] Add components
+- [ ] Add directives
 
 ## 📄 License
 

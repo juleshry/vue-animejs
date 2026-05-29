@@ -53,22 +53,6 @@ jobs:
       - run: npm publish
 
   deploy:
-    if: github.actor == 'juleshry'
     needs: publish
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: main
-      - uses: oven-sh/setup-bun@v2
-      - uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
-          restore-keys: ${{ runner.os }}-bun-
-      - run: bun install && bun install --cwd docs
-      - run: bun run --cwd docs docs:build
-      - run: npx netlify-cli deploy --prod --dir=docs/.vitepress/dist
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    uses: ./.github/workflows/deploy-docs.yml
+    secrets: inherit
