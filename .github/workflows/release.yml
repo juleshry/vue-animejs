@@ -57,5 +57,13 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Netlify build
-        run: curl --fail -X POST ${{ secrets.NETLIFY_BUILD_HOOK }}
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install && bun install --cwd docs
+      - run: bun run --cwd docs docs:build
+      - run: npx netlify-cli deploy --prod --dir=docs/.vitepress/dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

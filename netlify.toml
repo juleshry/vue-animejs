@@ -1,3 +1,2 @@
 [build]
-command = "bun install && bun install --cwd docs && bun run --cwd docs docs:build"
 publish = "docs/.vitepress/dist"
