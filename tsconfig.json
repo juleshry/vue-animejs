@@ -8,11 +8,11 @@
     "noEmit": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": ["node"],
+    "types": ["node", "bun-types"],
     "paths": {
       "@lib": ["./src/index.ts"],
       "@src/*": ["./src/*"]
     }
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "src/**/*", "playground/**/*", "tests/**/*"]
+  "include": ["vite.config.ts", "vitest.config.ts", "src/**/*", "playground/**/*", "tests/**/*", "scripts/**/*"]
 }
