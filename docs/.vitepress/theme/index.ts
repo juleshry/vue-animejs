@@ -11,6 +11,7 @@ import UseAnimatableDemo from "./components/UseAnimatableDemo.vue"
 import UseDraggableDemo from "./components/UseDraggableDemo.vue"
 import UseScopeDemo from "./components/UseScopeDemo.vue"
 import UseScopeDemoInner from "./components/UseScopeDemoInner.vue"
+import UseTextDemo from "./components/UseTextDemo.vue"
 import "./style.css"
 
 const DEMO_ROUTES = ["/demos/use-scope"]
@@ -34,5 +35,6 @@ export default {
     app.component("UseDraggableDemo", UseDraggableDemo)
     app.component("UseScopeDemo", UseScopeDemo)
     app.component("UseScopeDemoInner", UseScopeDemoInner)
+    app.component("UseTextDemo", UseTextDemo)
   },
 } satisfies Theme

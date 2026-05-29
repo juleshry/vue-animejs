@@ -62,6 +62,7 @@ export default defineConfig({
           { text: "useAnimatable", link: "/composables/use-animatable" },
           { text: "useDraggable", link: "/composables/use-draggable" },
           { text: "useScope", link: "/composables/use-scope" },
+          { text: "useText", link: "/composables/use-text" },
         ],
       },
     ],
