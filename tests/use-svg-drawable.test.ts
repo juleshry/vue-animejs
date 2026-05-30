@@ -5,6 +5,7 @@ import { withSetup } from "./utils"
 import { svg } from "animejs"
 
 const mock_svg = vi.mocked(svg)
+// oxlint-disable-next-line typescript/no-explicit-any
 const mock_drawable = { _drawable: true } as any
 
 vi.mock("animejs", () => ({
