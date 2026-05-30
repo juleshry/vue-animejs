@@ -12,6 +12,9 @@ import UseDraggableDemo from "./components/UseDraggableDemo.vue"
 import UseScopeDemo from "./components/UseScopeDemo.vue"
 import UseScopeDemoInner from "./components/UseScopeDemoInner.vue"
 import UseTextDemo from "./components/UseTextDemo.vue"
+import UseSvgDemo from "./components/UseSvgDemo.vue"
+import UseSvgDrawableDemo from "./components/UseSvgDrawableDemo.vue"
+import UseCreateMotionPathDemo from "./components/UseCreateMotionPathDemo.vue"
 import "./style.css"
 
 const DEMO_ROUTES = ["/demos/use-scope"]
@@ -36,5 +39,8 @@ export default {
     app.component("UseScopeDemo", UseScopeDemo)
     app.component("UseScopeDemoInner", UseScopeDemoInner)
     app.component("UseTextDemo", UseTextDemo)
+    app.component("UseSvgDemo", UseSvgDemo)
+    app.component("UseSvgDrawableDemo", UseSvgDrawableDemo)
+    app.component("UseCreateMotionPathDemo", UseCreateMotionPathDemo)
   },
 } satisfies Theme

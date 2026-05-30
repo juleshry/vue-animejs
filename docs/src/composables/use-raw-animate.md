@@ -25,7 +25,7 @@ onMounted(() => {
   useRawAnimate(box.value!, {
     translateX: 200,
     duration: 800,
-    easing: "easeInOutQuad",
+    ease: "inOutQuad",
   })
 })
 </script>
@@ -52,7 +52,7 @@ onMounted(() => {
   animation = useRawAnimate(box.value!, {
     translateX: 200,
     duration: 1000,
-    easing: "easeOutExpo",
+    ease: "outExpo",
     autoplay: false,
   })
 })

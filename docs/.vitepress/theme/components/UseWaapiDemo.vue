@@ -8,7 +8,7 @@
   const { play, pause, restart } = useWaapi(box, {
     translate: "220px",
     duration: 1000,
-    easing: "ease-in-out",
+    ease: "ease-in-out",
     autoplay: false,
   })
 </script>

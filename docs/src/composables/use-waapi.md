@@ -24,7 +24,7 @@ const box = useTemplateRef("box")
 const { play, pause, restart } = useWaapi(box, {
   translate: "220px",
   duration: 1000,
-  easing: "ease-in-out",
+  ease: "ease-in-out",
   autoplay: false,
 })
 </script>
@@ -57,7 +57,7 @@ const distance = ref(100)
 const options = computed(() => ({
   translate: `${distance.value}px`,
   duration: 600,
-  easing: "ease-out",
+  ease: "ease-out",
 }))
 
 useWaapi(box, options)
@@ -88,7 +88,7 @@ const box = useTemplateRef("box")
 const { play, convertEase } = useWaapi(box, {
   translate: "220px",
   duration: 800,
-  easing: convertEase(eases.inOut("quad")),
+  ease: convertEase(eases.inOut("quad")),
   autoplay: false,
 })
 </script>

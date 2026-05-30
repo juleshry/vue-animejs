@@ -11,7 +11,7 @@
     opacity: [0, 1],
     duration: 700,
     delay: (_: Target, i: number) => i * 50,
-    easing: "easeOutExpo",
+    ease: "outExpo",
     autoplay: true,
   })
 </script>

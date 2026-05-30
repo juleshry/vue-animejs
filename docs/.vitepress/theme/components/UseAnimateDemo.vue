@@ -8,7 +8,7 @@
   const { play, pause, restart } = useAnimate(box, {
     translateX: 220,
     duration: 1000,
-    easing: "easeInOutQuad",
+    ease: "inOutQuad",
     autoplay: false,
   })
 </script>

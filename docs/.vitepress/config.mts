@@ -63,6 +63,15 @@ export default defineConfig({
           { text: "useDraggable", link: "/composables/use-draggable" },
           { text: "useScope", link: "/composables/use-scope" },
           { text: "useText", link: "/composables/use-text" },
+          {
+            text: "useSvg",
+            link: "/composables/use-svg",
+            items: [
+              { text: "morphTo", link: "/composables/use-svg/use-svg-morph-to" },
+              { text: "createMotionPath", link: "/composables/use-svg/use-svg-motion-path" },
+            ],
+          },
+          { text: "useSvgDrawable", link: "/composables/use-svg-drawable" },
         ],
       },
     ],

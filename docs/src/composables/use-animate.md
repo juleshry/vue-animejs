@@ -20,7 +20,7 @@ const box = useTemplateRef("box")
 const { play, pause, restart } = useAnimate(box, {
   translateX: 200,
   duration: 800,
-  easing: "easeInOutQuad",
+  ease: "inOutQuad",
   autoplay: false,
 })
 </script>
@@ -53,7 +53,7 @@ const distance = ref(100)
 const options = computed(() => ({
   translateX: distance.value,
   duration: 600,
-  easing: "easeOutExpo",
+  ease: "outExpo",
 }))
 
 useAnimate(box, options)

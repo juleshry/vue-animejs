@@ -1,6 +1,21 @@
-import { svg, type FunctionValue, type TargetsParam } from "animejs"
-import { type MaybeRef, unref } from "vue"
+# useSvg
 
+Exposes Anime.js SVG utilities as a Vue composable, automatically unwrapping reactive refs passed to each helper.
+
+For drawable stroke animations, use [`useSvgDrawable`](/composables/use-svg-drawable) instead.
+
+## Helpers
+
+| Helper | Description |
+|---|---|
+| [`morphTo`](/composables/use-svg-morph-to) | Morph an SVG `<path>` to another shape |
+| [`createMotionPath`](/composables/use-svg-motion-path) | Animate an element along an SVG `<path>` track |
+
+## Type Declarations
+
+::: details Show Type Declarations
+
+```ts
 export interface UseSvgReturn {
   /** Returns a `FunctionValue` that morphs the current path to the given `path`. Pass the result as the `d` property in `useAnimate` options. */
   morphTo: (path: MaybeRef<TargetsParam>, precision?: MaybeRef<number>) => FunctionValue
@@ -13,21 +28,11 @@ export interface UseSvgReturn {
  *
  * For drawable stroke animations, use `useSvgDrawable` instead.
  */
-export function useSvg(): UseSvgReturn {
-  function morphTo(_path: MaybeRef<TargetsParam>, precision?: MaybeRef<number>) {
-    const path = unref(_path)
+export declare function useSvg(): UseSvgReturn
+```
 
-    if (!path) return () => ""
+:::
 
-    return svg.morphTo(unref(path), unref(precision))
-  }
+## Source
 
-  function createMotionPath(path: MaybeRef<TargetsParam>, offset?: MaybeRef<number>) {
-    return svg.createMotionPath(unref(path), unref(offset))
-  }
-
-  return {
-    morphTo,
-    createMotionPath,
-  }
-}
+[`Github`](https://github.com/juleshry/vue-animejs/blob/main/src/composables/use-svg.ts)

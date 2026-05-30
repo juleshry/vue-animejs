@@ -9,7 +9,7 @@
   const options = computed(() => ({
     translateX: distance.value,
     duration: 600,
-    easing: "easeOutExpo",
+    ease: "outExpo",
     loop: true,
     alternate: true,
   }))

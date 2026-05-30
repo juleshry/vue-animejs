@@ -10,7 +10,7 @@
     animation = useRawAnimate(box_ref, {
       translateX: 220,
       duration: 1000,
-      easing: "easeInOutQuad",
+      ease: "inOutQuad",
       autoplay: false,
     })
   })

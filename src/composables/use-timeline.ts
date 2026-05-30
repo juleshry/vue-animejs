@@ -17,20 +17,20 @@ type QueueEntry =
   | {
       type: "add"
       targets: AnimationTargets
-      params: AnimationParams
+      params: MaybeRef<AnimationParams>
       position?: TimelinePosition | StaggerFunction<number | string>
     }
-  | { type: "set"; targets: AnimationTargets; params: AnimationParams; position?: TimelinePosition }
+  | { type: "set"; targets: AnimationTargets; params: MaybeRef<AnimationParams>; position?: TimelinePosition }
 
 export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: AnimationParams,
+    params: MaybeRef<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
-  set: (targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (targets: AnimationTargets, params: MaybeRef<AnimationParams>, position?: TimelinePosition) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
   remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
 }
@@ -41,11 +41,11 @@ export interface UseTimelineReturn {
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: AnimationParams,
+    params: MaybeRef<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
-  set: (targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (targets: AnimationTargets, params: MaybeRef<AnimationParams>, position?: TimelinePosition) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
   remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
   /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
@@ -99,9 +99,9 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   function replayQueue() {
     for (const entry of queue) {
       if (entry.type === "add") {
-        timeline.value.add(resolveTarget(entry.targets), entry.params, entry.position)
+        timeline.value.add(resolveTarget(entry.targets), unref(entry.params), entry.position)
       } else {
-        timeline.value.set(resolveTarget(entry.targets), entry.params, entry.position)
+        timeline.value.set(resolveTarget(entry.targets), unref(entry.params), entry.position)
       }
     }
   }
@@ -128,23 +128,33 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
   function add(
     targets: AnimationTargets,
-    params: AnimationParams,
+    _params: MaybeRef<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
-    queue.push({ type: "add", targets, params, position })
+    queue.push({ type: "add", targets, params: _params, position })
 
     if (is_mounted) {
-      return { ...timeline.value.add(resolveTarget(targets), params, position), add, set, remove } as TimelineChain
+      return {
+        ...timeline.value.add(resolveTarget(targets), unref(_params), position),
+        add,
+        set,
+        remove,
+      } as TimelineChain
     }
 
     return { ...timeline.value, add, set, remove } as TimelineChain
   }
 
-  function set(targets: AnimationTargets, params: AnimationParams, position?: TimelinePosition) {
-    queue.push({ type: "set", targets, params, position })
+  function set(targets: AnimationTargets, _params: MaybeRef<AnimationParams>, position?: TimelinePosition) {
+    queue.push({ type: "set", targets, params: _params, position })
 
     if (is_mounted) {
-      return { ...timeline.value.set(resolveTarget(targets), params, position), add, set, remove } as TimelineChain
+      return {
+        ...timeline.value.set(resolveTarget(targets), unref(_params), position),
+        add,
+        set,
+        remove,
+      } as TimelineChain
     }
 
     return { ...timeline.value, add, set, remove } as TimelineChain

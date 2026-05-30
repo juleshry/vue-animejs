@@ -24,7 +24,7 @@ const { play, restart } = useAnimate(chars, {
   opacity: [0, 1],
   duration: 700,
   delay: (_: Target, i: number) => i * 50,
-  easing: "easeOutExpo",
+  ease: "outExpo",
 })
 </script>
 
@@ -53,7 +53,7 @@ const { play } = useAnimate(words, {
   translateX: [-16, 0],
   duration: 500,
   delay: (_: Target, i: number) => i * 80,
-  easing: "easeOutCubic",
+  ease: "outCubic",
 })
 </script>
 

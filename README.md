@@ -79,7 +79,8 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `useDraggable`   | Make a DOM element draggable with full control    |
 | `useLayout`      | Animate DOM layout changes (reorder, add, remove) |
 | `useScope`       | Create an Anime.js scope with lifecycle management |
-| `useSvg`         | SVG utilities: morph, drawable stroke, motion path |
+| `useSvg`         | SVG utilities: morph paths and motion path         |
+| `useSvgDrawable` | Animate SVG stroke drawing with the `draw` property |
 | `useText`        | Split text into animatable lines, words, and chars |
 
 ## 🚀 Usage
@@ -196,23 +197,62 @@ const { play, pause } = useWaapi(el, {
 
 ### `useSvg`
 
+> **Note:** `morphTo` requires a live DOM element. Add each target as a hidden `<path>`, pass the ref directly to `morphTo`, and wrap in a `computed` — `useTimeline.add()` accepts `MaybeRef<AnimationParams>` and resolves the computed after mount, when the target elements are available.
+
+```vue
+<script setup lang="ts">
+import { computed, useTemplateRef } from 'vue'
+import { useSvg, useTimeline } from '@juleshry/vue-animejs'
+
+const shape = useTemplateRef<SVGPathElement>('shape')
+const t_circle = useTemplateRef<SVGPathElement>('t-circle')
+const t_diamond = useTemplateRef<SVGPathElement>('t-diamond')
+
+const { morphTo } = useSvg()
+
+const { add } = useTimeline({
+  loop: true,
+  defaults: { duration: 1200, easing: 'easeInOutCubic' },
+  loopDelay: 500,
+})
+
+add(shape, computed(() => ({ d: morphTo(t_circle) })))
+  .add(shape, computed(() => ({ d: morphTo(t_diamond) })), '+=500')
+</script>
+
+<template>
+  <svg viewBox="0 0 100 100">
+    <path ref="shape" d="M 50 15 C 78 8, 95 28, 90 52 C 85 76, 68 90, 50 88 C 32 90, 15 76, 10 52 C 5 28, 22 8, 50 15 Z" />
+    <path ref="t-circle" d="M 50 10 C 72 10, 90 28, 90 50 C 90 72, 72 90, 50 90 C 28 90, 10 72, 10 50 C 10 28, 28 10, 50 10 Z" visibility="hidden" />
+    <path ref="t-diamond" d="M 50 5 C 54 32, 68 32, 95 50 C 68 68, 54 68, 50 95 C 46 68, 32 68, 5 50 C 32 32, 46 32, 50 5 Z" visibility="hidden" />
+  </svg>
+</template>
+```
+
+### `useSvgDrawable`
+
 ```vue
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
-import { useAnimate, useSvg } from '@juleshry/vue-animejs'
+import { useAnimate, useSvgDrawable } from '@juleshry/vue-animejs'
 
-const path = useTemplateRef<SVGPathElement>('path')
-const target = useTemplateRef<SVGPathElement>('target')
+const circle_el = useTemplateRef<SVGCircleElement>('circle')
 
-const { morphTo, createDrawable } = useSvg()
+const { drawable } = useSvgDrawable(circle_el)
 
-// Animate a path morph
-useAnimate(path, { d: morphTo(target), duration: 1000 })
-
-// Animate a drawable stroke
-const drawable = createDrawable(path)
-useAnimate(drawable, { strokeDashoffset: [1, 0], duration: 1200 })
+// draw values are normalised: 0 = hidden, 1 = fully drawn
+useAnimate(drawable, {
+  draw: ['0 0', '0.5 1', '0 1'],
+  duration: 1200,
+  easing: 'easeInOutQuad',
+})
 </script>
+
+<template>
+  <svg viewBox="0 0 100 100">
+    <circle ref="circle" cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="4" />
+  </svg>
+</template>
 ```
 
 ### `useDraggable`

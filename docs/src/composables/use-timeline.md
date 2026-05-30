@@ -22,8 +22,8 @@ const box2 = useTemplateRef<HTMLDivElement>("box2")
 
 const { add, play, restart } = useTimeline({ autoplay: false })
 
-add(box1, { translateX: 200, duration: 600, easing: "easeOutExpo" })
-  .add(box2, { translateX: 200, duration: 600, easing: "easeOutExpo" })
+add(box1, { translateX: 200, duration: 600, ease: "outExpo" })
+  .add(box2, { translateX: 200, duration: 600, ease: "outExpo" })
 </script>
 
 <template>
@@ -104,8 +104,8 @@ const options = computed(() => ({ autoplay: false, loop: loop.value }))
 
 const { add, play, restart } = useTimeline(options)
 
-add(box1, { translateX: 200, duration: 600, easing: "easeOutExpo" })
-  .add(box2, { translateX: 200, duration: 600, easing: "easeOutExpo" }, "-=300")
+add(box1, { translateX: 200, duration: 600, ease: "outExpo" })
+  .add(box2, { translateX: 200, duration: 600, ease: "outExpo" }, "-=300")
 </script>
 
 <template>

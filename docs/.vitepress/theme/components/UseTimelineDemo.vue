@@ -9,9 +9,9 @@
 
   const { add, play, pause, restart } = useTimeline({ autoplay: false })
 
-  add(box1, { translateX: 220, duration: 600, easing: "easeOutExpo" })
-    .add(box2, { translateX: 220, duration: 600, easing: "easeOutExpo" }, "-=400")
-    .add(box3, { translateX: 220, duration: 600, easing: "easeOutExpo" }, "-=400")
+  add(box1, { translateX: 220, duration: 600, ease: "outExpo" })
+    .add(box2, { translateX: 220, duration: 600, ease: "outExpo" }, "-=400")
+    .add(box3, { translateX: 220, duration: 600, ease: "outExpo" }, "-=400")
 </script>
 
 <template>

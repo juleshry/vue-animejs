@@ -54,7 +54,7 @@ const box = useTemplateRef("box")
 const { play, pause, restart } = useAnimate(box, {
   translateX: 200,
   duration: 800,
-  easing: "easeInOutQuad",
+  ease: "inOutQuad",
   autoplay: false,
 })
 </script>
