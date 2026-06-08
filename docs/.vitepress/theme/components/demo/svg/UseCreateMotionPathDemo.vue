@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useSvg, useTimeline } from "@juleshry/vue-animejs"
   import { stagger } from "animejs"
-  import { computed, ref, useTemplateRef } from "vue"
+  import { computed, useTemplateRef } from "vue"
 
   const dot_a = useTemplateRef<SVGCircleElement>("dot-a")
   const dot_b = useTemplateRef<SVGCircleElement>("dot-b")

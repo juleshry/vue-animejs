@@ -1,14 +1,14 @@
 <script setup lang="ts">
-  import { computed, useTemplateRef } from "vue"
-  import { useAnimate } from "@juleshry/vue-animejs"
-  import DemoSquare from "./DemoSquare.vue"
+  import { useTemplateRef } from "vue"
+  import { useWaapi } from "@juleshry/vue-animejs"
+  import DemoSquare from "./shared/DemoSquare.vue"
 
   const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
 
-  const { play, pause, restart } = useAnimate(box, {
-    translateX: 220,
+  const { play, pause, restart } = useWaapi(box, {
+    translate: "220px",
     duration: 1000,
-    ease: "inOutQuad",
+    ease: "ease-in-out",
     autoplay: false,
   })
 </script>

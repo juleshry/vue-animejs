@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { onMounted, useTemplateRef } from "vue"
   import { useRawAnimate, type UseRawAnimateReturn } from "@juleshry/vue-animejs"
-  import DemoSquare from "./DemoSquare.vue"
+  import DemoSquare from "./shared/DemoSquare.vue"
 
   const box_ref = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
   let animation: UseRawAnimateReturn

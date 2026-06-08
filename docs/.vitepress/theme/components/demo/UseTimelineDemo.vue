@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
   import { useTimeline } from "@juleshry/vue-animejs"
-  import DemoSquare from "./DemoSquare.vue"
+  import DemoSquare from "./shared/DemoSquare.vue"
 
   const box1 = useTemplateRef<InstanceType<typeof DemoSquare>>("box1")
   const box2 = useTemplateRef<InstanceType<typeof DemoSquare>>("box2")

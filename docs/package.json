@@ -4,9 +4,12 @@
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
+  "dependencies": {
+    "@juleshry/vue-animejs": "file:..",
+    "animejs": "file:../node_modules/animejs"
+  },
   "devDependencies": {
     "@vueuse/core": ">=14",
-    "animejs": ">=4",
     "vitepress": "^2.0.0-alpha.17"
   }
 }

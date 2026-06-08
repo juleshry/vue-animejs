@@ -4,7 +4,7 @@
   <h1 align="center">vue-animejs</h1>
   <p align="center">Vue 3 composables for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>
   <p align="center"><a href="https://vue-animejs.juleshry.dev">📖 Documentation</a></p>
-  <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" /></a></p>
+  <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" style="vertical-align: middle" /></a>&nbsp;&nbsp;<a href="https://ko-fi.com/C7O720SP29"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi" style="vertical-align: middle" /></a></p>
 </div>
 
 > [!WARNING]

@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import DefaultTheme from "vitepress/theme"
   import { useData } from "vitepress"
-  import BareLayout from "../layouts/BareLayout.vue"
+  import BareLayout from "../../layouts/BareLayout.vue"
 
   const { Layout } = DefaultTheme
   const { frontmatter } = useData()

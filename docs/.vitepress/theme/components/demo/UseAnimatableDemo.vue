@@ -3,7 +3,7 @@
   import { useEventListener } from "@vueuse/core"
   import { utils } from "animejs"
   import { useAnimatable } from "@juleshry/vue-animejs"
-  import DemoSquare from "./DemoSquare.vue"
+  import DemoSquare from "./shared/DemoSquare.vue"
 
   const stage = useTemplateRef("stage")
   const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
