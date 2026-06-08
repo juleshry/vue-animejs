@@ -31,7 +31,7 @@ export interface UseLayoutReturn {
  */
 export function useLayout(
   root: MaybeRef<DOMTargetSelector> | MaybeComputedElementRef,
-  params: MaybeRef<AutoLayoutParams>
+  params: MaybeRef<AutoLayoutParams> = {}
 ): UseLayoutReturn {
   const layout = shallowRef<AutoLayout | undefined>()
 

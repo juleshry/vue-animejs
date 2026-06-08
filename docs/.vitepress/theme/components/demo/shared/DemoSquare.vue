@@ -1,9 +1,11 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
 
+  import type { DemoSquareVariant } from "./Types"
+
   withDefaults(
     defineProps<{
-      variant?: 0 | 1 | 2
+      variant?: DemoSquareVariant
     }>(),
     { variant: 0 }
   )
@@ -18,7 +20,9 @@
 </script>
 
 <template>
-  <div ref="el" class="demo-square" :class="`variant-${variant}`" />
+  <div ref="el" class="demo-square" :class="`variant-${variant}`">
+    <slot />
+  </div>
 </template>
 
 <style scoped>
@@ -27,6 +31,12 @@
     height: 48px;
     border-radius: 8px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
   }
 
   .variant-0 {

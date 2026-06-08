@@ -5,7 +5,10 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "paths": {
+      "@juleshry/vue-animejs": ["../src/index.ts"]
+    }
   },
   "include": [".vitepress/**/*", "src/**/*", "vite-env.d.ts"]
 }

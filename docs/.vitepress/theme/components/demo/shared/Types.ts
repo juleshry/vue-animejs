@@ -1,0 +1,1 @@
+export type DemoSquareVariant = 0 | 1 | 2

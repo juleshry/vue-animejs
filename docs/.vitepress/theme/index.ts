@@ -15,6 +15,7 @@ import UseTextDemo from "./components/demo/UseTextDemo.vue"
 import UseSvgDemo from "./components/demo/svg/UseSvgDemo.vue"
 import UseSvgDrawableDemo from "./components/demo/svg/UseSvgDrawableDemo.vue"
 import UseCreateMotionPathDemo from "./components/demo/svg/UseCreateMotionPathDemo.vue"
+import UseLayoutDemo from "./components/demo/UseLayoutDemo.vue"
 import "./style.css"
 
 const DEMO_ROUTES = ["/demos/use-scope"]
@@ -42,5 +43,6 @@ export default {
     app.component("UseSvgDemo", UseSvgDemo)
     app.component("UseSvgDrawableDemo", UseSvgDrawableDemo)
     app.component("UseCreateMotionPathDemo", UseCreateMotionPathDemo)
+    app.component("UseLayoutDemo", UseLayoutDemo)
   },
 } satisfies Theme

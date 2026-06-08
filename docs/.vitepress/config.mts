@@ -72,6 +72,7 @@ export default defineConfig({
             ],
           },
           { text: "useSvgDrawable", link: "/composables/use-svg-drawable" },
+          { text: "useLayout", link: "/composables/use-layout" },
         ],
       },
     ],

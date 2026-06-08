@@ -9,7 +9,6 @@ if (!token || !siteId) {
 }
 
 await $`bun install`
-await $`bun install --cwd docs`
 await $`bun run --cwd docs docs:build`
 await $`bunx netlify-cli deploy --prod --dir=docs/.vitepress/dist`.env({
   ...process.env,
