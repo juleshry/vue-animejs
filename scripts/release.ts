@@ -1,10 +1,17 @@
 import { $ } from "bun"
 import semver from "semver"
-import { assertAdmin, intro, p } from "./cli"
+import { assertAdmin, intro, p, runVisible } from "./cli"
 
 // ── version bump ──────────────────────────────────────────────────────────────
 
 intro("vue-animejs release")
+
+if (!Bun.which("gh")) {
+  p.log.info("Install it with: brew install gh")
+  p.cancel("GitHub CLI (gh) is not installed.")
+  process.exit(1)
+}
+
 await assertAdmin(["juleshry"])
 
 const pkg = await Bun.file("package.json").json()
@@ -100,48 +107,70 @@ if (p.isCancel(proceed) || !proceed) {
 
 // ── update package.json ───────────────────────────────────────────────────────
 
-const spinner = p.spinner()
-
 pkg.version = input_version
 await Bun.write("package.json", JSON.stringify(pkg, null, 2) + "\n")
 
-// ── format, commit, tag ───────────────────────────────────────────────────────
+const notes = changelog || `Release ${tag}`
 
-spinner.start("Formatting and committing")
-await $`bun run format`.quiet()
-await $`git add package.json`.quiet()
-await $`git commit -m "chore: release ${tag}"`.quiet()
-await $`git tag ${tag}`.quiet()
-spinner.stop("Committed and tagged")
+// ── steps ─────────────────────────────────────────────────────────────────────
 
-// ── push (first gate — branch protection may reject this) ─────────────────────
-
-spinner.start(`Pushing ${tag} to origin`)
 try {
-  await $`git push origin main`.quiet()
-  await $`git push origin ${tag}`.quiet()
+  await p.tasks([
+    {
+      title: "Stage changes",
+      task: async () => {
+        await runVisible($`git add package.json`)
+      },
+    },
+    {
+      title: "Commit",
+      task: async () => {
+        await runVisible($`git commit -m "chore: release ${tag}"`)
+      },
+    },
+    {
+      title: "Tag",
+      task: async () => {
+        await runVisible($`git tag ${tag}`)
+      },
+    },
+    {
+      title: "Push branch",
+      task: async () => {
+        await runVisible($`git push origin main`)
+      },
+    },
+    {
+      title: "Push tag",
+      task: async () => {
+        await runVisible($`git push origin ${tag}`)
+      },
+    },
+    {
+      title: "Create GitHub release",
+      task: async () => {
+        await runVisible($`gh release create ${tag} --title ${tag} --notes ${notes}`)
+      },
+    },
+  ])
 } catch (err) {
-  spinner.stop("Push failed")
-  p.cancel(`Could not push to origin. Check your permissions on main.\n${err}`)
+  p.cancel(`Release failed: ${err}`)
   process.exit(1)
 }
-spinner.stop(`Pushed ${tag}`)
-
-// ── github release ────────────────────────────────────────────────────────────
-
-spinner.start("Creating GitHub release")
-const notes = changelog || `Release ${tag}`
-await $`gh release create ${tag} --title ${tag} --notes ${notes}`.quiet()
-spinner.stop(`GitHub release ${tag} created`)
 
 // ── optional netlify deploy ───────────────────────────────────────────────────
 
 const deploy = await p.confirm({ message: "Deploy docs to Netlify?", initialValue: false })
 
 if (!p.isCancel(deploy) && deploy) {
-  spinner.start("Deploying docs")
-  await $`bun run deploy:docs`
-  spinner.stop("Docs deployed")
+  await p.tasks([
+    {
+      title: "Deploy docs to Netlify",
+      task: async () => {
+        await runVisible($`bun run deploy:docs`)
+      },
+    },
+  ])
 }
 
 p.outro("Done.")
