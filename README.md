@@ -7,9 +7,6 @@
   <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" style="vertical-align: middle" /></a>&nbsp;&nbsp;<a href="https://ko-fi.com/C7O720SP29"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi" style="vertical-align: middle" /></a></p>
 </div>
 
-> [!WARNING]
-> This library is a work in progress. The API is not stable and may change at any time.
-
 ## 🚀 Overview
 
 **vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target or option and the animation updates automatically. Lifecycle cleanup is handled for you.

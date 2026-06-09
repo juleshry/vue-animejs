@@ -3,8 +3,6 @@ html {
 }
 
 :root {
-  --vp-layout-top-height: 36px;
-
   --vp-c-brand-1: #b3413c;
   --vp-c-brand-2: #40835d;
 
@@ -25,15 +23,6 @@ html {
 }
 
 @media (max-width: 640px) {
-  :root {
-    --vp-layout-top-height: 56px;
-  }
-
-  .VPSidebar {
-    top: 0 !important;
-    padding-top: var(--vp-layout-top-height) !important;
-  }
-
   .vp-doc div[class*="language-"] {
     margin-left: 0;
     margin-right: 0;
