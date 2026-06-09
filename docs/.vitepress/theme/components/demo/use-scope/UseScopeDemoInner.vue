@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { computed, ref, useTemplateRef } from "vue"
   import { useScope, useRawAnimate } from "@juleshry/vue-animejs"
-  import DemoSquare from "./DemoSquare.vue"
+  import DemoSquare from "../shared/DemoSquare.vue"
 
   const square = useTemplateRef<InstanceType<typeof DemoSquare>>("square")
   const is_narrow = ref<boolean>(false)
