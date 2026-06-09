@@ -112,6 +112,26 @@ await Bun.write("package.json", JSON.stringify(pkg, null, 2) + "\n")
 
 const notes = changelog || `Release ${tag}`
 
+// ── rollback helpers ──────────────────────────────────────────────────────────
+
+let committed = false
+let tagged = false
+let pushed = false
+
+async function rollback(): Promise<void> {
+  if (pushed) return
+  if (tagged) await $`git tag -d ${tag}`.quiet().catch(() => {})
+  if (committed) await $`git reset HEAD~1`.quiet().catch(() => {})
+}
+
+// Clean up on Ctrl+C before the push
+const onSigint = async () => {
+  await rollback()
+  p.cancel("Cancelled.")
+  process.exit(0)
+}
+process.once("SIGINT", onSigint)
+
 // ── steps ─────────────────────────────────────────────────────────────────────
 
 try {
@@ -126,18 +146,21 @@ try {
       title: "Commit",
       task: async () => {
         await runVisible($`git commit -m "chore: release ${tag}"`)
+        committed = true
       },
     },
     {
       title: "Tag",
       task: async () => {
         await $`git tag ${tag}`.quiet()
+        tagged = true
       },
     },
     {
       title: "Push branch",
       task: async () => {
         await runVisible($`git push origin main`)
+        pushed = true
       },
     },
     {
@@ -154,9 +177,13 @@ try {
     },
   ])
 } catch (err) {
+  process.removeListener("SIGINT", onSigint)
+  await rollback()
   p.cancel(`Release failed: ${err}`)
   process.exit(1)
 }
+
+process.removeListener("SIGINT", onSigint)
 
 // ── optional netlify deploy ───────────────────────────────────────────────────
 
