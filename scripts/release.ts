@@ -119,7 +119,7 @@ try {
     {
       title: "Stage changes",
       task: async () => {
-        await runVisible($`git add package.json`)
+        await $`git add package.json`.quiet()
       },
     },
     {
@@ -131,7 +131,7 @@ try {
     {
       title: "Tag",
       task: async () => {
-        await runVisible($`git tag ${tag}`)
+        await $`git tag ${tag}`.quiet()
       },
     },
     {
