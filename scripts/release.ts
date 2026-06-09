@@ -151,7 +151,7 @@ try {
     {
       title: "Tag",
       task: async () => {
-        await $`git tag ${tag}`.quiet()
+        await $`git tag -s ${tag} -m ${tag}`.quiet()
         tagged = true
       },
     },
