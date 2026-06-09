@@ -43,12 +43,12 @@ export async function assertAdmin(allowed: string[]): Promise<void> {
   }
 }
 
-/** Run a shell command, stream its output live, then erase the lines when done. */
+/** Stream a command's output live in dim text, then erase it when done. */
 export async function runVisible(cmd: { lines(): AsyncIterable<string> }): Promise<void> {
   let line_count = 0
   for await (const line of cmd.lines()) {
     if (line.trim()) {
-      process.stdout.write(`  ${line}\n`)
+      process.stdout.write(`  \x1b[2m${line}\x1b[0m\n`)
       line_count++
     }
   }

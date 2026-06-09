@@ -118,19 +118,18 @@ let committed = false
 let tagged = false
 let pushed = false
 
-async function rollback(): Promise<void> {
+// Must be synchronous — async functions are not awaited in exit handlers
+function rollback(): void {
   if (pushed) return
-  if (tagged) await $`git tag -d ${tag}`.quiet().catch(() => {})
-  if (committed) await $`git reset HEAD~1`.quiet().catch(() => {})
+  if (tagged) Bun.spawnSync(["git", "tag", "-d", tag])
+  if (committed) {
+    Bun.spawnSync(["git", "reset", "HEAD~1"])
+    Bun.spawnSync(["git", "restore", "package.json"])
+  }
 }
 
-// Clean up on Ctrl+C before the push
-const onSigint = async () => {
-  await rollback()
-  p.cancel("Cancelled.")
-  process.exit(0)
-}
-process.once("SIGINT", onSigint)
+// Fires synchronously before the process dies, including on Ctrl+C via clack
+process.on("exit", rollback)
 
 // ── steps ─────────────────────────────────────────────────────────────────────
 
@@ -159,31 +158,29 @@ try {
     {
       title: "Push branch",
       task: async () => {
-        await runVisible($`git push origin main`)
+        await $`git push origin main`
         pushed = true
       },
     },
     {
       title: "Push tag",
       task: async () => {
-        await runVisible($`git push origin ${tag}`)
+        await $`git push origin ${tag}`
       },
     },
     {
       title: "Create GitHub release",
       task: async () => {
-        await runVisible($`gh release create ${tag} --title ${tag} --notes ${notes}`)
+        await $`gh release create ${tag} --title ${tag} --notes ${notes}`
       },
     },
   ])
 } catch (err) {
-  process.removeListener("SIGINT", onSigint)
-  await rollback()
   p.cancel(`Release failed: ${err}`)
   process.exit(1)
 }
 
-process.removeListener("SIGINT", onSigint)
+process.removeListener("exit", rollback)
 
 // ── optional netlify deploy ───────────────────────────────────────────────────
 
@@ -194,7 +191,7 @@ if (!p.isCancel(deploy) && deploy) {
     {
       title: "Deploy docs to Netlify",
       task: async () => {
-        await runVisible($`bun run deploy:docs`)
+        await $`bun run deploy:docs`
       },
     },
   ])
