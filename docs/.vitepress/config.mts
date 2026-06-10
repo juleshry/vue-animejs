@@ -69,6 +69,7 @@ export default defineConfig({
         text: "Guide",
         items: [
           { text: "Getting Started", link: "/guide/getting-started" },
+          { text: "Why vue-animejs?", link: "/guide/benefits" },
           { text: "Contributing", link: "/contributing" },
           { text: "Guidelines", link: "/guide/guidelines" },
           { text: "Community", link: "/community" },
