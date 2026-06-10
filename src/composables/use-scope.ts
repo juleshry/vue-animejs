@@ -1,19 +1,10 @@
 import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
 import { createScope, type Scope, type ScopeMethod, type ScopeParams, type Tickable } from "animejs"
-import {
-  type DeepReadonly,
-  isRef,
-  type MaybeRef,
-  shallowReadonly,
-  type ShallowRef,
-  shallowRef,
-  unref,
-  watch,
-} from "vue"
+import { isRef, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 
 export interface UseScopeReturn {
   /** The underlying Anime.js `Scope` instance. */
-  scope: DeepReadonly<ShallowRef<Scope>>
+  scope: Readonly<ShallowRef<Scope | undefined>>
   /** Registers an anonymous method on the scope. Queued automatically if called before mount. */
   add: (method: ScopeMethod) => void
   /** Registers a named method on the scope so it can be called via `scope.methods[name]()`. Queued automatically if called before mount. */
@@ -36,27 +27,18 @@ export interface UseScopeReturn {
  * @param params - Anime.js scope parameters. Accepts a plain object or a reactive ref / computed.
  */
 export function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn {
-  const scope = shallowRef(createScope(unref(params)))
+  const scope = shallowRef<Scope | undefined>(undefined)
 
   const pending_adds: ScopeMethod[] = []
   const pending_named: [string, ScopeMethod][] = []
   const pending_once: ScopeMethod[] = []
 
   let is_mounted = false
-
-  const stopWatcher = isRef(params)
-    ? watch(
-        params,
-        new_params => {
-          scope.value.revert()
-          scope.value = createScope(new_params)
-        },
-        { flush: "post" }
-      )
-    : undefined
+  let stopWatcher: (() => void) | undefined
 
   tryOnMounted(() => {
     is_mounted = true
+    scope.value = createScope(unref(params))
 
     for (const method of pending_adds) scope.value.add(method)
     for (const [name, method] of pending_named) scope.value.add(name, method)
@@ -65,38 +47,49 @@ export function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn {
     pending_adds.length = 0
     pending_named.length = 0
     pending_once.length = 0
+
+    if (isRef(params)) {
+      stopWatcher = watch(
+        params,
+        new_params => {
+          scope.value?.revert()
+          scope.value = createScope(new_params)
+        },
+        { flush: "post" }
+      )
+    }
   })
 
   tryOnUnmounted(() => {
-    scope.value.revert()
+    scope.value?.revert()
     stopWatcher?.()
   })
 
   function add(method: ScopeMethod) {
     if (!is_mounted) return void pending_adds.push(method)
-    return scope.value.add(method)
+    return scope.value?.add(method)
   }
 
   function registerMethod(methodName: string, method: ScopeMethod) {
     if (!is_mounted) return void pending_named.push([methodName, method])
-    return scope.value.add(methodName, method)
+    return scope.value?.add(methodName, method)
   }
 
   function addOnce(method: ScopeMethod) {
     if (!is_mounted) return void pending_once.push(method)
-    return scope.value.addOnce(method)
+    return scope.value?.addOnce(method)
   }
 
   function keepTime(method: (scope: Scope) => Tickable) {
-    return scope.value.keepTime(method)
+    return scope.value?.keepTime(method)
   }
 
   function revert() {
-    return scope.value.revert()
+    return scope.value?.revert()
   }
 
   function refresh() {
-    return scope.value.refresh()
+    return scope.value?.refresh()
   }
 
   return {
