@@ -3,8 +3,14 @@
 
   <h1 align="center">vue-animejs</h1>
   <p align="center">Vue 3 composables for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>
-  <p align="center"><a href="https://vue-animejs.juleshry.dev">📖 Documentation</a></p>
-  <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" style="vertical-align: middle" /></a>&nbsp;&nbsp;<a href="https://ko-fi.com/C7O720SP29"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi" style="vertical-align: middle" /></a></p>
+  <p align="center">
+    <a href="https://www.npmjs.com/package/@juleshry/vue-animejs"><img src="https://img.shields.io/npm/v/%40juleshry%2Fvue-animejs?label=npm&color=a1b858" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/@juleshry/vue-animejs"><img src="https://img.shields.io/npm/dm/%40juleshry%2Fvue-animejs?color=50a36f" alt="npm downloads" /></a>
+    <a href="https://vue-animejs.juleshry.dev"><img src="https://img.shields.io/badge/docs%20%26%20demos-vue--animejs-4fc08d" alt="docs & demos" /></a>
+    <a href="https://github.com/juleshry/vue-animejs"><img src="https://img.shields.io/github/stars/juleshry/vue-animejs?style=flat&color=yellow" alt="GitHub stars" /></a>
+  </p>
+  <p align="center"><a href="https://app.netlify.com/projects/vue-animejs/deploys"><img src="https://api.netlify.com/api/v1/badges/8017f5b4-47b7-45e4-a5d6-269d638a71ab/deploy-status" alt="Netlify Status" /></a></p>
+  <p align="center"><a href="https://ko-fi.com/C7O720SP29"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="ko-fi" /></a></p>
 </div>
 
 ## 🚀 Overview
