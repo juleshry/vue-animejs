@@ -114,9 +114,7 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 ## 🗺️ TODO
 
 - [ ] Allow reactive refs inside option objects
-- [ ] Finish doc website
 - [ ] Add components
-- [ ] Add missing directives
 
 ## 📄 License
 
