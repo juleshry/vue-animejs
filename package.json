@@ -1,7 +1,7 @@
 {
   "name": "@juleshry/vue-animejs",
   "version": "1.0.1",
-  "description": "Vue 3 composables for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
+  "description": "Vue 3 composables and directives for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
   "keywords": [
     "animation",
     "animejs",
@@ -50,7 +50,7 @@
     "@vitest/coverage-v8": "^4.1.4",
     "@vue/test-utils": "^2.4.6",
     "@vueuse/core": ">=14",
-    "animejs": ">=4",
+    "animejs": "4.4.1",
     "bun-types": "^1.3.14",
     "happy-dom": "^20.9.0",
     "oxfmt": "^0.47.0",

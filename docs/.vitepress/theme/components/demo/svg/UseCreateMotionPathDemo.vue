@@ -19,7 +19,7 @@
 
   add(
     computed(() => [dot_a.value, dot_b.value, dot_c.value]),
-    computed(() => ({ ...createMotionPath(track), delay: stagger(300) }))
+    () => ({ ...createMotionPath(track), delay: stagger(300) })
   )
 </script>
 
