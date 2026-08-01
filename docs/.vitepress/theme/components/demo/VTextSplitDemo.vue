@@ -9,9 +9,10 @@
       opacity: [0, 1],
       duration: 700,
       delay: stagger(50),
-      ease: "outExpo",
+      ease: "inOutExpo",
       loop: true,
       alternate: true,
+      loopDelay: 100,
     },
   }
 </script>
