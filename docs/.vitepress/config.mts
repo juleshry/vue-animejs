@@ -99,6 +99,16 @@ export default defineConfig({
           { text: "useLayout", link: "/composables/use-layout" },
         ],
       },
+      {
+        text: "Directives",
+        items: [
+          { text: "vAnimate", link: "/directives/v-animate" },
+          { text: "vDraggable", link: "/directives/v-draggable" },
+          { text: "vWaapi", link: "/directives/v-waapi" },
+          { text: "vSvgDrawable", link: "/directives/v-svg-drawable" },
+          { text: "vTextSplit", link: "/directives/v-text-split" },
+        ],
+      },
     ],
   },
 })

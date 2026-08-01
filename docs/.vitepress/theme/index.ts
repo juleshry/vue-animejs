@@ -16,6 +16,11 @@ import UseSvgDemo from "./components/demo/svg/UseSvgDemo.vue"
 import UseSvgDrawableDemo from "./components/demo/svg/UseSvgDrawableDemo.vue"
 import UseCreateMotionPathDemo from "./components/demo/svg/UseCreateMotionPathDemo.vue"
 import UseLayoutDemo from "./components/demo/UseLayoutDemo.vue"
+import VAnimateDemo from "./components/demo/VAnimateDemo.vue"
+import VDraggableDemo from "./components/demo/VDraggableDemo.vue"
+import VWaapiDemo from "./components/demo/VWaapiDemo.vue"
+import VSvgDrawableDemo from "./components/demo/VSvgDrawableDemo.vue"
+import VTextSplitDemo from "./components/demo/VTextSplitDemo.vue"
 import "./style.css"
 
 const DEMO_ROUTES = ["/demos/use-scope"]
@@ -44,5 +49,10 @@ export default {
     app.component("UseSvgDrawableDemo", UseSvgDrawableDemo)
     app.component("UseCreateMotionPathDemo", UseCreateMotionPathDemo)
     app.component("UseLayoutDemo", UseLayoutDemo)
+    app.component("VAnimateDemo", VAnimateDemo)
+    app.component("VDraggableDemo", VDraggableDemo)
+    app.component("VWaapiDemo", VWaapiDemo)
+    app.component("VSvgDrawableDemo", VSvgDrawableDemo)
+    app.component("VTextSplitDemo", VTextSplitDemo)
   },
 } satisfies Theme
