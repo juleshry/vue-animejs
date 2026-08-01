@@ -12,7 +12,6 @@ import WaapiSection from "./pages/composables/WaapiSection.vue"
 import ScopeSection from "./pages/composables/ScopeSection.vue"
 import SvgSection from "./pages/composables/SvgSection.vue"
 import SvgDrawableSection from "./pages/composables/SvgDrawableSection.vue"
-import VAnimatableSection from "./pages/directives/VAnimatableSection.vue"
 import VAnimateSection from "./pages/directives/VAnimateSection.vue"
 import VDraggableSection from "./pages/directives/VDraggableSection.vue"
 import VSvgDrawableSection from "./pages/directives/VSvgDrawableSection.vue"
@@ -82,11 +81,6 @@ export const directive_routes = [
     path: "/directives/v-animate",
     component: VAnimateSection,
     meta: { label: "v-animate", description: "Declarative animation applied via template attribute" },
-  },
-  {
-    path: "/directives/v-animatable",
-    component: VAnimatableSection,
-    meta: { label: "v-animatable", description: "Animate element properties directly from reactive binding value" },
   },
   {
     path: "/directives/v-draggable",
