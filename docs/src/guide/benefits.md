@@ -176,3 +176,38 @@ Controlling an animation (play, pause, restart, seek) requires holding a referen
 ```
 
 :::
+
+## Declarative directives
+
+Some animations don't need imperative control — they just need to run and clean up. For those cases, a directive skips the composable indirection entirely and animates straight from a template attribute.
+
+::: code-group
+
+```vue [useAnimate]
+<script setup lang="ts">
+import { useTemplateRef } from "vue"
+import { useAnimate } from "@juleshry/vue-animejs"
+
+const box = useTemplateRef("box")
+
+useAnimate(box, { translateX: 200, duration: 800, loop: true })
+</script>
+
+<template>
+  <div ref="box" class="box" />
+</template>
+```
+
+```vue [v-animate]
+<script setup lang="ts">
+import { vAnimate } from "@juleshry/vue-animejs"
+</script>
+
+<template>
+  <div v-animate="{ translateX: 200, duration: 800, loop: true }" class="box" />
+</template>
+```
+
+:::
+
+Every composable that targets a single DOM element has a directive counterpart: `v-animate`, `v-draggable`, `v-waapi`, `v-svg-drawable`, and `v-text-split`. Reach for the composable instead when you need playback control (`play`, `pause`, `restart`) or access to the underlying instance.

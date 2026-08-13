@@ -24,7 +24,7 @@ export default defineConfig({
   },
 
   title: "Vue x Animejs",
-  description: "Reactive, lifecycle-aware animation composables for Vue 3 — powered by Anime.js v4.",
+  description: "Reactive, lifecycle-aware animation composables and directives for Vue 3 — powered by Anime.js v4.",
 
   srcDir: "src",
 

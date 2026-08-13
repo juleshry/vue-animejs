@@ -67,3 +67,21 @@ const { play, pause, restart } = useAnimate(box, {
   <button @click="restart">Restart</button>
 </template>
 ```
+
+## Your first directive
+
+For animations that don't need script-side control, a directive achieves the same result directly on the element — no `<script setup>` logic, no cleanup to write:
+
+```vue
+<script setup lang="ts">
+import { vAnimate } from "@juleshry/vue-animejs"
+</script>
+
+<template>
+  <div v-animate="{ translateX: 200, duration: 800, ease: 'inOutQuad' }" class="box" />
+</template>
+```
+
+::: tip
+See the [Directives](/directives/v-animate) section for the full list — `v-draggable`, `v-waapi`, `v-svg-drawable`, and `v-text-split` cover the same use cases as their composable counterparts.
+:::

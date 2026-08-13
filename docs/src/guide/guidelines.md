@@ -66,7 +66,45 @@ Composables register their own cleanup via `onUnmounted` — you do not need to 
 const { play } = useAnimate(el, { translateX: 200 })
 ```
 
-This applies to all composables: `useAnimate`, `useTimer`, `useTimeline`, and `useAnimatable`.
+This applies to all composables.
+
+## Directives
+
+Directives are declarative alternatives to their composable counterparts — they read the same option shapes but apply directly from a template attribute, with no `<script setup>` code required:
+
+```vue
+<script setup lang="ts">
+import { vAnimate } from "@juleshry/vue-animejs"
+</script>
+
+<template>
+  <div v-animate="{ translateX: 200, duration: 800 }" />
+</template>
+```
+
+- All directives are prefixed with `v-` and accept the same option shapes as their composable counterpart (e.g. `v-animate` mirrors `useAnimate`'s `AnimationParams`)
+- The binding value creates the instance on mount, re-creates it whenever the value changes, and reverts it on unmount — there is no manual cleanup to write
+- Bind a `ref` or `computed` instead of a plain object to react to state changes:
+
+```vue
+<script setup lang="ts">
+import { computed, ref } from "vue"
+import { vAnimate } from "@juleshry/vue-animejs"
+
+const duration = ref(800)
+const options = computed(() => ({ translateX: 200, duration: duration.value }))
+</script>
+
+<template>
+  <div v-animate="options" />
+</template>
+```
+
+::: warning
+Changing the binding value recreates the underlying Anime.js instance from scratch, same as changing a composable's reactive options.
+:::
+
+Reach for a directive when the animation has no imperative control needs (no `play` / `pause` / `restart` from script) and the options can be expressed inline. Reach for the composable instead when you need to control playback, read animation state, or share the instance across multiple elements.
 
 ## Returned Values
 

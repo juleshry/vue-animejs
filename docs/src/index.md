@@ -5,7 +5,7 @@ home: true
 hero:
   name: Vue x Animejs
   text: Animejs implementation for Vuejs.
-  tagline: Reactive, lifecycle-aware animation composables for Vue 3 — powered by Anime.js v4.
+  tagline: Reactive, lifecycle-aware animation composables and directives for Vue 3 — powered by Anime.js v4.
   image:
     src: /icon-animated.svg
     alt: Vue x Animejs
@@ -48,4 +48,19 @@ features:
   - icon: 🔭
     title: useScope
     details: Scope a group of animations to a component — they all pause, resume, and clean up together.
+  - icon: 🏷️
+    title: v-animate
+    details: Animate an element straight from a template attribute — no script setup, no cleanup to write.
+  - icon: 🧲
+    title: v-draggable
+    details: Make any element draggable with a single directive — snap, bounds, and momentum included.
+  - icon: ⚡
+    title: v-waapi
+    details: Drive native Web Animations API animations declaratively, straight from the template.
+  - icon: 🖌️
+    title: v-svg-drawable
+    details: Animate SVG stroke drawing declaratively by binding draw values to a template attribute.
+  - icon: ✂️
+    title: v-text-split
+    details: Split and animate text by character, word, or line declaratively, with zero script setup.
 ---
