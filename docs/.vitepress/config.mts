@@ -1,10 +1,37 @@
 import { defineConfig } from "vitepress"
-import { resolve } from "path"
+import { resolve, dirname } from "path"
 import { fileURLToPath, URL } from "node:url"
+import type { Plugin } from "vite"
 
 // https://vitepress.dev/reference/site-config
 const HOSTNAME = "https://vue-animejs.juleshry.dev"
 const OG_IMAGE = `${HOSTNAME}/icon-animated.svg`
+
+// VitePress's vendored VPSwitchAppearance.vue reads `isDark` synchronously
+// at setup time (via @vueuse/core's useDark), so its `aria-checked` binding
+// always disagrees with the SSR-rendered value for a dark-preference visitor,
+// triggering a hydration mismatch warning on every page load. It's not
+// exported or slot-replaceable, so this redirects VitePress's own relative
+// import of it to our drop-in replacement (same markup, plus
+// `data-allow-mismatch="attribute"`) instead of disabling VitePress's
+// appearance system, which would also lose localStorage persistence,
+// system-preference detection, and the FOUC-prevention script.
+function overrideVpSwitchAppearance(): Plugin {
+  const target = resolve(
+    import.meta.dirname,
+    "../node_modules/vitepress/dist/client/theme-default/components/VPSwitchAppearance.vue"
+  )
+  const replacement = resolve(import.meta.dirname, "theme/components/overrides/VPSwitchAppearance.vue")
+
+  return {
+    name: "override-vp-switch-appearance",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (!importer || !source.endsWith("VPSwitchAppearance.vue")) return null
+      return resolve(dirname(importer), source) === target ? replacement : null
+    },
+  }
+}
 
 const ICON_GLOBE =
   '<img src="https://www.juleshry.dev/favicon.ico" width="14" height="14" alt="" style="vertical-align:-2px;margin-right:3px;border-radius:2px">'
@@ -15,9 +42,10 @@ const ICON_KOFI =
 
 export default defineConfig({
   vite: {
+    plugins: [overrideVpSwitchAppearance()],
     resolve: {
       alias: {
-        "@juleshry/vue-animejs": resolve(__dirname, "../../src/index.ts"),
+        "@juleshry/vue-animejs": resolve(import.meta.dirname, "../../src/index.ts"),
         "@src": fileURLToPath(new URL("../../src", import.meta.url)),
       },
     },
@@ -57,11 +85,11 @@ export default defineConfig({
     },
 
     footer: {
-      message: `<div style="display: flex; align-items: center; justify-content: center; gap: 6px"">Made by 
-        <a href="https://juleshry.dev" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_GLOBE}<p>juleshry.dev</p></a> · 
-        <a href="https://github.com/juleshry" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_GITHUB}<p>GitHub</p></a> · 
-        <a href="https://ko-fi.com/C7O720SP29" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_KOFI}<p>Support on Ko-fi</p></a>
-        </div>`,
+      message: `<span style="display: flex; align-items: center; justify-content: center; gap: 6px">Made by
+        <a href="https://juleshry.dev" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_GLOBE}<span>juleshry.dev</span></a> ·
+        <a href="https://github.com/juleshry" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_GITHUB}<span>GitHub</span></a> ·
+        <a href="https://ko-fi.com/C7O720SP29" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 1px">${ICON_KOFI}<span>Support on Ko-fi</span></a>
+        </span>`,
     },
 
     sidebar: [
