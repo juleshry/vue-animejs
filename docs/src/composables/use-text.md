@@ -102,7 +102,7 @@ const { chars, words } = useText(text_el, params)
 ```ts
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
-  splitter: DeepReadonly<ShallowRef<TextSplitter | undefined>>
+  splitter: Readonly<ShallowRef<TextSplitter | undefined>>
   /** Reactive array of `<span>` elements representing each line after splitting. */
   lines: ComputedRef<HTMLElement[]>
   /** Reactive array of `<span>` elements representing each word after splitting. */

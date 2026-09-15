@@ -98,7 +98,7 @@ For all available options, see the [Anime.js animation documentation](https://an
 ```ts
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
-  animation: DeepReadonly<ShallowRef<JSAnimation | undefined>>
+  animation: Readonly<ShallowRef<JSAnimation | undefined>>
   /** Starts or resumes the animation. */
   play: () => JSAnimation | undefined
   /** Reverses playback direction. */

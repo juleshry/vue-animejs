@@ -100,7 +100,7 @@ const { record, animate } = useLayout(container, params)
 ```ts
 export interface UseLayoutReturn {
   /** The underlying Anime.js `AutoLayout` instance. `undefined` until the root element is available. */
-  layout: DeepReadonly<ShallowRef<AutoLayout | undefined>>
+  layout: Readonly<ShallowRef<AutoLayout | undefined>>
   /** Snapshots the current positions of all tracked children so the next layout change can be animated. */
   record: () => void
   /** Animates all children from their recorded positions to their new positions. */

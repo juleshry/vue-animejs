@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { nextTick, ref } from "vue"
 import { useSvgDrawable } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { svg } from "animejs"
 
 const mock_svg = vi.mocked(svg)
@@ -26,6 +26,13 @@ describe("useSvgDrawable", () => {
     await nextTick()
     expect(mock_svg.createDrawable).toHaveBeenCalledWith(path, 0, 0)
     expect(result.drawable.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the drawable instance (regression: readonly(shallowRef) stack overflow)", async () => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path") as SVGPathElement
+    const [result] = withSetup(() => useSvgDrawable(path))
+    await nextTick()
+    expectInstanceStaysRaw(result.drawable.value)
   })
 
   it("does not create drawable immediately when target is a ref", async () => {

@@ -135,7 +135,7 @@ function trigger() {
 ```ts
 export interface UseScopeReturn {
   /** The underlying Anime.js Scope instance. */
-  scope: DeepReadonly<ShallowRef<Scope>>
+  scope: Readonly<ShallowRef<Scope | undefined>>
   /** Adds a constructor callback to the scope. Animations created inside the callback are tracked by the scope. Deferred until mount if called before the component is mounted. */
   add: (method: ScopeMethod) => void
   /** Registers a named method on the scope, accessible via `scope.value.methods[name]`. Deferred until mount if called before the component is mounted. */

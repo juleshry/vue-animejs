@@ -8,11 +8,11 @@ import {
   type LayoutAnimationParams,
   type Timeline,
 } from "animejs"
-import { type DeepReadonly, isRef, type MaybeRef, readonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 
 export interface UseLayoutReturn {
   /** The underlying Anime.js `AutoLayout` instance. `undefined` until the root element is available. */
-  layout: DeepReadonly<ShallowRef<AutoLayout | undefined>>
+  layout: Readonly<ShallowRef<AutoLayout | undefined>>
   /** Snapshots the current positions of all tracked children so the next layout change can be animated. */
   record: () => void
   /** Animates all children from their recorded positions to their new positions. */
@@ -46,7 +46,7 @@ export function useLayout(
         return
       }
 
-      layout.value = createLayout(el as DOMTargetSelector, opt)
+      layout.value = markRaw(createLayout(el as DOMTargetSelector, opt))
     },
     { flush: "post", immediate: !isRef(root) }
   )
@@ -72,5 +72,5 @@ export function useLayout(
     return layout.value?.revert()
   }
 
-  return { layout: readonly(layout), record, animate, update, revert }
+  return { layout: shallowReadonly(layout), record, animate, update, revert }
 }

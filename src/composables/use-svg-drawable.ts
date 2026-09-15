@@ -1,6 +1,6 @@
 import { svg, type DrawableSVGGeometry, type DOMTargetSelector } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { isRef, type MaybeRef, readonly, type DeepReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseSvgDrawableReturn {
@@ -8,7 +8,7 @@ export interface UseSvgDrawableReturn {
    * The Anime.js drawable Proxy for the target element. `undefined` until the element is available.
    * Pass this ref — not the original template ref — as the `useAnimate` target to animate the `draw` property.
    */
-  drawable: DeepReadonly<ShallowRef<DrawableSVGGeometry | undefined>>
+  drawable: Readonly<ShallowRef<DrawableSVGGeometry | undefined>>
 }
 
 /**
@@ -33,7 +33,7 @@ export function useSvgDrawable(
         console.warn("[useSvgDrawable] Target element is null or undefined")
         return
       }
-      drawable.value = svg.createDrawable(el as DOMTargetSelector, unref(start), unref(end))[0]
+      drawable.value = markRaw(svg.createDrawable(el as DOMTargetSelector, unref(start), unref(end))[0])
     },
     { flush: "post", immediate: !isRef(target) }
   )
@@ -43,5 +43,5 @@ export function useSvgDrawable(
     drawable.value = undefined
   })
 
-  return { drawable: readonly(drawable) }
+  return { drawable: shallowReadonly(drawable) }
 }

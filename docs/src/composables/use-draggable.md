@@ -120,26 +120,26 @@ For all available options, see the [Anime.js draggable documentation](https://an
 ```ts
 export interface UseDraggableReturn {
   /** The underlying Anime.js draggable instance. `undefined` until the target is available. */
-  draggable: DeepReadonly<ShallowRef<Draggable | undefined>>
-  /** Disables dragging without removing the instance. */
+  draggable: Readonly<ShallowRef<Draggable | undefined>>
+  /** Disables drag interactions without destroying the instance. */
   disable: () => void
-  /** Re-enables a disabled draggable. */
+  /** Re-enables drag interactions after `disable()`. */
   enable: () => void
-  /** Programmatically sets the x position. */
+  /** Moves the draggable to the given x position. Pass `true` to suppress the update callback. */
   setX: (x: number, muteUpdateCallback?: boolean) => void
-  /** Programmatically sets the y position. */
+  /** Moves the draggable to the given y position. Pass `true` to suppress the update callback. */
   setY: (y: number, muteUpdateCallback?: boolean) => void
-  /** Animates the element back into the viewport. */
+  /** Animates the draggable into the visible viewport. */
   animateInView: (duration?: number, gap?: number, ease?: EasingParam) => void
-  /** Scrolls the element into the viewport. */
+  /** Scrolls the draggable into the visible viewport. */
   scrollInView: (duration?: number, gap?: number, ease?: EasingParam) => void
-  /** Stops any in-progress release animation. */
+  /** Stops any in-progress snap or momentum animation. */
   stop: () => void
-  /** Resets the element to its initial position. */
+  /** Resets the draggable position to its initial state. */
   reset: () => void
-  /** Removes the draggable and restores the element's original styles. */
+  /** Cancels the draggable and restores the element to its original state. */
   revert: () => void
-  /** Re-reads container and element dimensions (call after layout changes). */
+  /** Re-reads the element's size and container bounds. */
   refresh: () => void
 }
 

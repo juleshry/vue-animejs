@@ -20,7 +20,7 @@ export interface UseSvgReturn {
   /** Returns a `FunctionValue` that morphs the current path to the given `path`. Pass the result as the `d` property in `useAnimate` options. */
   morphTo: (path: MaybeRef<TargetsParam>, precision?: MaybeRef<number>) => FunctionValue
   /** Creates a motion-path object from an SVG `<path>`. Spread the result into `useAnimate` options to animate `translateX`, `translateY`, and `rotate` along the path. */
-  createMotionPath: (path: MaybeRef<TargetsParam>, offset?: MaybeRef<number>) => ReturnType<typeof svg.createMotionPath>
+  createMotionPath: (path: MaybeRef<TargetsParam | null>, offset?: MaybeRef<number>) => ReturnType<typeof svg.createMotionPath>
 }
 
 /**

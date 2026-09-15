@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, h, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { useScope } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeScopeMock } from "../mocks"
 import { createScope } from "animejs"
 
@@ -29,6 +29,11 @@ describe("useScope", () => {
     const params = { defaults: { duration: 1000 } }
     withSetup(() => useScope(params))
     expect(mock_createScope).toHaveBeenCalledWith(params)
+  })
+
+  it("does not deep-wrap the scope instance (regression: readonly(shallowRef) stack overflow)", () => {
+    const [result] = withSetup(() => useScope({}))
+    expectInstanceStaysRaw(result.scope.value)
   })
 
   it("flushes buffered add() calls on mount", () => {

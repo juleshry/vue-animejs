@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { nextTick, ref } from "vue"
 import { useTimer } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeTimerMock } from "../mocks"
 import { createTimer } from "animejs"
 
@@ -32,6 +32,11 @@ describe("useTimer", () => {
   it("exposes the timer instance", () => {
     const [result] = withSetup(() => useTimer())
     expect(result.timer.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the timer instance (regression: readonly(shallowRef) stack overflow)", () => {
+    const [result] = withSetup(() => useTimer())
+    expectInstanceStaysRaw(result.timer.value)
   })
 
   it("delegates play to the timer instance", () => {

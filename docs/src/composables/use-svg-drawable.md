@@ -111,7 +111,7 @@ export interface UseSvgDrawableReturn {
    * The Anime.js drawable Proxy for the target element. `undefined` until the element is available.
    * Pass this ref — not the original template ref — as the `useAnimate` target to animate the `draw` property.
    */
-  drawable: DeepReadonly<ShallowRef<DrawableSVGGeometry | undefined>>
+  drawable: Readonly<ShallowRef<DrawableSVGGeometry | undefined>>
 }
 
 /**

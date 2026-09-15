@@ -81,10 +81,10 @@ For all available options, see the [Anime.js timer documentation](https://animej
 ```ts
 export interface UseTimerReturn {
   /** The underlying Anime.js timer instance. */
-  timer: DeepReadonly<ShallowRef<Timer>>
+  timer: Readonly<ShallowRef<Timer>>
   /** Starts or resumes the timer. */
   play: () => Timer
-  /** Reverses playback direction. */
+  /** Reverses the timer's playback direction. */
   reverse: () => Timer
   /** Pauses the timer at the current position. */
   pause: () => Timer
@@ -94,13 +94,13 @@ export interface UseTimerReturn {
   alternate: () => Timer
   /** Resumes from a paused state. */
   resume: () => Timer
-  /** Jumps immediately to the end of the timer. */
+  /** Jumps immediately to the end of the timer duration. */
   complete: () => Timer
   /** Resets the timer to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
   reset: (softReset?: boolean) => Timer
   /** Stops the timer and removes it from the Anime.js engine. */
   cancel: () => Timer
-  /** Cancels the timer and restores its state. */
+  /** Cancels the timer and restores any associated state to its original values. */
   revert: () => Timer
   /** Seeks to a specific time (in ms). */
   seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timer

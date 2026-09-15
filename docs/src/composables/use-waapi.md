@@ -128,8 +128,8 @@ For all available options, see the [Anime.js WAAPI documentation](https://animej
 ```ts
 export interface UseWaapiReturn {
   /** The underlying Anime.js WAAPI animation instance. `undefined` until the target is available. */
-  animation: DeepReadonly<ShallowRef<WAAPIAnimation | undefined>>
-  /** Resumes the animation from a paused state. */
+  animation: Readonly<ShallowRef<WAAPIAnimation | undefined>>
+  /** Resumes from a paused state. */
   resume: () => WAAPIAnimation | undefined
   /** Pauses the animation at the current position. */
   pause: () => WAAPIAnimation | undefined
@@ -139,26 +139,26 @@ export interface UseWaapiReturn {
   play: () => WAAPIAnimation | undefined
   /** Reverses playback direction. */
   reverse: () => WAAPIAnimation | undefined
-  /** Seeks to a specific time (in ms). */
+  /** Seeks to a specific time (in ms). Accepts a reactive ref for the time value. */
   seek: (time: MaybeRef<number>, muteCallbacks?: MaybeRef<boolean>) => WAAPIAnimation | undefined
   /** Restarts the animation from the beginning. */
   restart: () => WAAPIAnimation | undefined
-  /** Commits the current animated styles to the element's inline style, then stops the animation. */
+  /** Commits the current animated styles to the element's inline style, then cancels the animation. */
   commitStyles: () => WAAPIAnimation | undefined
   /** Jumps immediately to the end of the animation. */
   complete: () => WAAPIAnimation | undefined
-  /** Cancels the animation and removes it from the WAAPI engine. */
+  /** Stops the animation and removes it from the WAAPI engine. */
   cancel: () => WAAPIAnimation | undefined
   /** Cancels the animation and restores all animated properties to their original values. */
   revert: () => WAAPIAnimation | undefined
-  /** Converts an Anime.js easing function to a WAAPI-compatible CSS easing string. */
+  /** Converts an Anime.js easing function to a CSS `cubic-bezier()` string usable by WAAPI. */
   convertEase: (fn: MaybeRef<EasingFunction>, samples?: MaybeRef<number>) => string
 }
 
 /**
- * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
+ * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
- * @param targets - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param options - Anime.js WAAPI animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export declare function useWaapi(

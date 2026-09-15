@@ -94,18 +94,18 @@ For all available options, see the [Anime.js animation documentation](https://an
 ::: details Show Type Declarations
 
 ```ts
-export interface UseRawAnimateReturn {
-  animate: (target: TargetSelector, options: AnimationParams) => void
-}
+/** The Anime.js `JSAnimation` instance returned by `useRawAnimate`. */
+export type UseRawAnimateReturn = JSAnimation
 
 /**
- * Calls Anime.js `animate()` directly, returning the raw `JSAnimation` instance without Vue lifecycle integration or reactivity.
+ * Thin wrapper around Anime.js `animate()`. Resolves the target (unwrapping refs and Vue component
+ * refs via `.$el`) and immediately starts the animation.
  *
- * @param target - The element(s) to animate. Accepts a CSS selector, DOM element, or a `MaybeRef` of either.
- * @param options - Anime.js animation parameters. Accepts a plain object or a `MaybeRef`. Defaults to `{}`.
+ * @param target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export declare function useRawAnimate(
-  target: MaybeRef<TargetSelector>,
+  target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
   options?: MaybeRef<AnimationParams>
 ): JSAnimation
 ```

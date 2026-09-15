@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useAnimate } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeAnimationMock } from "../mocks"
 import { animate } from "animejs"
 
@@ -27,6 +27,13 @@ describe("useAnimate", () => {
     await nextTick()
     expect(mock_animate).toHaveBeenCalledWith(el, { opacity: [0, 1] })
     expect(result.animation.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the animation instance (regression: readonly(shallowRef) stack overflow)", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useAnimate(el, { opacity: [0, 1] }))
+    await nextTick()
+    expectInstanceStaysRaw(result.animation.value)
   })
 
   it("does not create animation immediately when target is a ref", async () => {

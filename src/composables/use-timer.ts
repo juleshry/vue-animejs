@@ -1,10 +1,10 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
-import { type MaybeRef, type ShallowRef, shallowRef, unref, watch, type DeepReadonly, readonly } from "vue"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 
 export interface UseTimerReturn {
   /** The underlying Anime.js timer instance. */
-  timer: DeepReadonly<ShallowRef<Timer>>
+  timer: Readonly<ShallowRef<Timer>>
   /** Starts or resumes the timer. */
   play: () => Timer
   /** Reverses the timer's playback direction. */
@@ -37,13 +37,13 @@ export interface UseTimerReturn {
  * @param options - Anime.js timer parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
-  const timer = shallowRef<Timer>(createTimer(unref(options)))
+  const timer = shallowRef<Timer>(markRaw(createTimer(unref(options))))
 
   const { stop } = watch(
     () => unref(options),
     options => {
       cancel()
-      timer.value = createTimer(options)
+      timer.value = markRaw(createTimer(options))
     },
     { deep: 1 }
   )
@@ -102,7 +102,7 @@ export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
   }
 
   return {
-    timer: readonly(timer),
+    timer: shallowReadonly(timer),
     play,
     reverse,
     pause,

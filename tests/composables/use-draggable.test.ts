@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { nextTick, ref } from "vue"
 import { useDraggable } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeDraggableMock } from "../mocks"
 import { createDraggable } from "animejs"
 
@@ -26,6 +26,13 @@ describe("useDraggable", () => {
     await nextTick()
     expect(mock_createDraggable).toHaveBeenCalledWith(el, { container: document.body })
     expect(result.draggable.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the draggable instance (regression: readonly(shallowRef) stack overflow)", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useDraggable(el, { container: document.body }))
+    await nextTick()
+    expectInstanceStaysRaw(result.draggable.value)
   })
 
   it("does not create draggable immediately when target is a ref", async () => {

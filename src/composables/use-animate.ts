@@ -1,11 +1,11 @@
-import { type DeepReadonly, type MaybeRef, type ShallowRef, shallowRef, unref, watch, readonly, isRef } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
 import { tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
-  animation: DeepReadonly<ShallowRef<JSAnimation | undefined>>
+  animation: Readonly<ShallowRef<JSAnimation | undefined>>
   /** Starts or resumes the animation. */
   play: () => JSAnimation | undefined
   /** Reverses playback direction. */
@@ -65,7 +65,7 @@ export function useAnimate(_target: AnimationTargets, _options: MaybeRef<Animati
       return
     }
 
-    animation.value = animate(el, opt)
+    animation.value = markRaw(animate(el, opt))
   }
 
   function play() {
@@ -121,7 +121,7 @@ export function useAnimate(_target: AnimationTargets, _options: MaybeRef<Animati
   }
 
   return {
-    animation: readonly(animation),
+    animation: shallowReadonly(animation),
     play,
     reverse,
     pause,

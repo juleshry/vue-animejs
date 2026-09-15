@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { nextTick, ref } from "vue"
 import { useAnimatable } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeAnimatableMock } from "../mocks"
 import { AnimatableParams, createAnimatable } from "animejs"
 
@@ -26,6 +26,13 @@ describe("useAnimatable", () => {
     await nextTick()
     expect(mock_createAnimatable).toHaveBeenCalledWith(el, { opacity: {} })
     expect(result.animatable.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the animatable instance (regression: readonly(shallowRef) stack overflow)", async () => {
+    const el = document.createElement("div")
+    const [result] = withSetup(() => useAnimatable(el, { opacity: {} }))
+    await nextTick()
+    expectInstanceStaysRaw(result.animatable.value)
   })
 
   it("does not create animatable immediately when target is a ref", async () => {

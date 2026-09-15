@@ -88,9 +88,13 @@ useAnimate(el, { translateX: 250, duration: 800 })
 
 **Directives** — declarative alternatives for element-bound animations:
 
-| Directive    | Description                                      |
-|--------------|--------------------------------------------------|
-| `v-animate`  | Animate an element declaratively via template attribute |
+| Directive        | Description                                      |
+|------------------|--------------------------------------------------|
+| `v-animate`      | Animate an element declaratively via template attribute |
+| `v-draggable`    | Make an element draggable declaratively |
+| `v-svg-drawable` | Animate SVG stroke drawing declaratively via the `draw` property |
+| `v-waapi`        | Animate via WAAPI declaratively |
+| `v-text-split`   | Split text into animatable lines, words, and chars declaratively |
 
 ## 🚀 Usage
 

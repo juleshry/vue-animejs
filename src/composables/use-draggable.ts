@@ -1,11 +1,11 @@
-import { type DeepReadonly, isRef, type MaybeRef, readonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 import { type Draggable, type DraggableParams, createDraggable, type EasingParam } from "animejs"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseDraggableReturn {
   /** The underlying Anime.js draggable instance. `undefined` until the target is available. */
-  draggable: DeepReadonly<ShallowRef<Draggable | undefined>>
+  draggable: Readonly<ShallowRef<Draggable | undefined>>
   /** Disables drag interactions without destroying the instance. */
   disable: () => void
   /** Re-enables drag interactions after `disable()`. */
@@ -48,7 +48,7 @@ export function useDraggable(targets: AnimationTargets, options: MaybeRef<Dragga
         return
       }
 
-      draggable.value = createDraggable(el, opt)
+      draggable.value = markRaw(createDraggable(el, opt))
     },
     { flush: "post", immediate: !isRef(targets) }
   )
@@ -99,7 +99,7 @@ export function useDraggable(targets: AnimationTargets, options: MaybeRef<Dragga
   }
 
   return {
-    draggable: readonly(draggable),
+    draggable: shallowReadonly(draggable),
     disable,
     enable,
     setX,

@@ -1,10 +1,10 @@
 import { type AnimatableObject, type AnimatableParams, createAnimatable, type TargetsParam } from "animejs"
 import {
   computed,
-  type DeepReadonly,
   isRef,
+  markRaw,
   type MaybeRef,
-  readonly,
+  shallowReadonly,
   type ShallowRef,
   shallowRef,
   unref,
@@ -15,7 +15,7 @@ import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.
 
 export interface UseAnimatableReturn {
   /** The underlying Anime.js animatable instance. `undefined` until the target is available. */
-  animatable: DeepReadonly<ShallowRef<AnimatableObject | undefined>>
+  animatable: Readonly<ShallowRef<AnimatableObject | undefined>>
   /** Cancels the animatable and restores all animated properties to their original values. */
   revert: () => AnimatableObject | undefined
 }
@@ -48,7 +48,7 @@ export function useAnimatable(
         return
       }
 
-      animatable.value = createAnimatable(el, opt)
+      animatable.value = markRaw(createAnimatable(el, opt))
     },
     { flush: "post", immediate: !isRef(targets) }
   )
@@ -62,5 +62,5 @@ export function useAnimatable(
     return animatable.value?.revert()
   }
 
-  return { animatable: readonly(animatable), revert }
+  return { animatable: shallowReadonly(animatable), revert }
 }

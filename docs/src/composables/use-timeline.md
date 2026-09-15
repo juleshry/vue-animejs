@@ -139,7 +139,7 @@ export type TimelineChain = Timeline & {
 
 export interface UseTimelineReturn {
   /** The underlying Anime.js timeline instance. */
-  timeline: DeepReadonly<ShallowRef<Timeline>>
+  timeline: Readonly<ShallowRef<Timeline>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: MaybeRef<TargetsParam>,

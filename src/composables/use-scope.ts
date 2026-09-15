@@ -1,6 +1,6 @@
 import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
 import { createScope, type Scope, type ScopeMethod, type ScopeParams, type Tickable } from "animejs"
-import { isRef, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 
 export interface UseScopeReturn {
   /** The underlying Anime.js `Scope` instance. */
@@ -38,7 +38,7 @@ export function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn {
 
   tryOnMounted(() => {
     is_mounted = true
-    scope.value = createScope(unref(params))
+    scope.value = markRaw(createScope(unref(params)))
 
     for (const method of pending_adds) scope.value.add(method)
     for (const [name, method] of pending_named) scope.value.add(name, method)
@@ -53,7 +53,7 @@ export function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn {
         params,
         new_params => {
           scope.value?.revert()
-          scope.value = createScope(new_params)
+          scope.value = markRaw(createScope(new_params))
         },
         { flush: "post" }
       )

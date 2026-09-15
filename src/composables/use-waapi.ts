@@ -7,11 +7,11 @@ import {
   type WAAPIAnimation,
   type EasingFunction,
 } from "animejs"
-import { DeepReadonly, isRef, type MaybeRef, readonly, ShallowRef, shallowRef, unref, watch } from "vue"
+import { isRef, markRaw, type MaybeRef, shallowReadonly, ShallowRef, shallowRef, unref, watch } from "vue"
 
 export interface UseWaapiReturn {
   /** The underlying Anime.js WAAPI animation instance. `undefined` until the target is available. */
-  animation: DeepReadonly<ShallowRef<WAAPIAnimation | undefined>>
+  animation: Readonly<ShallowRef<WAAPIAnimation | undefined>>
   /** Resumes from a paused state. */
   resume: () => WAAPIAnimation | undefined
   /** Pauses the animation at the current position. */
@@ -53,7 +53,7 @@ export function useWaapi(
   const { stop } = watch(
     [() => resolveTarget(targets as AnimationTargets), () => unref(options)],
     ([el, opt]) => {
-      animation.value = waapi.animate(el as DOMTargetsParam, opt)
+      animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
     },
     { flush: "post", immediate: !isRef(targets) }
   )
@@ -107,7 +107,7 @@ export function useWaapi(
   }
 
   return {
-    animation: readonly(animation),
+    animation: shallowReadonly(animation),
     resume,
     pause,
     alternate,

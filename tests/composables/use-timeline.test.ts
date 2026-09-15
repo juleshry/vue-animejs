@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useTimeline } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeTimelineMock } from "../mocks"
 import { createTimeline } from "animejs"
 
@@ -29,6 +29,11 @@ describe("useTimeline", () => {
   it("exposes the timeline instance", () => {
     const [result] = withSetup(() => useTimeline())
     expect(result.timeline.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the timeline instance (regression: readonly(shallowRef) stack overflow)", () => {
+    const [result] = withSetup(() => useTimeline())
+    expectInstanceStaysRaw(result.timeline.value)
   })
 
   it("calls timeline.add directly when already mounted", () => {

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useLayout } from "@lib"
-import { withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeLayoutMock } from "../mocks"
 import { AutoLayoutParams, createLayout } from "animejs"
 
@@ -28,6 +28,14 @@ describe("useLayout", () => {
     await nextTick()
     expect(mock_createLayout).toHaveBeenCalledWith(el, params)
     expect(result.layout.value).toBeDefined()
+  })
+
+  it("does not deep-wrap the layout instance (regression: readonly(shallowRef) stack overflow)", async () => {
+    const el = document.createElement("div")
+    const params: AutoLayoutParams = { properties: ["boxShadow"] }
+    const [result] = withSetup(() => useLayout(el, params))
+    await nextTick()
+    expectInstanceStaysRaw(result.layout.value)
   })
 
   it("does not create layout immediately when target is a ref", async () => {

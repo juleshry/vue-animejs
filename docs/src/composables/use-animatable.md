@@ -89,13 +89,13 @@ For all available options, see the [Anime.js animatable documentation](https://a
 ```ts
 export interface UseAnimatableReturn {
   /** The underlying Anime.js animatable instance. `undefined` until the target is available. */
-  animatable: DeepReadonly<ShallowRef<AnimatableObject | undefined>>
-  /** Stops the animatable and restores all properties to their original values. */
+  animatable: Readonly<ShallowRef<AnimatableObject | undefined>>
+  /** Cancels the animatable and restores all animated properties to their original values. */
   revert: () => AnimatableObject | undefined
 }
 
 /**
- * Wraps Anime.js `createAnimatable()` into a Vue composable. The animatable is created reactively — it re-creates whenever the target element or options change — and is reverted automatically on unmount.
+ * Wraps Anime.js `createAnimatable()` into a Vue composable. Reactively re-creates the animatable when the target or options change, and reverts it automatically on unmount.
  *
  * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param options - Anime.js animatable parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.

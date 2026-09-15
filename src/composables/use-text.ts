@@ -4,19 +4,19 @@ import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.
 import {
   computed,
   isRef,
-  readonly,
+  markRaw,
+  shallowReadonly,
   shallowRef,
   unref,
   watch,
   type ComputedRef,
-  type DeepReadonly,
   type MaybeRef,
   type ShallowRef,
 } from "vue"
 
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
-  splitter: DeepReadonly<ShallowRef<TextSplitter | undefined>>
+  splitter: Readonly<ShallowRef<TextSplitter | undefined>>
   /** Reactive array of `<span>` elements representing each line after splitting. */
   lines: ComputedRef<HTMLElement[]>
   /** Reactive array of `<span>` elements representing each word after splitting. */
@@ -53,7 +53,7 @@ export function useText(
 
       if (!el) return
 
-      splitter.value = splitText(el as HTMLElement | NodeList | string | HTMLElement[], params)
+      splitter.value = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
     },
     { flush: "post", immediate: !isRef(_target) }
   )
@@ -73,7 +73,7 @@ export function useText(
   }
 
   return {
-    splitter: readonly(splitter),
+    splitter: shallowReadonly(splitter),
     lines,
     words,
     chars,

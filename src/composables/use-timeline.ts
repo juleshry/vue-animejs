@@ -1,13 +1,13 @@
 import {
+  markRaw,
   type MaybeRef,
   type MaybeRefOrGetter,
+  shallowReadonly,
   type ShallowRef,
   shallowRef,
   toValue,
   unref,
   watch,
-  type DeepReadonly,
-  readonly,
 } from "vue"
 import {
   type AnimationParams,
@@ -51,7 +51,7 @@ export type TimelineChain = Timeline & {
 
 export interface UseTimelineReturn {
   /** The underlying Anime.js timeline instance. */
-  timeline: DeepReadonly<ShallowRef<Timeline>>
+  timeline: Readonly<ShallowRef<Timeline>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: AnimationTargets,
@@ -112,7 +112,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
   const queue: QueueEntry[] = []
 
-  const timeline = shallowRef<Timeline>(createTimeline(unref(options)))
+  const timeline = shallowRef<Timeline>(markRaw(createTimeline(unref(options))))
 
   function replayQueue() {
     for (const entry of queue) {
@@ -128,7 +128,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
     () => unref(options),
     _options => {
       revert()
-      timeline.value = createTimeline(_options)
+      timeline.value = markRaw(createTimeline(_options))
       replayQueue()
     },
     { flush: "post", deep: 1 }
@@ -256,7 +256,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   }
 
   return {
-    timeline: readonly(timeline),
+    timeline: shallowReadonly(timeline),
     add,
     set,
     sync,
