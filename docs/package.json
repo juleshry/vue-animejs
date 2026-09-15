@@ -7,7 +7,7 @@
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
-    "@vueuse/core": ">=14",
-    "vitepress": "^2.0.0-alpha.17"
+    "@vueuse/core": "^14.4.0",
+    "vitepress": "^2.0.0-alpha.20"
   }
 }
