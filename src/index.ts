@@ -2,7 +2,12 @@ export { useAnimate, type UseAnimateReturn } from "./composables/use-animate.ts"
 export { useRawAnimate, type UseRawAnimateReturn } from "./composables/use-raw-animate.ts"
 export { useTimer, type UseTimerReturn } from "./composables/use-timer.ts"
 export { useTimeline, type TimelineChain, type UseTimelineReturn } from "./composables/use-timeline.ts"
-export { useAnimatable, type UseAnimatableReturn } from "./composables/use-animatable.ts"
+export {
+  useAnimatable,
+  type UseAnimatableReturn,
+  type TypedAnimatableObject,
+  type AnimatablePropertyKeys,
+} from "./composables/use-animatable.ts"
 export { useRawAnimatable, type UseRawAnimatableReturn } from "./composables/use-raw-animatable.ts"
 export { useDraggable, type UseDraggableReturn } from "./composables/use-draggable.ts"
 export { useLayout, type UseLayoutReturn } from "./composables/use-layout.ts"

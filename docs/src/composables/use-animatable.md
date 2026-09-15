@@ -87,11 +87,19 @@ For all available options, see the [Anime.js animatable documentation](https://a
 ::: details Show Type Declarations
 
 ```ts
-export interface UseAnimatableReturn {
+/** The keys of `T` that represent animatable properties, excluding Anime.js's reserved config keys (`ease`, `duration`, `unit`, `modifier`, `composition`). */
+export type AnimatablePropertyKeys<T extends AnimatableParams> = Exclude<keyof T, keyof AnimatablePropertyParamsOptions>
+
+/** An `AnimatableObject` narrowed to only the property setters/getters implied by `T`. */
+export type TypedAnimatableObject<T extends AnimatableParams> = Animatable & {
+  [K in AnimatablePropertyKeys<T>]: AnimatableProperty
+}
+
+export interface UseAnimatableReturn<T extends AnimatableParams = AnimatableParams> {
   /** The underlying Anime.js animatable instance. `undefined` until the target is available. */
-  animatable: Readonly<ShallowRef<AnimatableObject | undefined>>
+  animatable: Readonly<ShallowRef<TypedAnimatableObject<T> | undefined>>
   /** Cancels the animatable and restores all animated properties to their original values. */
-  revert: () => AnimatableObject | undefined
+  revert: () => TypedAnimatableObject<T> | undefined
 }
 
 /**
@@ -100,10 +108,10 @@ export interface UseAnimatableReturn {
  * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param options - Anime.js animatable parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
-export declare function useAnimatable(
+export declare function useAnimatable<T extends AnimatableParams = AnimatableParams>(
   targets: MaybeRef<TargetsParam>,
-  options?: MaybeRef<AnimatableParams>
-): UseAnimatableReturn
+  options?: MaybeRef<T>
+): UseAnimatableReturn<T>
 ```
 
 :::
@@ -114,6 +122,7 @@ export declare function useAnimatable(
 - When `targets` is a **plain value** (string selector, element), the animatable is created immediately.
 - If either `targets` or `options` changes, the current animatable is **reverted** and a new one is created.
 - On component **unmount**, the watcher and animatable are cleaned up automatically via `revert()`.
+- The properties available on `animatable.value` are inferred from the shape of `options` passed at the call site — calling a property that wasn't configured (or a reserved config key like `ease`) is a type error.
 
 ::: tip
 Call properties as functions on `animatable.value` (e.g. `animatable.value.x(100)`) to spring-animate to the new value. Calling without arguments reads the current value (e.g. `animatable.value.x()`). No play method needed — the animatable responds immediately.
