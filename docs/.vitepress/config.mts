@@ -84,6 +84,7 @@ export default defineConfig({
           { text: "useTimeline", link: "/composables/use-timeline" },
           { text: "useWaapi", link: "/composables/use-waapi" },
           { text: "useAnimatable", link: "/composables/use-animatable" },
+          { text: "useRawAnimatable", link: "/composables/use-raw-animatable" },
           { text: "useDraggable", link: "/composables/use-draggable" },
           { text: "useScope", link: "/composables/use-scope" },
           { text: "useText", link: "/composables/use-text" },

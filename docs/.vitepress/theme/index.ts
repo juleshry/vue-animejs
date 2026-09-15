@@ -8,6 +8,7 @@ import UseTimelineDemo from "./components/demo/UseTimelineDemo.vue"
 import UseRawAnimateDemo from "./components/demo/UseRawAnimateDemo.vue"
 import UseWaapiDemo from "./components/demo/UseWaapiDemo.vue"
 import UseAnimatableDemo from "./components/demo/UseAnimatableDemo.vue"
+import UseRawAnimatableDemo from "./components/demo/UseRawAnimatableDemo.vue"
 import UseDraggableDemo from "./components/demo/UseDraggableDemo.vue"
 import UseScopeDemo from "./components/demo/use-scope/UseScopeDemo.vue"
 import UseScopeDemoInner from "./components/demo/use-scope/UseScopeDemoInner.vue"
@@ -41,6 +42,7 @@ export default {
     app.component("UseRawAnimateDemo", UseRawAnimateDemo)
     app.component("UseWaapiDemo", UseWaapiDemo)
     app.component("UseAnimatableDemo", UseAnimatableDemo)
+    app.component("UseRawAnimatableDemo", UseRawAnimatableDemo)
     app.component("UseDraggableDemo", UseDraggableDemo)
     app.component("UseScopeDemo", UseScopeDemo)
     app.component("UseScopeDemoInner", UseScopeDemoInner)

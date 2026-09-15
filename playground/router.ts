@@ -2,9 +2,11 @@ import { createRouter, createWebHashHistory } from "vue-router"
 import ComposablesPage from "./pages/ComposablesPage.vue"
 import DirectivesPage from "./pages/DirectivesPage.vue"
 import AnimateSection from "./pages/composables/AnimateSection.vue"
+import RawAnimateSection from "./pages/composables/RawAnimateSection.vue"
 import TimerSection from "./pages/composables/TimerSection.vue"
 import TimelineSection from "./pages/composables/TimelineSection.vue"
 import AnimatableSection from "./pages/composables/AnimatableSection.vue"
+import RawAnimatableSection from "./pages/composables/RawAnimatableSection.vue"
 import DraggableSection from "./pages/composables/DraggableSection.vue"
 import LayoutSection from "./pages/composables/LayoutSection.vue"
 import TextSection from "./pages/composables/TextSection.vue"
@@ -25,6 +27,11 @@ export const composable_routes = [
     meta: { label: "useAnimate", description: "Basic animation with play/restart controls" },
   },
   {
+    path: "/composables/raw-animate",
+    component: RawAnimateSection,
+    meta: { label: "useRawAnimate", description: "Thin escape hatch returning the raw JSAnimation instance" },
+  },
+  {
     path: "/composables/timer",
     component: TimerSection,
     meta: { label: "useTimer", description: "Timer with frame rate and loop controls" },
@@ -38,6 +45,11 @@ export const composable_routes = [
     path: "/composables/animatable",
     component: AnimatableSection,
     meta: { label: "useAnimatable", description: "Prepare elements as optimized animation targets" },
+  },
+  {
+    path: "/composables/raw-animatable",
+    component: RawAnimatableSection,
+    meta: { label: "useRawAnimatable", description: "Thin escape hatch returning the raw AnimatableObject instance" },
   },
   {
     path: "/composables/draggable",
