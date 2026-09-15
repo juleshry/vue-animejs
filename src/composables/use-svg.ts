@@ -17,12 +17,14 @@ export interface UseSvgReturn {
  * For drawable stroke animations, use `useSvgDrawable` instead.
  */
 export function useSvg(): UseSvgReturn {
-  function morphTo(_path: MaybeRef<TargetsParam>, precision?: MaybeRef<number>) {
-    const path = unref(_path)
+  function morphTo(_path: MaybeRef<TargetsParam>, precision?: MaybeRef<number>): FunctionValue {
+    return (target, index, targets, prevTween) => {
+      const path = unref(_path)
 
-    if (!path) return () => ""
+      if (!path) return ""
 
-    return svg.morphTo(unref(path), unref(precision))
+      return svg.morphTo(path, unref(precision))(target, index, targets, prevTween)
+    }
   }
 
   function createMotionPath(path: MaybeRef<TargetsParam | null>, offset?: MaybeRef<number>) {

@@ -15,22 +15,42 @@ vi.mock("animejs", () => ({
 describe("useSvg", () => {
   beforeEach(() => {
     mock_svg.morphTo.mockClear()
+    mock_svg.morphTo.mockReturnValue(vi.fn(() => "morphed"))
     mock_svg.createMotionPath.mockClear()
   })
 
   describe("morphTo", () => {
-    it("calls svg.morphTo with the path", () => {
+    it("does not call svg.morphTo until the returned FunctionValue is invoked", () => {
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
       const { morphTo } = useSvg()
-      morphTo(path)
+      const morph = morphTo(path)
+      expect(mock_svg.morphTo).not.toHaveBeenCalled()
+
+      morph()
       expect(mock_svg.morphTo).toHaveBeenCalledWith(path, undefined)
     })
 
-    it("unwraps ref path and precision", () => {
+    it("unwraps ref path and precision when invoked", () => {
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
       const { morphTo } = useSvg()
-      morphTo(ref(path), ref(2))
+      const morph = morphTo(ref(path), ref(2))
+      morph()
       expect(mock_svg.morphTo).toHaveBeenCalledWith(path, 2)
+    })
+
+    it("re-checks a ref path on every invocation instead of freezing an unresolved value", () => {
+      const path_ref = ref<SVGPathElement | null>(null)
+      const { morphTo } = useSvg()
+      const morph = morphTo(path_ref)
+
+      expect(morph()).toBe("")
+      expect(mock_svg.morphTo).not.toHaveBeenCalled()
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+      path_ref.value = path
+
+      expect(morph()).toBe("morphed")
+      expect(mock_svg.morphTo).toHaveBeenCalledWith(path, undefined)
     })
   })
 

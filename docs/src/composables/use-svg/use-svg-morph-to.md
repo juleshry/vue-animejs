@@ -10,7 +10,7 @@ Morphs an SVG `<path>` to another shape. Returns a `FunctionValue` to pass as th
 
 ### Basic morphing
 
-`morphTo` requires a live DOM element as the morph target — it cannot accept raw path data strings. Add the target shape as a hidden `<path>`, reference it with `useTemplateRef`, then **pass the ref directly** to `morphTo`. Because `morphTo` calls `unref()` internally, passing the ref inside a `computed` makes the options reactive: the ref value is resolved when the computed is first read, which happens after mount.
+`morphTo` requires a live DOM element as the morph target — it cannot accept raw path data strings. Add the target shape as a hidden `<path>`, reference it with `useTemplateRef`, then **pass the ref directly** to `morphTo`. `morphTo` returns a `FunctionValue` that resolves the ref lazily, only when Anime.js reads the `d` value — so a plain options object works whether the target is mounted yet or not. Reach for `computed()` only if you want the morph target itself to change later.
 
 ::: warning
 Both paths must have the same number of SVG commands and the same command types for smooth interpolation.
@@ -18,7 +18,7 @@ Both paths must have the same number of SVG commands and the same command types 
 
 ```vue
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue"
+import { useTemplateRef } from "vue"
 import { useAnimate, useSvg } from "@juleshry/vue-animejs"
 
 const shape = useTemplateRef<SVGPathElement>("shape")
@@ -26,15 +26,13 @@ const target = useTemplateRef<SVGPathElement>("target")
 
 const { morphTo } = useSvg()
 
-const options = computed(() => ({
+useAnimate(shape, {
   d: morphTo(target),
   duration: 1400,
   ease: "inOutCubic",
   loop: true,
   alternate: true,
-}))
-
-useAnimate(shape, options)
+})
 </script>
 
 <template>
@@ -49,11 +47,11 @@ useAnimate(shape, options)
 
 ### Multi-shape timeline morphing
 
-To cycle through several shapes, use `useTimeline`. Pass each morph step as `computed(() => ({ d: morphTo(target) }))` — `useTimeline.add()` accepts `MaybeRef<AnimationParams>` and resolves the computed after mount, ensuring the target elements are in the DOM. Use a position offset (`"+=N"`) between steps to pause, and `loopDelay` on the timeline options to pause before looping back.
+To cycle through several shapes, use `useTimeline`. Pass each morph step as a plain `{ d: morphTo(target) }` object — `morphTo` resolves each target lazily on its own, so `useTimeline.add()` doesn't need a `computed()` wrapper to stay correct. Use a position offset (`"+=N"`) between steps to pause, and `loopDelay` on the timeline options to pause before looping back.
 
 ```vue
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue"
+import { useTemplateRef } from "vue"
 import { useSvg, useTimeline } from "@juleshry/vue-animejs"
 
 const shape = useTemplateRef<SVGPathElement>("shape")
@@ -68,8 +66,8 @@ const { add, restart } = useTimeline({
   loopDelay: 500,
 })
 
-add(shape, computed(() => ({ d: morphTo(t_circle) })))
-  .add(shape, computed(() => ({ d: morphTo(t_diamond) })), "+=500")
+add(shape, { d: morphTo(t_circle) })
+  .add(shape, { d: morphTo(t_diamond) }, "+=500")
 </script>
 
 <template>
@@ -98,7 +96,7 @@ export interface UseSvgReturn {
 ## Behavior
 
 - `morphTo` requires a **live DOM element** — always add the target as a hidden `<path>` in the template.
-- Pass the **ref itself** (not `.value`) to `morphTo` so that `unref()` is called at read time inside a `computed`, deferring resolution to after mount.
+- Pass the **ref itself** (not `.value`) to `morphTo`. The returned `FunctionValue` re-resolves the ref every time Anime.js invokes it, so it stays correct even if the target isn't mounted yet when `morphTo()` is called (e.g. behind a `v-if`).
 - When cycling through multiple shapes, Anime.js stores the resampled target path on the source element after each morph, ensuring seamless chaining across loop iterations.
 
 ## Source

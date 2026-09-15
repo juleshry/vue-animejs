@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useSvg, useTimeline } from "@juleshry/vue-animejs"
-  import { computed, useTemplateRef } from "vue"
+  import { useTemplateRef } from "vue"
 
   const DELAY = 500
 
@@ -19,25 +19,10 @@
     loopDelay: DELAY,
   })
 
-  add(
-    shape,
-    computed(() => ({ d: morphTo(t_spade) }))
-  )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_diamond) })),
-      `+=${DELAY}`
-    )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_club) })),
-      `+=${DELAY}`
-    )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_heart) })),
-      `+=${DELAY}`
-    )
+  add(shape, { d: morphTo(t_spade) })
+    .add(shape, { d: morphTo(t_diamond) }, `+=${DELAY}`)
+    .add(shape, { d: morphTo(t_club) }, `+=${DELAY}`)
+    .add(shape, { d: morphTo(t_heart) }, `+=${DELAY}`)
 </script>
 
 <template>

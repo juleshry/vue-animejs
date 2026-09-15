@@ -22,25 +22,10 @@
     loopDelay: DELAY,
   })
 
-  addMorph(
-    shape,
-    computed(() => ({ d: morphTo(t_spade) }))
-  )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_diamond) })),
-      `+=${DELAY}`
-    )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_club) })),
-      `+=${DELAY}`
-    )
-    .add(
-      shape,
-      computed(() => ({ d: morphTo(t_heart) })),
-      `+=${DELAY}`
-    )
+  addMorph(shape, { d: morphTo(t_spade) })
+    .add(shape, { d: morphTo(t_diamond) }, `+=${DELAY}`)
+    .add(shape, { d: morphTo(t_club) }, `+=${DELAY}`)
+    .add(shape, { d: morphTo(t_heart) }, `+=${DELAY}`)
 
   // --- createMotionPath demo ---
   const dot_a = useTemplateRef("dot-a")
