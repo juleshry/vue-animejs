@@ -1,4 +1,4 @@
-import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import {
   type WAAPIAnimationParams,
@@ -55,7 +55,7 @@ export function useWaapi(
     ([el, opt]) => {
       animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
     },
-    { flush: "post", immediate: !isRef(targets) }
+    { flush: "post", immediate: !isRef(targets) && isClient }
   )
 
   tryOnUnmounted(() => {

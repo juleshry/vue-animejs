@@ -1,4 +1,4 @@
-import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import {
   type AutoLayout,
@@ -48,7 +48,7 @@ export function useLayout(
 
       layout.value = markRaw(createLayout(el as DOMTargetSelector, opt))
     },
-    { flush: "post", immediate: !isRef(root) }
+    { flush: "post", immediate: !isRef(root) && isClient }
   )
 
   tryOnUnmounted(() => {

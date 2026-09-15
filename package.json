@@ -48,6 +48,7 @@
     "@types/node": "^22.0.0",
     "@types/semver": "^7.7.1",
     "@vitest/coverage-v8": "^4.1.4",
+    "@vue/server-renderer": ">=3.5",
     "@vue/test-utils": "^2.4.6",
     "@vueuse/core": ">=14",
     "animejs": "4.4.1",

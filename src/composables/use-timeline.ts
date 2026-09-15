@@ -20,7 +20,7 @@ import {
   type TimelinePosition,
   type Timer,
 } from "animejs"
-import { tryOnMounted, tryOnUnmounted } from "@vueuse/core"
+import { isClient, tryOnMounted, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 type QueueEntry =
@@ -50,8 +50,8 @@ export type TimelineChain = Timeline & {
 }
 
 export interface UseTimelineReturn {
-  /** The underlying Anime.js timeline instance. */
-  timeline: Readonly<ShallowRef<Timeline>>
+  /** The underlying Anime.js timeline instance. `undefined` until mounted. */
+  timeline: Readonly<ShallowRef<Timeline | undefined>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: AnimationTargets,
@@ -67,39 +67,39 @@ export interface UseTimelineReturn {
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
   remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
   /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
-  sync: (synced?: Tickable, position?: TimelinePosition) => Timeline
+  sync: (synced?: Tickable, position?: TimelinePosition) => Timeline | undefined
   /** Adds a named label at a position so it can be referenced by `.add()` or `.seek()`. */
-  label: (labelName: string, position?: TimelinePosition) => Timeline
+  label: (labelName: string, position?: TimelinePosition) => Timeline | undefined
   /** Inserts a callback function at a specific point in the timeline. */
-  call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline
+  call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline | undefined
   /** Renders the timeline once without playing it. */
-  init: (internalRender?: boolean) => Timeline
+  init: (internalRender?: boolean) => Timeline | undefined
   /** Starts or resumes the timeline. */
-  play: () => Timeline
+  play: () => Timeline | undefined
   /** Reverses playback direction. */
-  reverse: () => Timeline
+  reverse: () => Timeline | undefined
   /** Pauses the timeline at the current position. */
-  pause: () => Timeline
+  pause: () => Timeline | undefined
   /** Restarts the timeline from the beginning. */
-  restart: () => Timeline
+  restart: () => Timeline | undefined
   /** Toggles between forward and reverse direction. */
-  alternate: () => Timeline
+  alternate: () => Timeline | undefined
   /** Resumes from a paused state. */
-  resume: () => Timeline
+  resume: () => Timeline | undefined
   /** Jumps immediately to the end of the timeline. */
-  complete: () => Timeline
+  complete: () => Timeline | undefined
   /** Resets the timeline to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
-  reset: (softReset?: boolean) => Timeline
+  reset: (softReset?: boolean) => Timeline | undefined
   /** Stops the timeline and removes it from the Anime.js engine. */
-  cancel: () => Timeline
+  cancel: () => Timeline | undefined
   /** Cancels the timeline and restores all animated properties to their original values. */
-  revert: () => Timeline
+  revert: () => Timeline | undefined
   /** Seeks to a specific time (in ms). */
-  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline | undefined
   /** Rescales the timeline to a new total duration. */
-  stretch: (newDuration: number) => Timeline
+  stretch: (newDuration: number) => Timeline | undefined
   /** Re-reads the current values of all animated properties from the DOM. */
-  refresh: () => Timeline
+  refresh: () => Timeline | undefined
 }
 
 /**
@@ -112,14 +112,14 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
   const queue: QueueEntry[] = []
 
-  const timeline = shallowRef<Timeline>(markRaw(createTimeline(unref(options))))
+  const timeline = shallowRef<Timeline>()
 
   function replayQueue() {
     for (const entry of queue) {
       if (entry.type === "add") {
-        timeline.value.add(resolveTarget(entry.targets), toValue(entry.params), entry.position)
+        timeline.value?.add(resolveTarget(entry.targets), toValue(entry.params), entry.position)
       } else {
-        timeline.value.set(resolveTarget(entry.targets), toValue(entry.params), entry.position)
+        timeline.value?.set(resolveTarget(entry.targets), toValue(entry.params), entry.position)
       }
     }
   }
@@ -127,6 +127,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   const { stop } = watch(
     () => unref(options),
     _options => {
+      if (!isClient) return
       revert()
       timeline.value = markRaw(createTimeline(_options))
       replayQueue()
@@ -135,6 +136,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   )
 
   tryOnMounted(() => {
+    timeline.value = markRaw(createTimeline(unref(options)))
     is_mounted = true
     replayQueue()
   })
@@ -153,7 +155,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
     if (is_mounted) {
       return {
-        ...timeline.value.add(resolveTarget(targets), toValue(_params), position),
+        ...timeline.value?.add(resolveTarget(targets), toValue(_params), position),
         add,
         set,
         remove,
@@ -168,7 +170,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
     if (is_mounted) {
       return {
-        ...timeline.value.set(resolveTarget(targets), toValue(_params), position),
+        ...timeline.value?.set(resolveTarget(targets), toValue(_params), position),
         add,
         set,
         remove,
@@ -184,75 +186,75 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
       return { ...timeline.value, add, set, remove } as TimelineChain
     }
 
-    return { ...timeline.value.remove(resolveTarget(targets), propertyName), add, set, remove } as TimelineChain
+    return { ...timeline.value?.remove(resolveTarget(targets), propertyName), add, set, remove } as TimelineChain
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {
-    return timeline.value.sync(synced, position)
+    return timeline.value?.sync(synced, position)
   }
 
   function label(labelName: string, position?: TimelinePosition) {
-    return timeline.value.label(labelName, position)
+    return timeline.value?.label(labelName, position)
   }
 
   function call(callback: Callback<Timer>, position?: TimelinePosition) {
-    return timeline.value.call(callback, position)
+    return timeline.value?.call(callback, position)
   }
 
   function init(internalRender?: boolean) {
-    return timeline.value.init(internalRender)
+    return timeline.value?.init(internalRender)
   }
 
   function play() {
-    return timeline.value.play()
+    return timeline.value?.play()
   }
 
   function reverse() {
-    return timeline.value.reverse()
+    return timeline.value?.reverse()
   }
 
   function pause() {
-    return timeline.value.pause()
+    return timeline.value?.pause()
   }
 
   function restart() {
-    return timeline.value.restart()
+    return timeline.value?.restart()
   }
 
   function alternate() {
-    return timeline.value.alternate()
+    return timeline.value?.alternate()
   }
 
   function resume() {
-    return timeline.value.resume()
+    return timeline.value?.resume()
   }
 
   function complete() {
-    return timeline.value.complete()
+    return timeline.value?.complete()
   }
 
   function reset(softReset?: boolean) {
-    return timeline.value.reset(softReset)
+    return timeline.value?.reset(softReset)
   }
 
   function cancel() {
-    return timeline.value.cancel()
+    return timeline.value?.cancel()
   }
 
   function revert() {
-    return timeline.value.revert()
+    return timeline.value?.revert()
   }
 
   function seek(time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) {
-    return timeline.value.seek(time, muteCallbacks, internalRender)
+    return timeline.value?.seek(time, muteCallbacks, internalRender)
   }
 
   function stretch(newDuration: number) {
-    return timeline.value.stretch(newDuration)
+    return timeline.value?.stretch(newDuration)
   }
 
   function refresh() {
-    return timeline.value.refresh()
+    return timeline.value?.refresh()
   }
 
   return {

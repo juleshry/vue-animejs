@@ -1,5 +1,5 @@
 import { svg, type DrawableSVGGeometry, type DOMTargetSelector } from "animejs"
-import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
@@ -35,7 +35,7 @@ export function useSvgDrawable(
       }
       drawable.value = markRaw(svg.createDrawable(el as DOMTargetSelector, unref(start), unref(end))[0])
     },
-    { flush: "post", immediate: !isRef(target) }
+    { flush: "post", immediate: !isRef(target) && isClient }
   )
 
   tryOnUnmounted(() => {

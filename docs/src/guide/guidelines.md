@@ -68,6 +68,19 @@ const { play } = useAnimate(el, { translateX: 200 })
 
 This applies to all composables.
 
+## SSR
+
+Every composable is safe to call during server-side rendering (Nuxt, `@vue/server-renderer`, `vite-ssr`) — Anime.js instances are only ever created once the component has actually mounted in a browser. During SSR, the returned instance ref (`animation`, `timer`, `timeline`, etc.) stays `undefined` and control methods (`play`, `pause`, …) are no-ops:
+
+```ts
+// Safe to call at the top level of setup(), even on the server
+const { animation, play } = useAnimate(".box", { translateX: 200 })
+```
+
+::: warning
+`useRawAnimate` is the one exception — it creates the Anime.js instance immediately and unconditionally, by design. Only call it from inside your own `onMounted`.
+:::
+
 ## Directives
 
 Directives are declarative alternatives to their composable counterparts — they read the same option shapes but apply directly from a template attribute, with no `<script setup>` code required:

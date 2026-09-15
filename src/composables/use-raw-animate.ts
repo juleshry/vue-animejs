@@ -9,6 +9,9 @@ export type UseRawAnimateReturn = JSAnimation
  * Thin wrapper around Anime.js `animate()`. Resolves the target (unwrapping refs and Vue component
  * refs via `.$el`) and immediately starts the animation.
  *
+ * SSR-safety is the caller's responsibility: invoke this from inside your own `onMounted` (it runs
+ * unconditionally and immediately, with no client-only guard), never at `setup()` top level.
+ *
  * @param _target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param _options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */

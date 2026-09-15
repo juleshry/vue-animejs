@@ -15,7 +15,7 @@
 
 ## 🚀 Overview
 
-**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target or option and the animation updates automatically. Lifecycle cleanup is handled for you.
+**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target or option and the animation updates automatically. Lifecycle cleanup is handled for you, and every composable is safe to call during SSR (Nuxt, `@vue/server-renderer`) — Anime.js instances are only created once mounted in a browser.
 
 **Before** — raw Anime.js in a Vue component:
 

@@ -1,6 +1,6 @@
 import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
-import { tryOnUnmounted } from "@vueuse/core"
+import { isClient, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseAnimateReturn {
@@ -48,7 +48,7 @@ export function useAnimate(_target: AnimationTargets, _options: MaybeRef<Animati
     ([el, opt]) => {
       createAnimation(el, opt)
     },
-    { flush: "post", immediate: !isRef(_target) }
+    { flush: "post", immediate: !isRef(_target) && isClient }
   )
 
   tryOnUnmounted(() => {

@@ -1,5 +1,5 @@
 import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
-import { tryOnUnmounted } from "@vueuse/core"
+import { isClient, tryOnUnmounted } from "@vueuse/core"
 import { type Draggable, type DraggableParams, createDraggable, type EasingParam } from "animejs"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
@@ -50,7 +50,7 @@ export function useDraggable(targets: AnimationTargets, options: MaybeRef<Dragga
 
       draggable.value = markRaw(createDraggable(el, opt))
     },
-    { flush: "post", immediate: !isRef(targets) }
+    { flush: "post", immediate: !isRef(targets) && isClient }
   )
 
   tryOnUnmounted(() => {

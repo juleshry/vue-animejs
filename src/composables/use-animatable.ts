@@ -10,7 +10,7 @@ import {
   unref,
   watch,
 } from "vue"
-import { tryOnUnmounted } from "@vueuse/core"
+import { isClient, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 
 export interface UseAnimatableReturn {
@@ -50,7 +50,7 @@ export function useAnimatable(
 
       animatable.value = markRaw(createAnimatable(el, opt))
     },
-    { flush: "post", immediate: !isRef(targets) }
+    { flush: "post", immediate: !isRef(targets) && isClient }
   )
 
   tryOnUnmounted(() => {

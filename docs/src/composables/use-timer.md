@@ -80,32 +80,32 @@ For all available options, see the [Anime.js timer documentation](https://animej
 
 ```ts
 export interface UseTimerReturn {
-  /** The underlying Anime.js timer instance. */
-  timer: Readonly<ShallowRef<Timer>>
+  /** The underlying Anime.js timer instance. `undefined` until mounted. */
+  timer: Readonly<ShallowRef<Timer | undefined>>
   /** Starts or resumes the timer. */
-  play: () => Timer
+  play: () => Timer | undefined
   /** Reverses the timer's playback direction. */
-  reverse: () => Timer
+  reverse: () => Timer | undefined
   /** Pauses the timer at the current position. */
-  pause: () => Timer
+  pause: () => Timer | undefined
   /** Restarts the timer from the beginning. */
-  restart: () => Timer
+  restart: () => Timer | undefined
   /** Toggles between forward and reverse direction. */
-  alternate: () => Timer
+  alternate: () => Timer | undefined
   /** Resumes from a paused state. */
-  resume: () => Timer
+  resume: () => Timer | undefined
   /** Jumps immediately to the end of the timer duration. */
-  complete: () => Timer
+  complete: () => Timer | undefined
   /** Resets the timer to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
-  reset: (softReset?: boolean) => Timer
+  reset: (softReset?: boolean) => Timer | undefined
   /** Stops the timer and removes it from the Anime.js engine. */
-  cancel: () => Timer
+  cancel: () => Timer | undefined
   /** Cancels the timer and restores any associated state to its original values. */
-  revert: () => Timer
+  revert: () => Timer | undefined
   /** Seeks to a specific time (in ms). */
-  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timer
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timer | undefined
   /** Rescales the timer to a new total duration. */
-  stretch: (newDuration: number) => Timer
+  stretch: (newDuration: number) => Timer | undefined
 }
 
 /**
@@ -120,7 +120,7 @@ export declare function useTimer(options?: MaybeRef<TimerParams>): UseTimerRetur
 
 ## Reactivity Behavior
 
-- The timer is created **immediately** when `useTimer` is called.
+- The timer is created **on mount**, not at `setup()` time — `timer` is `undefined` until then (this keeps `useTimer` safe to call during SSR, where `onMounted` never runs). Control methods are no-ops and return `undefined` while `timer` is unset.
 - If `options` changes, the current timer is **cancelled** and a new one is created with the new parameters.
 - On component **unmount**, the watcher and timer are cleaned up automatically.
 

@@ -1,5 +1,5 @@
 import { splitText, type TextSplitter, type TextSplitterParams } from "animejs"
-import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import {
   computed,
@@ -55,7 +55,7 @@ export function useText(
 
       splitter.value = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
     },
-    { flush: "post", immediate: !isRef(_target) }
+    { flush: "post", immediate: !isRef(_target) && isClient }
   )
 
   tryOnUnmounted(() => {

@@ -101,6 +101,9 @@ export type UseRawAnimateReturn = JSAnimation
  * Thin wrapper around Anime.js `animate()`. Resolves the target (unwrapping refs and Vue component
  * refs via `.$el`) and immediately starts the animation.
  *
+ * SSR-safety is the caller's responsibility: invoke this from inside your own `onMounted` (it runs
+ * unconditionally and immediately, with no client-only guard), never at `setup()` top level.
+ *
  * @param target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
@@ -118,6 +121,7 @@ export declare function useRawAnimate(
 - There is **no reactivity**: changing `target` or `options` after the call does nothing.
 - There is **no automatic cleanup**: the animation is not cancelled on component unmount. You must call `animation.cancel()` or `animation.revert()` yourself in `onUnmounted` if needed.
 - The return value is the raw Anime.js `JSAnimation` instance — not a Vue ref.
+- **SSR-safety is your responsibility.** Unlike `useAnimate`, `useRawAnimate` has no client-only guard — call it from inside `onMounted`, never at the top level of `setup()`, or it will run (and can throw) during server rendering.
 
 ::: tip
 Prefer [`useAnimate`](./use-animate) for typical use cases. Use `useRawAnimate` only when you need direct access to the `JSAnimation` instance and want to manage the lifecycle yourself.

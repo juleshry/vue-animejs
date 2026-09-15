@@ -138,8 +138,8 @@ export type TimelineChain = Timeline & {
 }
 
 export interface UseTimelineReturn {
-  /** The underlying Anime.js timeline instance. */
-  timeline: Readonly<ShallowRef<Timeline>>
+  /** The underlying Anime.js timeline instance. `undefined` until mounted. */
+  timeline: Readonly<ShallowRef<Timeline | undefined>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: MaybeRef<TargetsParam>,
@@ -151,39 +151,39 @@ export interface UseTimelineReturn {
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
   remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
   /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
-  sync: (synced?: Tickable, position?: TimelinePosition) => Timeline
+  sync: (synced?: Tickable, position?: TimelinePosition) => Timeline | undefined
   /** Adds a named label at a position so it can be referenced by `.add()` or `.seek()`. */
-  label: (labelName: string, position?: TimelinePosition) => Timeline
+  label: (labelName: string, position?: TimelinePosition) => Timeline | undefined
   /** Inserts a callback function at a specific point in the timeline. */
-  call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline
+  call: (callback: Callback<Timer>, position?: TimelinePosition) => Timeline | undefined
   /** Renders the timeline once without playing it. */
-  init: (internalRender?: boolean) => Timeline
+  init: (internalRender?: boolean) => Timeline | undefined
   /** Starts or resumes the timeline. */
-  play: () => Timeline
+  play: () => Timeline | undefined
   /** Reverses playback direction. */
-  reverse: () => Timeline
+  reverse: () => Timeline | undefined
   /** Pauses the timeline at the current position. */
-  pause: () => Timeline
+  pause: () => Timeline | undefined
   /** Restarts the timeline from the beginning. */
-  restart: () => Timeline
+  restart: () => Timeline | undefined
   /** Toggles between forward and reverse direction. */
-  alternate: () => Timeline
+  alternate: () => Timeline | undefined
   /** Resumes from a paused state. */
-  resume: () => Timeline
+  resume: () => Timeline | undefined
   /** Jumps immediately to the end of the timeline. */
-  complete: () => Timeline
+  complete: () => Timeline | undefined
   /** Resets the timeline to its initial state. Pass `true` for a soft reset that preserves the current cycle. */
-  reset: (softReset?: boolean) => Timeline
+  reset: (softReset?: boolean) => Timeline | undefined
   /** Stops the timeline and removes it from the Anime.js engine. */
-  cancel: () => Timeline
+  cancel: () => Timeline | undefined
   /** Cancels the timeline and restores all animated properties to their original values. */
-  revert: () => Timeline
+  revert: () => Timeline | undefined
   /** Seeks to a specific time (in ms). */
-  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline
+  seek: (time: number, muteCallbacks?: boolean | number, internalRender?: boolean | number) => Timeline | undefined
   /** Rescales the timeline to a new total duration. */
-  stretch: (newDuration: number) => Timeline
+  stretch: (newDuration: number) => Timeline | undefined
   /** Re-reads the current values of all animated properties from the DOM. */
-  refresh: () => Timeline
+  refresh: () => Timeline | undefined
 }
 
 /**
@@ -198,6 +198,7 @@ export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTime
 
 ## Reactivity & Lifecycle Behavior
 
+- The timeline is created **on mount**, not at `setup()` time — `timeline` is `undefined` until then (this keeps `useTimeline` safe to call during SSR, where `onMounted` never runs). Control methods other than `add`/`set`/`remove` are no-ops and return `undefined` while `timeline` is unset.
 - `add` and `set` calls made **before mount** are queued and replayed once the component mounts — safe to call at the top level of `<script setup>`.
 - `remove` **cannot** be called before mount; it logs a warning and is a no-op.
 - If `options` changes after mount, the current timeline is **reverted** and recreated. All registered `add`/`set` calls are replayed automatically on the new timeline.
