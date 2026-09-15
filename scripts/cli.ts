@@ -5,12 +5,12 @@ const LOGO = `
 --------********        *****@@@@@@@@#-
  --------********      **@@@@@@@@@@@@@@@@@
    -------********    @@@@@@@@@@@@@@@@@@@@@@@
-    -------+******* @@@@@@@@@@@@@@@@@@@@@@========
-     -------=******@@@@@@#*--------      @========
-      --------****@@@@@%**--------      @@=======@
+    -------******** @@@@@@@@@@@@@@@@@@@@@@@========
+     --------******@@@@@@#*--------      @========
+      --------****@@@@@%**--------      @========
        --------**@@@@@@**-----@@@@@@@@@ @@@@@@@@@
         --------*@@@@@@@@@@@@@@@@@@@@@@       @@@@
-         -------=@@@@@@+-------      @@       @@@@
+         -------@@@@@@@+-------      @@       @@@@
           ------%@@@@@--------               @@@@@
            -----+@@@@--------@@@@@@@@@       @@@@@
             -----@@@@-------@@@@@@@@@@       @@@@@
@@ -23,8 +23,21 @@ const LOGO = `
                    -       @@@@@@@@@@@@@
 `
 
+// Sampled from docs/src/public/icon.png: the Vue green + navy "V" behind the black "ai" mark, red accent square.
+const GREEN = "65;184;131"
+const NAVY = "53;73;94"
+const RED = "251;71;73"
+
+function paint(rgb: string, text: string): string {
+  return `\x1b[38;2;${rgb}m${text}\x1b[0m`
+}
+
+const COLORED_LOGO = LOGO.replace(/-+/g, m => paint(GREEN, m))
+  .replace(/\*+/g, m => paint(NAVY, m))
+  .replace(/=+/g, m => paint(RED, m))
+
 export function intro(title: string): void {
-  console.log(LOGO)
+  console.log(COLORED_LOGO)
   p.intro(title)
 }
 
