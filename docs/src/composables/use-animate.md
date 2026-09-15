@@ -89,6 +89,33 @@ const { play } = useAnimate(".box", {
 </template>
 ```
 
+### Array of targets
+
+Pass an array of individual template refs to animate them together as a single group.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from "vue"
+import { useAnimate } from "@juleshry/vue-animejs"
+
+const box1 = useTemplateRef("box1")
+const box2 = useTemplateRef("box2")
+const box3 = useTemplateRef("box3")
+
+useAnimate([box1, box2, box3], {
+  translateY: -20,
+  duration: 600,
+  ease: "outExpo",
+})
+</script>
+
+<template>
+  <div ref="box1" class="box" />
+  <div ref="box2" class="box" />
+  <div ref="box3" class="box" />
+</template>
+```
+
 ## Type Declarations
 
 For all available options, see the [Anime.js animation documentation](https://animejs.com/documentation/animation).
@@ -130,7 +157,7 @@ export interface UseAnimateReturn {
 /**
  * Wraps Anime.js `animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
  *
- * @param target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
  * @param options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export declare function useAnimate(

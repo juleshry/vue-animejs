@@ -29,6 +29,19 @@
   function increase() {
     distance.value += 50
   }
+
+  const groupBox1 = useTemplateRef("groupBox1")
+  const groupBox2 = useTemplateRef("groupBox2")
+  const groupBox3 = useTemplateRef("groupBox3")
+
+  const { restart: restartGroup } = useAnimate([groupBox1, groupBox2, groupBox3], {
+    translateY: -20,
+    backgroundColor: "#00c48c",
+    duration: 800,
+    ease: "outExpo",
+    loop: true,
+    alternate: true,
+  })
 </script>
 
 <template>
@@ -44,6 +57,16 @@
     <button @click="increase">Increase animation</button>
     <p>Distance: {{ distance }}</p>
   </SectionWrapper>
+
+  <SectionWrapper>
+    <template #title>Array of Targets</template>
+    <div class="group">
+      <div ref="groupBox1" class="group-box" />
+      <div ref="groupBox2" class="group-box" />
+      <div ref="groupBox3" class="group-box" />
+    </div>
+    <button @click="restartGroup">Restart animation</button>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
@@ -57,6 +80,17 @@
     width: 20px;
     aspect-ratio: 1;
     background-color: red;
+  }
+
+  .group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .group-box {
+    width: 60px;
+    height: 60px;
+    background-color: #00c48c;
   }
 
   button {

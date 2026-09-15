@@ -211,4 +211,29 @@ describe("useAnimate", () => {
     await nextTick()
     expect(mock_animate).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, { opacity: [0, 1] })
   })
+
+  it("resolves an array of individual template refs to an array of elements", async () => {
+    const el1 = document.createElement("div")
+    const el2 = document.createElement("div")
+    const ref1 = ref(el1)
+    const ref2 = ref(el2)
+    withSetup(() => useAnimate([ref1, ref2], { opacity: [0, 1] }))
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledWith([el1, el2], { opacity: [0, 1] })
+  })
+
+  it("filters out unmounted refs from an array target and skips empty results", async () => {
+    const el1 = document.createElement("div")
+    const ref1 = ref<HTMLElement | null>(el1)
+    const ref2 = ref<HTMLElement | null>(null)
+    withSetup(() => useAnimate([ref1, ref2], { opacity: [0, 1] }))
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledWith([el1], { opacity: [0, 1] })
+
+    mock_animate.mockClear()
+    ref1.value = null
+    await nextTick()
+    expect(mock_animate).not.toHaveBeenCalled()
+    expect(console.warn).toHaveBeenCalledWith("Target element is null or undefined")
+  })
 })
