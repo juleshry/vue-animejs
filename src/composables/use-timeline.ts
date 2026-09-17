@@ -31,6 +31,7 @@ type QueueEntry =
       position?: TimelinePosition | StaggerFunction<number | string>
     }
   | { type: "set"; targets: AnimationTargets; params: MaybeRefOrGetter<AnimationParams>; position?: TimelinePosition }
+  | { type: "call"; callback: Callback<Timer>; position?: TimelinePosition }
 
 export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
@@ -118,8 +119,10 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
     for (const entry of queue) {
       if (entry.type === "add") {
         timeline.value?.add(resolveTarget(entry.targets), toValue(entry.params), entry.position)
-      } else {
+      } else if (entry.type === "set") {
         timeline.value?.set(resolveTarget(entry.targets), toValue(entry.params), entry.position)
+      } else {
+        timeline.value?.call(entry.callback, entry.position)
       }
     }
   }
@@ -198,6 +201,7 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   }
 
   function call(callback: Callback<Timer>, position?: TimelinePosition) {
+    queue.push({ type: "call", callback, position })
     return timeline.value?.call(callback, position)
   }
 

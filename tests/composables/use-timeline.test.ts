@@ -73,6 +73,20 @@ describe("useTimeline", () => {
     expect(mock_timeline.set).toHaveBeenCalledWith(el, { opacity: 0 }, undefined)
   })
 
+  it("flushes queued call calls after mount", () => {
+    const cb = vi.fn()
+    mount(
+      defineComponent({
+        setup() {
+          const tl = useTimeline()
+          tl.call(cb, 0) // called during setup, before onMounted
+          return () => h("div")
+        },
+      })
+    )
+    expect(mock_timeline.call).toHaveBeenCalledWith(cb, 0)
+  })
+
   it("warns when remove is called before mount", () => {
     const el = document.createElement("div")
     mount(
@@ -186,6 +200,24 @@ describe("useTimeline", () => {
     options.value = { loop: true }
     await nextTick()
     expect(mock_timeline.set).toHaveBeenCalledWith(el, { opacity: 0 }, undefined)
+  })
+
+  it("replays queued call calls on the new timeline when options change", async () => {
+    const cb = vi.fn()
+    const options = ref({ loop: false })
+    mount(
+      defineComponent({
+        setup() {
+          const tl = useTimeline(options)
+          tl.call(cb, 0)
+          return () => h("div")
+        },
+      })
+    )
+    mock_timeline.call.mockClear()
+    options.value = { loop: true }
+    await nextTick()
+    expect(mock_timeline.call).toHaveBeenCalledWith(cb, 0)
   })
 
   it("replays add calls made after mount when options change", async () => {

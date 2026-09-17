@@ -178,6 +178,16 @@ describe("useWaapi", () => {
     expect(mock_waapi.animate).not.toHaveBeenCalled()
   })
 
+  it("resolves an array of individual template refs to an array of elements", async () => {
+    const el1 = document.createElement("div")
+    const el2 = document.createElement("div")
+    const ref1 = ref(el1)
+    const ref2 = ref(el2)
+    withSetup(() => useWaapi([ref1, ref2], { opacity: [0, 1] }))
+    await nextTick()
+    expect(mock_waapi.animate).toHaveBeenCalledWith([el1, el2], { opacity: [0, 1] })
+  })
+
   it("resolves a Vue component ref to its $el", async () => {
     const ChildComp = defineComponent({ render: () => h("div") })
     const wrapper = mount(

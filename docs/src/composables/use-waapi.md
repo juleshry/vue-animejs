@@ -119,6 +119,33 @@ const { play } = useWaapi(".box", {
 </template>
 ```
 
+### Array of targets
+
+Pass an array of individual template refs to animate them together as a single group.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from "vue"
+import { useWaapi } from "@juleshry/vue-animejs"
+
+const box1 = useTemplateRef("box1")
+const box2 = useTemplateRef("box2")
+const box3 = useTemplateRef("box3")
+
+useWaapi([box1, box2, box3], {
+  translate: "220px",
+  duration: 600,
+  ease: "ease-out",
+})
+</script>
+
+<template>
+  <div ref="box1" class="box" />
+  <div ref="box2" class="box" />
+  <div ref="box3" class="box" />
+</template>
+```
+
 ## Type Declarations
 
 For all available options, see the [Anime.js WAAPI documentation](https://animejs.com/documentation/web-animations-api).
@@ -158,11 +185,11 @@ export interface UseWaapiReturn {
 /**
  * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
- * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
  * @param options - Anime.js WAAPI animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export declare function useWaapi(
-  targets: MaybeRef<DOMTargetsParam> | MaybeComputedElementRef,
+  targets: AnimationTargets,
   options?: MaybeRef<WAAPIAnimationParams>
 ): UseWaapiReturn
 ```

@@ -1,4 +1,4 @@
-import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { isClient, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import {
   type WAAPIAnimationParams,
@@ -41,17 +41,14 @@ export interface UseWaapiReturn {
 /**
  * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
- * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
  * @param options - Anime.js WAAPI animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
-export function useWaapi(
-  targets: MaybeRef<DOMTargetsParam> | MaybeComputedElementRef,
-  options: MaybeRef<WAAPIAnimationParams> = {}
-): UseWaapiReturn {
+export function useWaapi(targets: AnimationTargets, options: MaybeRef<WAAPIAnimationParams> = {}): UseWaapiReturn {
   const animation = shallowRef<WAAPIAnimation | undefined>()
 
   const { stop } = watch(
-    [() => resolveTarget(targets as AnimationTargets), () => unref(options)],
+    [() => resolveTarget(targets), () => unref(options)],
     ([el, opt]) => {
       animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
     },
