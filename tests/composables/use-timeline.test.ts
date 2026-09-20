@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { computed, defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useTimeline } from "@lib"
 import { expectInstanceStaysRaw, withSetup } from "../utils"
@@ -164,6 +164,28 @@ describe("useTimeline", () => {
     options.value = { loop: true }
     await nextTick()
     expect(mock_timeline.revert).toHaveBeenCalled()
+  })
+
+  it("creates the timeline only once when options depend on a template ref that resolves at mount", async () => {
+    // Regression: options that read a template ref (null during setup(), populated by the
+    // time the component mounts) must not cause a double createTimeline() — one from the
+    // reactive options watcher reacting to the ref's mount-time change, another from the
+    // unconditional tryOnMounted creation. The extra revert() this produced could revert an
+    // autoplay ScrollObserver linked to the discarded first timeline before it ever resolved.
+    mount(
+      defineComponent({
+        setup() {
+          const el = ref<HTMLElement | null>(null)
+          const options = computed(() => (el.value ? { loop: true } : { loop: false }))
+          useTimeline(options)
+          return () => h("div", { ref: el })
+        },
+      })
+    )
+    await nextTick()
+    await nextTick()
+    expect(mock_createTimeline).toHaveBeenCalledTimes(1)
+    expect(mock_createTimeline).toHaveBeenCalledWith({ loop: true })
   })
 
   it("replays queued add calls on the new timeline when options change", async () => {

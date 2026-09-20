@@ -38,17 +38,31 @@ export interface UseTimerReturn {
  */
 export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
   const timer = shallowRef<Timer>()
+  // Tracks the exact `options` value the current timer was built from. Options that read a
+  // template ref (null during setup(), populated by the time the component mounts) resolve to
+  // a new value right at mount — which the reactive watch below AND the unconditional
+  // tryOnMounted creation each try to (re)build the timer from. Without this guard, whichever
+  // one runs second calls cancel()/rebuilds on top of the other's timer — and when `autoplay`
+  // is a ScrollObserver, the discarded timer's revert() cascades into reverting that observer
+  // before it ever finishes resolving its scroll target, permanently breaking it.
+  let last_built_from: TimerParams | undefined
+
+  function createFromOptions(_options: TimerParams) {
+    if (_options === last_built_from) return
+    last_built_from = _options
+    cancel()
+    timer.value = markRaw(createTimer(_options))
+  }
 
   tryOnMounted(() => {
-    timer.value = markRaw(createTimer(unref(options)))
+    createFromOptions(unref(options))
   })
 
   const { stop } = watch(
     () => unref(options),
     options => {
       if (!isClient) return
-      cancel()
-      timer.value = markRaw(createTimer(options))
+      createFromOptions(options)
     },
     { deep: 1 }
   )

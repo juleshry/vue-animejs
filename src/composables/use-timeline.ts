@@ -110,6 +110,14 @@ export interface UseTimelineReturn {
  */
 export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
   let is_mounted = false
+  // Tracks the exact `options` value the current timeline was built from. Options that read
+  // a template ref (null during setup(), populated by the time the component mounts) resolve
+  // to a new value right at mount — which the reactive watch below AND the unconditional
+  // tryOnMounted creation each try to (re)build the timeline from. Without this guard, whichever
+  // one runs second calls revert() on the timeline the other just built, which — when `autoplay`
+  // is a ScrollObserver — cascades into reverting that observer before it ever finishes resolving
+  // its scroll target, permanently breaking scroll-linked timelines.
+  let last_built_from: TimelineParams | undefined
 
   const queue: QueueEntry[] = []
 
@@ -127,21 +135,26 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
     }
   }
 
+  function createFromOptions(_options: TimelineParams) {
+    if (_options === last_built_from) return
+    last_built_from = _options
+    revert()
+    timeline.value = markRaw(createTimeline(_options))
+    replayQueue()
+  }
+
   const { stop } = watch(
     () => unref(options),
     _options => {
       if (!isClient) return
-      revert()
-      timeline.value = markRaw(createTimeline(_options))
-      replayQueue()
+      createFromOptions(_options)
     },
     { flush: "post", deep: 1 }
   )
 
   tryOnMounted(() => {
-    timeline.value = markRaw(createTimeline(unref(options)))
+    createFromOptions(unref(options))
     is_mounted = true
-    replayQueue()
   })
 
   tryOnUnmounted(() => {

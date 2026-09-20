@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { nextTick, ref } from "vue"
+import { computed, defineComponent, h, nextTick, ref } from "vue"
+import { mount } from "@vue/test-utils"
 import { useTimer } from "@lib"
 import { expectInstanceStaysRaw, withSetup } from "../utils"
 import { makeTimerMock } from "../mocks"
@@ -73,6 +74,28 @@ describe("useTimer", () => {
     options.value = { duration: 1000 }
     await nextTick()
     expect(mock_timer.cancel).toHaveBeenCalled()
+  })
+
+  it("creates the timer only once when options depend on a template ref that resolves at mount", async () => {
+    // Regression: options that read a template ref (null during setup(), populated by the
+    // time the component mounts) must not cause a double createTimer() — one from the reactive
+    // options watcher reacting to the ref's mount-time change, another from the unconditional
+    // tryOnMounted creation. The extra cancel()/rebuild this produced could revert an autoplay
+    // ScrollObserver linked to the discarded first timer before it ever resolved.
+    mount(
+      defineComponent({
+        setup() {
+          const el = ref<HTMLElement | null>(null)
+          const options = computed(() => (el.value ? { duration: 1000 } : { duration: 0 }))
+          useTimer(options)
+          return () => h("div", { ref: el })
+        },
+      })
+    )
+    await nextTick()
+    await nextTick()
+    expect(mock_createTimer).toHaveBeenCalledTimes(1)
+    expect(mock_createTimer).toHaveBeenCalledWith({ duration: 1000 })
   })
 
   it("cancels the timer on unmount", () => {
