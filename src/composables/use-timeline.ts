@@ -110,13 +110,7 @@ export interface UseTimelineReturn {
  */
 export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
   let is_mounted = false
-  // Tracks the exact `options` value the current timeline was built from. Options that read
-  // a template ref (null during setup(), populated by the time the component mounts) resolve
-  // to a new value right at mount — which the reactive watch below AND the unconditional
-  // tryOnMounted creation each try to (re)build the timeline from. Without this guard, whichever
-  // one runs second calls revert() on the timeline the other just built, which — when `autoplay`
-  // is a ScrollObserver — cascades into reverting that observer before it ever finishes resolving
-  // its scroll target, permanently breaking scroll-linked timelines.
+  // Guards against the mount-time watch tick and tryOnMounted both building from the same options.
   let last_built_from: TimelineParams | undefined
 
   const queue: QueueEntry[] = []
