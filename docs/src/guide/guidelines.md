@@ -81,6 +81,10 @@ const { animation, play } = useAnimate(".box", { translateX: 200 })
 `useRawAnimate` is the one exception — it creates the Anime.js instance immediately and unconditionally, by design. Only call it from inside your own `onMounted`.
 :::
 
+::: tip
+[`useScroll`](/composables/use-scroll) is lazy rather than mount-gated — its `observer`/`autoplay`/`autoplayComputed` are computed and only create the underlying `ScrollObserver` the first time one of them is read, not automatically on mount. It's still SSR-safe (nothing is created server-side even if read), it just doesn't follow the "exists after mount" rule the other composables do.
+:::
+
 ## Directives
 
 Directives are declarative alternatives to their composable counterparts — they read the same option shapes but apply directly from a template attribute, with no `<script setup>` code required:

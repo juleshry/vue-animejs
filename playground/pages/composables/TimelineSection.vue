@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import { useTemplateRef, ref, computed, watch } from "vue"
-  import { onScroll } from "animejs"
-  import { useTimeline } from "@lib"
+  import { useScroll, useTimeline } from "@lib"
   import SectionWrapper from "../../components/SectionWrapper.vue"
 
   const box1 = useTemplateRef("box1")
@@ -41,23 +40,22 @@
   // creation). The second call's revert() would cancel the first timeline's autoplay
   // ScrollObserver before it finished resolving, permanently breaking the scroll-linked
   // animation. `creationCount` should stay at 1.
-  const scrollContainerEl = useTemplateRef<HTMLDivElement>("scrollContainer")
-  const scrollBoxEl = useTemplateRef<HTMLDivElement>("scrollBox")
+  //
+  // `scrollTarget` (not `scrollBox`) is what useScroll measures — it sits between the two
+  // spacers exactly like the animated box used to, so the enter/leave thresholds and the sync
+  // progress they produce are unchanged. `scrollBox`, the element actually being animated, is
+  // `position: sticky` and pinned at the top of the container instead, so it's visible for the
+  // whole scroll range rather than having to be chased into view.
+  const scrollContainerEl = useTemplateRef("scrollContainer")
+  const scrollTargetEl = useTemplateRef("scrollTarget")
+  const scrollBoxEl = useTemplateRef("scrollBox")
   const creationCount = ref(0)
 
-  const scrollOptions = computed(() =>
-    scrollContainerEl.value && scrollBoxEl.value
-      ? {
-          autoplay: onScroll({
-            container: scrollContainerEl.value,
-            target: scrollBoxEl.value,
-            enter: "bottom top",
-            leave: "top bottom",
-            sync: true,
-          }),
-        }
-      : { autoplay: false }
-  )
+  const { autoplayComputed: scrollOptions } = useScroll(scrollContainerEl, scrollTargetEl, {
+    enter: "bottom top",
+    leave: "top bottom",
+    sync: true,
+  })
 
   const { timeline: scrollTimeline, add: addScroll } = useTimeline(scrollOptions)
 
@@ -102,8 +100,9 @@
   <SectionWrapper>
     <template #title>Scroll-driven timeline (regression)</template>
     <div ref="scrollContainer" class="scroll-container">
+      <div ref="scrollBox" class="box scroll-box" />
       <div class="scroll-spacer" />
-      <div ref="scrollBox" class="box" />
+      <div ref="scrollTarget" class="scroll-target" />
       <div class="scroll-spacer" />
     </div>
     <span>Instance created: {{ creationCount }} time(s) — should stay 1</span>
@@ -133,11 +132,20 @@
     height: 160px;
     overflow-y: auto;
     border: 1px solid #2a2a2a;
-    padding: 0 10px;
+    padding: 8px 10px;
+  }
+
+  .scroll-box {
+    position: sticky;
+    top: 8px;
   }
 
   .scroll-spacer {
     height: 200px;
+  }
+
+  .scroll-target {
+    height: 20px;
   }
 
   .controls {

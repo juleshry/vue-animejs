@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { useTemplateRef, ref, computed } from "vue"
-  import { useAnimate } from "@lib"
+  import { useAnimate, useScroll } from "@lib"
   import SectionWrapper from "../../components/SectionWrapper.vue"
 
   const box = useTemplateRef("box")
@@ -42,6 +42,27 @@
     loop: true,
     alternate: true,
   })
+
+  // useScroll's `autoplay` merges into a plain useAnimate options object just like any other
+  // animate param, alongside translateX/backgroundColor/duration.
+  const scrollContainerEl = useTemplateRef<HTMLDivElement>("scrollContainer")
+  const scrollTargetEl = useTemplateRef<HTMLDivElement>("scrollTarget")
+  const scrollBoxEl = useTemplateRef<HTMLDivElement>("scrollBox")
+
+  const { autoplay } = useScroll(scrollContainerEl, scrollTargetEl, {
+    enter: "bottom top",
+    leave: "top bottom",
+    sync: true,
+  })
+
+  const scrollAnimateOptions = computed(() => ({
+    translateX: 150,
+    backgroundColor: "#9593ff",
+    duration: 1000,
+    autoplay: autoplay.value,
+  }))
+
+  useAnimate(scrollBoxEl, scrollAnimateOptions)
 </script>
 
 <template>
@@ -67,6 +88,16 @@
     </div>
     <button @click="restartGroup">Restart animation</button>
   </SectionWrapper>
+
+  <SectionWrapper>
+    <template #title>Scroll-linked Animation</template>
+    <div ref="scrollContainer" class="scroll-container">
+      <div ref="scrollBox" class="scroll-box" />
+      <div class="scroll-spacer" />
+      <div ref="scrollTarget" class="scroll-target" />
+      <div class="scroll-spacer" />
+    </div>
+  </SectionWrapper>
 </template>
 
 <style lang="postcss" scoped>
@@ -91,6 +122,29 @@
     width: 60px;
     height: 60px;
     background-color: #00c48c;
+  }
+
+  .scroll-container {
+    height: 160px;
+    overflow-y: auto;
+    border: 1px solid #2a2a2a;
+    padding: 8px 10px;
+  }
+
+  .scroll-box {
+    position: sticky;
+    top: 8px;
+    width: 20px;
+    height: 20px;
+    background-color: #ff3e00;
+  }
+
+  .scroll-target {
+    height: 20px;
+  }
+
+  .scroll-spacer {
+    height: 200px;
   }
 
   button {

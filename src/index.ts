@@ -11,6 +11,7 @@ export {
 export { useRawAnimatable, type UseRawAnimatableReturn } from "./composables/use-raw-animatable.ts"
 export { useDraggable, type UseDraggableReturn } from "./composables/use-draggable.ts"
 export { useLayout, type UseLayoutReturn } from "./composables/use-layout.ts"
+export { useScroll, type UseScrollReturn } from "./composables/use-scroll.ts"
 export { useSvg, type UseSvgReturn } from "./composables/use-svg.ts"
 export { useSvgDrawable, type UseSvgDrawableReturn } from "./composables/use-svg-drawable.ts"
 export { useText, type UseTextReturn } from "./composables/use-text.ts"

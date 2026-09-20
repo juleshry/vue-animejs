@@ -116,6 +116,16 @@ export function makeTextSplitterMock() {
   }
 }
 
+export function makeScrollObserverMock() {
+  return {
+    link: vi.fn().mockReturnThis(),
+    refresh: vi.fn().mockReturnThis(),
+    removeDebug: vi.fn().mockReturnThis(),
+    debug: vi.fn(),
+    revert: vi.fn().mockReturnThis(),
+  }
+}
+
 export function makeScopeMock() {
   const mock = {
     add: vi.fn(),

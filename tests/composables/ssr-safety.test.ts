@@ -7,6 +7,7 @@ import {
   createLayout,
   createTimeline,
   createTimer,
+  onScroll,
   splitText,
   svg,
   waapi,
@@ -16,6 +17,7 @@ import {
   useAnimate,
   useDraggable,
   useLayout,
+  useScroll,
   useSvgDrawable,
   useText,
   useTimeline,
@@ -29,6 +31,7 @@ vi.mock("animejs", () => ({
   createAnimatable: vi.fn(() => ({ revert: vi.fn() })),
   createDraggable: vi.fn(() => ({ revert: vi.fn() })),
   createLayout: vi.fn(() => ({ revert: vi.fn() })),
+  onScroll: vi.fn(() => ({ revert: vi.fn() })),
   svg: { createDrawable: vi.fn(() => [{}]) },
   splitText: vi.fn(() => ({ revert: vi.fn(), lines: [], words: [], chars: [] })),
   waapi: { animate: vi.fn(() => ({ cancel: vi.fn() })) },
@@ -41,6 +44,7 @@ const mock_createAnimatable = vi.mocked(createAnimatable)
 const mock_createDraggable = vi.mocked(createDraggable)
 const mock_createLayout = vi.mocked(createLayout)
 const mock_createDrawable = vi.mocked(svg.createDrawable)
+const mock_onScroll = vi.mocked(onScroll)
 const mock_splitText = vi.mocked(splitText)
 const mock_waapiAnimate = vi.mocked(waapi.animate)
 const mock_createTimer = vi.mocked(createTimer)
@@ -73,6 +77,12 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useLayout(".target"))
     expect(mock_createLayout).not.toHaveBeenCalled()
     expect(result.layout.value).toBeUndefined()
+  })
+
+  it("useScroll does not attach scroll listeners for non-ref selector container/target", async () => {
+    const result = await renderSSR(() => useScroll(".container", ".target"))
+    expect(mock_onScroll).not.toHaveBeenCalled()
+    expect(result.observer.value).toBeUndefined()
   })
 
   it("useSvgDrawable does not touch the target for a non-ref selector", async () => {

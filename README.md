@@ -77,6 +77,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `useRawAnimate`  | Thin wrapper around Anime.js `animate()` with ref unwrapping |
 | `useTimer`       | Drive a timer with full playback control          |
 | `useTimeline`    | Sequence multiple animations on a shared timeline |
+| `useScroll`      | Drive an animation's `autoplay` option from scroll position |
 | `useWaapi`       | Animate via the Web Animations API (WAAPI)        |
 | `useAnimatable`  | Create a reactive animatable object               |
 | `useDraggable`   | Make a DOM element draggable with full control    |

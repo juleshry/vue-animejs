@@ -5,6 +5,7 @@ import Layout from "./components/layout/Layout.vue"
 import UseAnimateDemo from "./components/demo/UseAnimateDemo.vue"
 import UseTimerDemo from "./components/demo/UseTimerDemo.vue"
 import UseTimelineDemo from "./components/demo/UseTimelineDemo.vue"
+import UseScrollDemo from "./components/demo/UseScrollDemo.vue"
 import UseRawAnimateDemo from "./components/demo/UseRawAnimateDemo.vue"
 import UseWaapiDemo from "./components/demo/UseWaapiDemo.vue"
 import UseAnimatableDemo from "./components/demo/UseAnimatableDemo.vue"
@@ -39,6 +40,7 @@ export default {
     app.component("UseAnimateDemo", UseAnimateDemo)
     app.component("UseTimerDemo", UseTimerDemo)
     app.component("UseTimelineDemo", UseTimelineDemo)
+    app.component("UseScrollDemo", UseScrollDemo)
     app.component("UseRawAnimateDemo", UseRawAnimateDemo)
     app.component("UseWaapiDemo", UseWaapiDemo)
     app.component("UseAnimatableDemo", UseAnimatableDemo)
