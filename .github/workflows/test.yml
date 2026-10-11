@@ -20,5 +20,17 @@ jobs:
       - run: bun run format:check
       - run: bun run lint
       - run: bun run test
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+      - run: bun install
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
