@@ -7,6 +7,7 @@ import {
   type TextSplitterParams,
 } from "animejs"
 import type { Directive } from "vue"
+import { deferMount } from "@src/utils/deferred-mount.ts"
 import { stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
 
 export interface VTextSplitValue extends TextSplitterParams {
@@ -57,9 +58,15 @@ function destroy(entry: Entry) {
   entry.splitter.revert()
 }
 
+const deferred = deferMount<HTMLElement, VTextSplitValue | undefined>((el, binding, vnode) => {
+  instances.set(el, create(el, binding.value, vnode.props))
+})
+
 /**
  * Declarative text-split directive. Splits the element's text into chars, words, or lines on
- * mount, and optionally animates the resulting spans. Re-creates on binding change, reverts on unmount.
+ * mount (once the mount flush has finished, so components' own `onMounted` hooks still see the
+ * rendered DOM), and optionally animates the resulting spans. Re-creates on binding change, reverts
+ * on unmount.
  *
  * With `ssrHidden: true`, the element is hidden on the server until its text is split and animated
  * on the client (text can only be split in the browser).
@@ -78,16 +85,16 @@ export const vTextSplit: Directive<HTMLElement, VTextSplitValue | undefined> = {
     // for this node (vuejs/core#11189). The server style is only removed in create(), once the text
     // is split and animated, so the unsplit text never shows.
   },
-  mounted(el, binding, vnode) {
-    instances.set(el, create(el, binding.value, vnode.props))
-  },
+  mounted: deferred.mounted,
   updated(el, binding, vnode) {
     if (binding.value === binding.oldValue) return
+    if (deferred.reschedule(el, binding, vnode)) return
     const entry = instances.get(el)
     if (entry) destroy(entry)
     instances.set(el, create(el, binding.value, vnode.props))
   },
   unmounted(el) {
+    deferred.cancel(el)
     const entry = instances.get(el)
     if (entry) destroy(entry)
     instances.delete(el)

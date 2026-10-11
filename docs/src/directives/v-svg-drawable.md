@@ -96,7 +96,8 @@ const options = computed(() => ({
 ```ts
 /**
  * Declarative SVG drawable directive. Wraps the SVG geometry element in an Anime.js drawable
- * Proxy and animates the `draw` property on mount. Re-creates it when the binding value changes
+ * Proxy and animates the `draw` property on mount (once the mount flush has finished, so components'
+ * own `onMounted` hooks still see the rendered DOM). Re-creates it when the binding value changes
  * and reverts on unmount.
  *
  * During SSR, renders the path's starting draw state (see `getInitialDraw`) so it doesn't show fully
@@ -113,7 +114,7 @@ export declare const vSvgDrawable: Directive<SVGGeometryElement, AnimationParams
 
 ## Lifecycle Behavior
 
-- On **mount**, the element is wrapped in a drawable Proxy and, if a binding value is provided, the `draw` animation is created immediately.
+- On **mount**, the element is wrapped in a drawable Proxy and, if a binding value is provided, the `draw` animation is created. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous animation is **cancelled** and **reverted**, then a new drawable and animation are created from the new value.
 - On **unmount**, the animation is cancelled and reverted.
 - During **SSR**, the path is rendered in its starting draw state (`pathLength`, `stroke-dasharray`, `stroke-dashoffset`), so it doesn't show fully drawn before hydration. That's the `from` of `draw: [from, to]` / `draw: { from }`, or nothing drawn (`"0 0"`) otherwise, matching what `svg.createDrawable()` paints first. The attributes are removed again before the drawable is created on the client. See [SSR](/guide/guidelines#ssr).

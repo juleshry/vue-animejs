@@ -60,7 +60,8 @@ For all available options, see the [Anime.js animation documentation](https://an
 
 ```ts
 /**
- * Declarative animation directive. Applies an Anime.js animation to the element on mount,
+ * Declarative animation directive. Applies an Anime.js animation to the element on mount (once the
+ * mount flush has finished, so components' own `onMounted` hooks still see the rendered DOM),
  * re-creates it when the binding value changes, and reverts it on unmount.
  *
  * During SSR, renders the animation's "from" state as an inline style (see `getInitialStyle`) so the
@@ -77,7 +78,7 @@ export declare const vAnimate: Directive<HTMLElement, AnimationParams>
 
 ## Lifecycle Behavior
 
-- On **mount**, the animation is created immediately from the binding value.
+- On **mount**, the animation is created from the binding value. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous animation is **cancelled** and **reverted**, then a new one is created from the new value.
 - On **unmount**, the animation is cancelled and reverted, cleaning up all Anime.js state on the element.
 - During **SSR**, the animation's "from" values (`prop: [from, to]` or `prop: { from }`) are rendered as an inline style, so the element starts in its initial state instead of flashing its final one before hydration. That style is removed again before the animation is created on the client. See [SSR](/guide/guidelines#ssr) for which values are supported.

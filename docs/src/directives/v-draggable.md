@@ -83,8 +83,9 @@ For all available options, see the [Anime.js draggable documentation](https://an
 
 ```ts
 /**
- * Declarative draggable directive. Makes the element draggable on mount,
- * re-creates it when the binding value changes, and reverts it on unmount.
+ * Declarative draggable directive. Makes the element draggable on mount (once the mount flush has
+ * finished, so components' own `onMounted` hooks still see the rendered DOM), re-creates it when the
+ * binding value changes, and reverts it on unmount.
  *
  * @example
  * <div v-draggable />
@@ -97,7 +98,7 @@ export declare const vDraggable: Directive<HTMLElement, DraggableParams | undefi
 
 ## Lifecycle Behavior
 
-- On **mount**, the draggable is created immediately from the binding value.
+- On **mount**, the draggable is created from the binding value. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous draggable is **reverted**, then a new one is created from the new value.
 - On **unmount**, the draggable is reverted, restoring the element's original styles.
 

@@ -1,5 +1,5 @@
 import { expect } from "vitest"
-import { type Component, createSSRApp, defineComponent, h, isProxy, isReactive, reactive } from "vue"
+import { type Component, createSSRApp, defineComponent, h, isProxy, isReactive, nextTick, reactive } from "vue"
 import { mount, type VueWrapper } from "@vue/test-utils"
 import { renderToString } from "@vue/server-renderer"
 
@@ -14,6 +14,16 @@ export function withSetup<T>(setup: () => T): [T, VueWrapper] {
     })
   )
   return [result, wrapper]
+}
+
+/**
+ * Mounts a component and waits for its directives' first mount, which is deferred until the mount
+ * flush has finished (see `deferMount`).
+ */
+export async function mountDirective(component: Component): Promise<VueWrapper> {
+  const wrapper = mount(component)
+  await nextTick()
+  return wrapper
 }
 
 /**

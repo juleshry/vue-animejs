@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, nextTick, ref } from "vue"
-import { mount } from "@vue/test-utils"
 import { vSvgDrawable } from "@lib"
 import { makeAnimationMock } from "../mocks"
+import { mountDirective } from "../utils"
 import { animate, svg } from "animejs"
 
 const mock_animate = vi.mocked(animate)
@@ -17,8 +17,8 @@ vi.mock("animejs", () => ({
   },
 }))
 
-function mountWithDirective(opts: object | undefined) {
-  return mount(
+async function mountWithDirective(opts: object | undefined) {
+  return mountDirective(
     defineComponent({
       directives: { svgDrawable: vSvgDrawable },
       template: '<svg><path v-svg-drawable="opts" /></svg>',
@@ -36,26 +36,26 @@ describe("vSvgDrawable", () => {
     Object.values(mock_animation).forEach(fn => fn.mockClear())
   })
 
-  it("calls svg.createDrawable on mount", () => {
-    mountWithDirective({ draw: "0 1", duration: 1200 })
+  it("calls svg.createDrawable on mount", async () => {
+    await mountWithDirective({ draw: "0 1", duration: 1200 })
     expect(mock_svg.createDrawable).toHaveBeenCalledOnce()
   })
 
-  it("calls animate with the drawable proxy and params on mount", () => {
-    mountWithDirective({ draw: "0 1", duration: 1200 })
+  it("calls animate with the drawable proxy and params on mount", async () => {
+    await mountWithDirective({ draw: "0 1", duration: 1200 })
     expect(mock_animate).toHaveBeenCalledOnce()
     expect(mock_animate).toHaveBeenCalledWith(mock_drawable, { draw: "0 1", duration: 1200 })
   })
 
-  it("does not call animate when no params are provided", () => {
-    mountWithDirective(undefined)
+  it("does not call animate when no params are provided", async () => {
+    await mountWithDirective(undefined)
     expect(mock_svg.createDrawable).toHaveBeenCalledOnce()
     expect(mock_animate).not.toHaveBeenCalled()
   })
 
   it("cancels and reverts previous animation and recreates when binding value changes", async () => {
     const options = ref<object | undefined>({ draw: "0 1" })
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { svgDrawable: vSvgDrawable },
         template: '<svg><path v-svg-drawable="options" /></svg>',
@@ -80,7 +80,7 @@ describe("vSvgDrawable", () => {
   it("does not recreate when binding value reference is unchanged", async () => {
     const stable_opts = { draw: "0 1" }
     const trigger = ref(0)
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { svgDrawable: vSvgDrawable },
         template: '<svg><path v-svg-drawable="stableOpts" :data-x="trigger" /></svg>',
@@ -97,8 +97,8 @@ describe("vSvgDrawable", () => {
     expect(mock_animate).not.toHaveBeenCalled()
   })
 
-  it("cancels and reverts animation on unmount", () => {
-    const wrapper = mountWithDirective({ draw: "0 1" })
+  it("cancels and reverts animation on unmount", async () => {
+    const wrapper = await mountWithDirective({ draw: "0 1" })
     mock_animation.cancel.mockClear()
     mock_animation.revert.mockClear()
     wrapper.unmount()
@@ -106,14 +106,14 @@ describe("vSvgDrawable", () => {
     expect(mock_animation.revert).toHaveBeenCalledOnce()
   })
 
-  it("does not throw on unmount when no params were provided", () => {
-    const wrapper = mountWithDirective(undefined)
+  it("does not throw on unmount when no params were provided", async () => {
+    const wrapper = await mountWithDirective(undefined)
     expect(() => wrapper.unmount()).not.toThrow()
   })
 
   it("cancels and reverts when value changes to undefined", async () => {
     const options = ref<object | undefined>({ draw: "0 1" })
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { svgDrawable: vSvgDrawable },
         template: '<svg><path v-svg-drawable="options" /></svg>',

@@ -152,6 +152,7 @@ import { vAnimate } from "@juleshry/vue-animejs"
 
 - All directives are prefixed with `v-` and accept the same option shapes as their composable counterpart (e.g. `v-animate` mirrors `useAnimate`'s `AnimationParams`)
 - The binding value creates the instance on mount, re-creates it whenever the value changes, and reverts it on unmount — there is no manual cleanup to write
+- The instance is created once the mount flush has finished, after every `onMounted` hook of that flush and still before the browser paints. Your own `onMounted` (and tools that compare server and client HTML there, like @nuxt/hints) still sees the element as rendered, not already animated
 - Bind a `ref` or `computed` instead of a plain object to react to state changes:
 
 ```vue

@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, afterEach, beforeAll, type MockInstance } from "vitest"
-import { type App, type Directive, createApp, createSSRApp, h, nextTick, ref, withDirectives } from "vue"
+import {
+  type App,
+  type Directive,
+  createApp,
+  createSSRApp,
+  defineComponent,
+  getCurrentInstance,
+  h,
+  nextTick,
+  onMounted,
+  ref,
+  withDirectives,
+} from "vue"
 import { renderToString } from "@vue/server-renderer"
-import { vAnimate, vSvgDrawable, vTextSplit, vWaapi } from "@lib"
+import { vAnimate, vDraggable, vSvgDrawable, vTextSplit, vWaapi } from "@lib"
 import { getInitialStyle } from "@src/utils/initial-style.ts"
 import { SSR_ATTRS_ATTR, SSR_STYLE_ATTR, toSSRProps } from "@src/utils/ssr-props.ts"
 
@@ -17,6 +29,15 @@ beforeAll(() => {
     this.finished.catch(() => {})
     cancel.call(this)
   }
+
+  // happy-dom has no `document.fonts`, which splitText reads; fonts are already loaded in a browser here
+  const fonts = {
+    status: "loaded",
+    get ready() {
+      return Promise.resolve()
+    },
+  }
+  Object.defineProperty(document, "fonts", { value: fonts, configurable: true })
 })
 
 afterEach(() => {
@@ -37,6 +58,7 @@ async function hydrate(
   const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
   app = createSSRApp({ render })
   app.mount(container)
+  await nextTick() // directives' first mount is deferred until the mount flush has finished
   return { el: container.firstElementChild as HTMLElement, container, warn }
 }
 
@@ -121,6 +143,7 @@ describe("vSvgDrawable hydration", () => {
     document.body.append(client)
     const client_app = createApp({ render })
     client_app.mount(client)
+    await nextTick()
     const client_path = client.querySelector("path")!
     const client_mounted = client_path.outerHTML
     client_app.unmount()
@@ -135,17 +158,6 @@ describe("vSvgDrawable hydration", () => {
 })
 
 describe("vTextSplit hydration", () => {
-  // happy-dom has no `document.fonts`, which splitText reads; fonts are already loaded in a browser here
-  beforeAll(() => {
-    const fonts = {
-      status: "loaded",
-      get ready() {
-        return Promise.resolve()
-      },
-    }
-    Object.defineProperty(document, "fonts", { value: fonts, configurable: true })
-  })
-
   function render(value: Record<string, unknown>, props: Record<string, unknown> = {}) {
     return () => withDirectives(h("p", props, "Hello world"), [[vTextSplit, value]])
   }
@@ -182,5 +194,47 @@ describe("vTextSplit hydration", () => {
   it("restores the user's own visibility", async () => {
     const { el } = await hydrate(render({ words: true, ssrHidden: true }, { style: { visibility: "visible" } }))
     expect(el.style.visibility).toBe("visible")
+  })
+})
+
+// Regression: during hydration, an element's directive `mounted` runs before the `onMounted` of the
+// components whose root it is. Tools like @nuxt/hints compare a component's `outerHTML` between
+// `setup()` and its own `onMounted`, so any DOM write in that window (the SSR strip, an animation's
+// first frame, a text split) is reported as a mismatch. Directives must wait for the flush to finish.
+describe("directives leave the DOM untouched until every onMounted has run", () => {
+  const cases: [string, Directive, unknown, string][] = [
+    ["vAnimate", vAnimate, { opacity: [0, 1], translateY: [20, 0], duration: 1000 }, "div"],
+    ["vWaapi", vWaapi, { opacity: [0, 1], translateY: [20, 0], duration: 1000 }, "div"],
+    ["vSvgDrawable", vSvgDrawable, { draw: ["0.25 0.5", "0 1"], duration: 1000 }, "path"],
+    ["vTextSplit", vTextSplit, { words: true, ssrHidden: true, animation: { opacity: [0, 1] } }, "p"],
+    ["vDraggable", vDraggable, {}, "div"],
+  ]
+
+  it.each(cases)("%s on a component root", async (_, directive, value, tag) => {
+    const seen: [string, string][] = []
+    function recordOnMounted(name: string): void {
+      const instance = getCurrentInstance()!
+      onMounted(() => seen.push([name, (instance.vnode.el as Element).outerHTML]))
+    }
+
+    const Inner = defineComponent({
+      setup() {
+        recordOnMounted("Inner")
+        return () => h(tag, tag === "path" ? { d: "M0 0L10 10" } : {}, tag === "p" ? "Hello world" : undefined)
+      },
+    })
+    // The directive sits on the component vnode, so Vue hands it down to Inner's root element
+    const Outer = defineComponent({
+      setup() {
+        recordOnMounted("Outer")
+        return () => withDirectives(h(Inner), [[directive, value]])
+      },
+    })
+
+    const { container } = await hydrate(() => (tag === "path" ? h("svg", [h(Outer)]) : h(Outer)))
+    const server_html = (await renderToString(createSSRApp({ render: () => h(Outer) }))).replace(/<!--.*?-->/g, "")
+    expect(seen.map(([name]) => name)).toEqual(["Inner", "Outer"])
+    for (const [, html] of seen) expect(html).toBe(server_html)
+    expect(container.querySelector(tag)!.outerHTML).not.toBe(server_html) // the directive did run, afterwards
   })
 })

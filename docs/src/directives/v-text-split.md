@@ -164,7 +164,9 @@ export interface VTextSplitValue extends TextSplitterParams {
 
 /**
  * Declarative text-split directive. Splits the element's text into chars, words, or lines on
- * mount, and optionally animates the resulting spans. Re-creates on binding change, reverts on unmount.
+ * mount (once the mount flush has finished, so components' own `onMounted` hooks still see the
+ * rendered DOM), and optionally animates the resulting spans. Re-creates on binding change, reverts
+ * on unmount.
  *
  * With `ssrHidden: true`, the element is hidden on the server until its text is split and animated
  * on the client (text can only be split in the browser).
@@ -181,7 +183,7 @@ export declare const vTextSplit: Directive<HTMLElement, VTextSplitValue | undefi
 
 ## Lifecycle Behavior
 
-- On **mount**, the text is split immediately. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first.
+- On **mount**, the text is split. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous split is **reverted** and its animation **cancelled**, then the text is split and animated again from the new value.
 - On **unmount**, the animation is cancelled and the split is reverted, restoring the original text content.
 - During **SSR**, the text is rendered unsplit. With `ssrHidden: true`, the element also gets `visibility: hidden`, removed on the client right after the animation is created (after `document.fonts.ready` for `lines`), or right after the split when there's no `animation`.
