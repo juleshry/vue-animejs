@@ -5,7 +5,7 @@ home: true
 hero:
   name: Vue x Animejs
   text: Animejs implementation for Vuejs.
-  tagline: Reactive, lifecycle-aware animation composables and directives for Vue 3 — powered by Anime.js v4.
+  tagline: Reactive, lifecycle-aware, SSR-safe animation composables and directives for Vue 3 — powered by Anime.js v4.
   image:
     src: /icon-animated.svg
     alt: Vue x Animejs
@@ -18,6 +18,9 @@ hero:
       link: https://github.com/juleshry/vue-animejs
 
 features:
+  - icon: 🖥️
+    title: SSR-safe
+    details: Every composable and directive works with Nuxt and server-side rendering out of the box. No ClientOnly wrapper, no window errors.
   - icon: 🎬
     title: useAnimate
     details: Animate any DOM element or CSS selector. Reactive options — change a prop, the animation updates automatically.

@@ -88,6 +88,33 @@ import { vTextSplit } from "@juleshry/vue-animejs"
 </template>
 ```
 
+### Server-side rendering
+
+Text can only be split in the browser, so the server sends it whole and the client splits it after hydration. Without help, the full text shows for a moment before the animation hides each piece and animates it back in. Set `ssrHidden: true` to hide the element on the server instead: it stays hidden until the text is split and the animation has painted its starting state, then becomes visible.
+
+The text can't be split on the server because:
+
+- splitting rewrites the element's children into `<span>`s, and a directive can only add attributes to its element on the server, not change what's inside it
+- `lines` depends on layout (container width, loaded fonts), which only exists in the browser. That's also why line animations wait for `document.fonts.ready`
+- pre-split HTML wouldn't match the component's template, so Vue would report a hydration mismatch on the children
+
+::: warning
+`ssrHidden` is opt-in because the text stays invisible until JavaScript runs: if it fails to load, or hydration is slow, the text isn't readable. Prefer it for decorative headings, not for content that must be readable right away.
+:::
+
+```vue
+<script setup lang="ts">
+import { stagger } from "animejs"
+import { vTextSplit } from "@juleshry/vue-animejs"
+</script>
+
+<template>
+  <h1 v-text-split="{ words: true, ssrHidden: true, animation: { opacity: [0, 1], delay: stagger(60) } }">
+    Hidden until split
+  </h1>
+</template>
+```
+
 ### Reactive options
 
 Bind a `ref` or `computed` — the split is reverted and re-created whenever the value changes.
@@ -127,11 +154,22 @@ const options = computed(() => ({
 ```ts
 export interface VTextSplitValue extends TextSplitterParams {
   animation?: AnimationParams
+  /**
+   * SSR only: renders the element with `visibility: hidden` on the server, removed once the text is
+   * split and the animation has painted its starting state, so the unsplit text doesn't flash before
+   * hydration. Opt-in because the text stays invisible until JavaScript runs.
+   */
+  ssrHidden?: boolean
 }
 
 /**
  * Declarative text-split directive. Splits the element's text into chars, words, or lines on
- * mount, and optionally animates the resulting spans. Re-creates on binding change, reverts on unmount.
+ * mount (once the mount flush has finished, so components' own `onMounted` hooks still see the
+ * rendered DOM), and optionally animates the resulting spans. Re-creates on binding change, reverts
+ * on unmount.
+ *
+ * With `ssrHidden: true`, the element is hidden on the server until its text is split and animated
+ * on the client (text can only be split in the browser).
  *
  * @example
  * <p v-text-split="{ words: true, animation: { translateY: [20, 0], opacity: [0, 1], delay: stagger(60) } }">Hello</p>
@@ -145,9 +183,10 @@ export declare const vTextSplit: Directive<HTMLElement, VTextSplitValue | undefi
 
 ## Lifecycle Behavior
 
-- On **mount**, the text is split immediately. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first.
+- On **mount**, the text is split. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous split is **reverted** and its animation **cancelled**, then the text is split and animated again from the new value.
 - On **unmount**, the animation is cancelled and the split is reverted, restoring the original text content.
+- During **SSR**, the text is rendered unsplit. With `ssrHidden: true`, the element also gets `visibility: hidden`, removed on the client right after the animation is created (after `document.fonts.ready` for `lines`), or right after the split when there's no `animation`.
 
 ::: tip
 `animation` accepts the same parameters as `useAnimate` / `v-animate`, including `stagger()` for `delay` to sequence chars, words, or lines.

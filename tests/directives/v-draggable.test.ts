@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, nextTick, ref } from "vue"
-import { mount } from "@vue/test-utils"
 import { vDraggable } from "@lib"
 import { makeDraggableMock } from "../mocks"
+import { mountDirective } from "../utils"
 import { createDraggable } from "animejs"
 
 const mock_create_draggable = vi.mocked(createDraggable)
@@ -12,8 +12,8 @@ vi.mock("animejs", () => ({
   createDraggable: vi.fn(() => mock_draggable),
 }))
 
-function mountWithDirective(opts: object | undefined) {
-  return mount(
+async function mountWithDirective(opts: object | undefined) {
+  return mountDirective(
     defineComponent({
       directives: { draggable: vDraggable },
       template: '<div v-draggable="opts" />',
@@ -30,21 +30,21 @@ describe("vDraggable", () => {
     Object.values(mock_draggable).forEach(fn => fn.mockClear())
   })
 
-  it("calls createDraggable on mount with provided options", () => {
-    const wrapper = mountWithDirective({ snap: [0, 100] })
+  it("calls createDraggable on mount with provided options", async () => {
+    const wrapper = await mountWithDirective({ snap: [0, 100] })
     expect(mock_create_draggable).toHaveBeenCalledOnce()
     expect(mock_create_draggable).toHaveBeenCalledWith(wrapper.element, { snap: [0, 100] })
   })
 
-  it("calls createDraggable on mount with empty options when no value is provided", () => {
-    const wrapper = mountWithDirective(undefined)
+  it("calls createDraggable on mount with empty options when no value is provided", async () => {
+    const wrapper = await mountWithDirective(undefined)
     expect(mock_create_draggable).toHaveBeenCalledOnce()
     expect(mock_create_draggable).toHaveBeenCalledWith(wrapper.element, {})
   })
 
   it("reverts previous instance and recreates when binding value changes", async () => {
     const options = ref<object | undefined>({ snap: [0, 100] })
-    const wrapper = mount(
+    const wrapper = await mountDirective(
       defineComponent({
         directives: { draggable: vDraggable },
         template: '<div v-draggable="options" />',
@@ -65,7 +65,7 @@ describe("vDraggable", () => {
   it("does not recreate when binding value reference is unchanged", async () => {
     const stable_opts = { snap: [0, 100] }
     const trigger = ref(0)
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { draggable: vDraggable },
         template: '<div v-draggable="stableOpts" :data-x="trigger" />',
@@ -80,8 +80,8 @@ describe("vDraggable", () => {
     expect(mock_create_draggable).not.toHaveBeenCalled()
   })
 
-  it("reverts instance on unmount", () => {
-    const wrapper = mountWithDirective({ snap: [0, 100] })
+  it("reverts instance on unmount", async () => {
+    const wrapper = await mountWithDirective({ snap: [0, 100] })
     mock_draggable.revert.mockClear()
     wrapper.unmount()
     expect(mock_draggable.revert).toHaveBeenCalledOnce()

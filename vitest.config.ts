@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config"
+import { configDefaults, defineConfig } from "vitest/config"
 import { fileURLToPath, URL } from "node:url"
 
 export default defineConfig({
@@ -6,6 +6,8 @@ export default defineConfig({
     environment: "happy-dom",
     globals: false,
     pool: "vmThreads",
+    // Playwright e2e specs, run with `bun run test:e2e`
+    exclude: [...configDefaults.exclude, "e2e/**"],
   },
   resolve: {
     alias: {

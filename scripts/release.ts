@@ -17,26 +17,40 @@ await assertAdmin(["juleshry"])
 const pkg = await Bun.file("package.json").json()
 const current_version = pkg.version as string
 
-const bump = await p.select({
-  message: `Current version is v${current_version}. Select bump type:`,
-  options: (["patch", "minor", "major"] as const).map(type => ({
-    value: type,
-    label: type,
-    hint: `→ v${semver.inc(current_version, type)}`,
-  })),
+const PRERELEASE_ID = "beta"
+
+const channel = await p.select({
+  message: `Current version is v${current_version}. Select release type:`,
+  options: [
+    { value: "beta", label: "beta", hint: "prerelease, published under the beta npm tag" },
+    ...versionOptions(["patch", "minor", "major"]),
+  ],
 })
 
-if (p.isCancel(bump)) {
+if (p.isCancel(channel)) {
   p.cancel("Cancelled.")
   process.exit(0)
 }
 
-const input_version = semver.inc(current_version, bump)!
+const bump = channel === "beta" ? await selectBetaBump() : channel
+
+const input_version = semver.inc(current_version, bump, PRERELEASE_ID)!
 const tag = `v${input_version}`
+const is_prerelease = semver.prerelease(input_version) !== null
+
+const branch = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim()
+
+// The publish workflow builds the tagged commit, so a stable release from another branch would ship unmerged code
+if (!is_prerelease && branch !== "main") {
+  p.cancel(`Stable releases must be cut from main (current branch: ${branch}).`)
+  process.exit(1)
+}
 
 // ── changelog ─────────────────────────────────────────────────────────────────
 
-const last_tag = (await $`git describe --tags --abbrev=0`.text().catch(() => "")).trim()
+// A stable release lists everything since the previous stable one, skipping intermediate beta tags
+const describe_flags = is_prerelease ? [] : ["--exclude", "*-*"]
+const last_tag = (await $`git describe --tags --abbrev=0 ${describe_flags}`.text().catch(() => "")).trim()
 
 const raw_log = last_tag
   ? await $`git log ${last_tag}..HEAD --pretty=format:"%s"`.text()
@@ -158,7 +172,7 @@ try {
     {
       title: "Push branch",
       task: async () => {
-        await $`git push origin main`
+        await $`git push origin ${branch}`
         pushed = true
       },
     },
@@ -171,7 +185,8 @@ try {
     {
       title: "Create GitHub release",
       task: async () => {
-        await $`gh release create ${tag} --title ${tag} --notes ${notes}`
+        const release_flags = is_prerelease ? ["--prerelease"] : []
+        await $`gh release create ${tag} --title ${tag} --notes ${notes} ${release_flags}`
       },
     },
   ])
@@ -184,17 +199,50 @@ process.removeListener("exit", rollback)
 
 // ── optional netlify deploy ───────────────────────────────────────────────────
 
-const deploy = await p.confirm({ message: "Deploy docs to Netlify?", initialValue: false })
+// The docs site documents the latest stable version, so betas never deploy it
+if (is_prerelease) {
+  p.log.info("Beta release: skipping docs deploy.")
+} else {
+  const deploy = await p.confirm({ message: "Deploy docs to Netlify?", initialValue: false })
 
-if (!p.isCancel(deploy) && deploy) {
-  await p.tasks([
-    {
-      title: "Deploy docs to Netlify",
-      task: async () => {
-        await $`bun run deploy:docs`
+  if (!p.isCancel(deploy) && deploy) {
+    await p.tasks([
+      {
+        title: "Deploy docs to Netlify",
+        task: async () => {
+          await $`bun run deploy:docs`
+        },
       },
-    },
-  ])
+    ])
+  }
 }
 
 p.outro("Done.")
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+
+function versionOptions(types: semver.ReleaseType[]): { value: semver.ReleaseType; label: string; hint: string }[] {
+  return types.map(type => ({
+    value: type,
+    label: type,
+    hint: `→ v${semver.inc(current_version, type, PRERELEASE_ID)}`,
+  }))
+}
+
+async function selectBetaBump(): Promise<semver.ReleaseType> {
+  const beta_types: semver.ReleaseType[] = ["prepatch", "preminor", "premajor"]
+  // Only offered from a prerelease: from a stable version it would behave like prepatch
+  if (semver.prerelease(current_version)) beta_types.unshift("prerelease")
+
+  const beta_bump = await p.select({
+    message: "Select beta bump type:",
+    options: versionOptions(beta_types),
+  })
+
+  if (p.isCancel(beta_bump)) {
+    p.cancel("Cancelled.")
+    process.exit(0)
+  }
+
+  return beta_bump
+}

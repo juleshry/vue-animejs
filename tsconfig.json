@@ -14,5 +14,13 @@
       "@src/*": ["./src/*"]
     }
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "src/**/*", "playground/**/*", "tests/**/*", "scripts/**/*"]
+  "include": [
+    "vite.config.ts",
+    "vitest.config.ts",
+    "src/**/*",
+    "playground/**/*",
+    "tests/**/*",
+    "e2e/**/*",
+    "scripts/**/*"
+  ]
 }

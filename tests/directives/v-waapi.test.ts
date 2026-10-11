@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, nextTick, ref } from "vue"
-import { mount } from "@vue/test-utils"
 import { vWaapi } from "@lib"
 import { makeWaapiAnimationMock } from "../mocks"
+import { mountDirective } from "../utils"
 import { waapi } from "animejs"
 
 const mock_waapi = vi.mocked(waapi)
@@ -14,8 +14,8 @@ vi.mock("animejs", () => ({
   },
 }))
 
-function mountWithDirective(opts: object | undefined) {
-  return mount(
+async function mountWithDirective(opts: object | undefined) {
+  return mountDirective(
     defineComponent({
       directives: { waapi: vWaapi },
       template: '<div v-waapi="opts" />',
@@ -32,20 +32,20 @@ describe("vWaapi", () => {
     Object.values(mock_animation).forEach(fn => fn.mockClear())
   })
 
-  it("calls waapi.animate on mount with provided options", () => {
-    const wrapper = mountWithDirective({ translateX: 250, duration: 800 })
+  it("calls waapi.animate on mount with provided options", async () => {
+    const wrapper = await mountWithDirective({ translateX: 250, duration: 800 })
     expect(mock_waapi.animate).toHaveBeenCalledOnce()
     expect(mock_waapi.animate).toHaveBeenCalledWith(wrapper.element, { translateX: 250, duration: 800 })
   })
 
-  it("does not call waapi.animate on mount when no value is provided", () => {
-    mountWithDirective(undefined)
+  it("does not call waapi.animate on mount when no value is provided", async () => {
+    await mountWithDirective(undefined)
     expect(mock_waapi.animate).not.toHaveBeenCalled()
   })
 
   it("cancels previous animation and recreates when binding value changes", async () => {
     const options = ref<object | undefined>({ translateX: 250 })
-    const wrapper = mount(
+    const wrapper = await mountDirective(
       defineComponent({
         directives: { waapi: vWaapi },
         template: '<div v-waapi="options" />',
@@ -66,7 +66,7 @@ describe("vWaapi", () => {
   it("does not recreate when binding value reference is unchanged", async () => {
     const stable_opts = { translateX: 250 }
     const trigger = ref(0)
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { waapi: vWaapi },
         template: '<div v-waapi="stableOpts" :data-x="trigger" />',
@@ -83,7 +83,7 @@ describe("vWaapi", () => {
 
   it("restores originalStyle and cancels animation on update", async () => {
     const options = ref<object | undefined>({ translateX: 250 })
-    const wrapper = mount(
+    const wrapper = await mountDirective(
       defineComponent({
         directives: { waapi: vWaapi },
         template: '<div v-waapi="options" style="color: red;" />',
@@ -101,21 +101,38 @@ describe("vWaapi", () => {
     expect(wrapper.element.style.cssText).toBe(original_style)
   })
 
-  it("cancels animation on unmount", () => {
-    const wrapper = mountWithDirective({ translateX: 250 })
+  // Regression: originalStyle used to be read after waapi.animate(), capturing the styles it writes
+  it("restores the style from before the animation was created on unmount", async () => {
+    mock_waapi.animate.mockImplementationOnce(target => {
+      ;(target as HTMLElement).style.transform = "translateX(var(--translateX))"
+      return mock_animation as never
+    })
+    const wrapper = await mountDirective(
+      defineComponent({
+        directives: { waapi: vWaapi },
+        template: '<div v-waapi="{ translateX: 250 }" style="color: red;" />',
+      })
+    )
+    const element = wrapper.element as HTMLElement
+    wrapper.unmount()
+    expect(element.style.cssText).toBe("color: red;")
+  })
+
+  it("cancels animation on unmount", async () => {
+    const wrapper = await mountWithDirective({ translateX: 250 })
     mock_animation.cancel.mockClear()
     wrapper.unmount()
     expect(mock_animation.cancel).toHaveBeenCalledOnce()
   })
 
-  it("does not throw on unmount when no value was provided", () => {
-    const wrapper = mountWithDirective(undefined)
+  it("does not throw on unmount when no value was provided", async () => {
+    const wrapper = await mountWithDirective(undefined)
     expect(() => wrapper.unmount()).not.toThrow()
   })
 
   it("cancels animation when value changes to undefined", async () => {
     const options = ref<object | undefined>({ translateX: 250 })
-    mount(
+    await mountDirective(
       defineComponent({
         directives: { waapi: vWaapi },
         template: '<div v-waapi="options" />',

@@ -177,6 +177,12 @@ Controlling an animation (play, pause, restart, seek) requires holding a referen
 
 :::
 
+## SSR-safe
+
+Raw Anime.js touches `window` and `document` as soon as you create an instance, so calling it from `setup()` crashes on the server. vue-animejs composables and directives are safe to use in Nuxt or any `@vue/server-renderer` app as-is. Nothing runs on the server, instances are created once the component mounts in the browser, and there is no `<ClientOnly>` to add.
+
+`v-animate`, `v-waapi` and `v-svg-drawable` also render the animation's starting state on the server, so the element doesn't show its final state and then jump back when the page hydrates. `v-text-split` can hide its text until it's split, with `ssrHidden: true`. See [SSR](/guide/guidelines#ssr) for details.
+
 ## Declarative directives
 
 Some animations don't need imperative control — they just need to run and clean up. For those cases, a directive skips the composable indirection entirely and animates straight from a template attribute.

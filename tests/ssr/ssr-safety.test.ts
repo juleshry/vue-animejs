@@ -5,6 +5,7 @@ import {
   createAnimatable,
   createDraggable,
   createLayout,
+  createScope,
   createTimeline,
   createTimer,
   onScroll,
@@ -17,7 +18,11 @@ import {
   useAnimate,
   useDraggable,
   useLayout,
+  useRawAnimatable,
+  useRawAnimate,
+  useScope,
   useScroll,
+  useSvg,
   useSvgDrawable,
   useText,
   useTimeline,
@@ -31,8 +36,9 @@ vi.mock("animejs", () => ({
   createAnimatable: vi.fn(() => ({ revert: vi.fn() })),
   createDraggable: vi.fn(() => ({ revert: vi.fn() })),
   createLayout: vi.fn(() => ({ revert: vi.fn() })),
+  createScope: vi.fn(() => ({ revert: vi.fn() })),
   onScroll: vi.fn(() => ({ revert: vi.fn() })),
-  svg: { createDrawable: vi.fn(() => [{}]) },
+  svg: { createDrawable: vi.fn(() => [{}]), createMotionPath: vi.fn(), morphTo: vi.fn() },
   splitText: vi.fn(() => ({ revert: vi.fn(), lines: [], words: [], chars: [] })),
   waapi: { animate: vi.fn(() => ({ cancel: vi.fn() })) },
   createTimer: vi.fn(() => ({ cancel: vi.fn() })),
@@ -43,7 +49,10 @@ const mock_animate = vi.mocked(animate)
 const mock_createAnimatable = vi.mocked(createAnimatable)
 const mock_createDraggable = vi.mocked(createDraggable)
 const mock_createLayout = vi.mocked(createLayout)
+const mock_createScope = vi.mocked(createScope)
 const mock_createDrawable = vi.mocked(svg.createDrawable)
+const mock_createMotionPath = vi.mocked(svg.createMotionPath)
+const mock_morphTo = vi.mocked(svg.morphTo)
 const mock_onScroll = vi.mocked(onScroll)
 const mock_splitText = vi.mocked(splitText)
 const mock_waapiAnimate = vi.mocked(waapi.animate)
@@ -113,5 +122,29 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useTimeline({ autoplay: true }))
     expect(mock_createTimeline).not.toHaveBeenCalled()
     expect(result.timeline.value).toBeUndefined()
+  })
+
+  it("useScope does not create a scope during SSR", async () => {
+    const result = await renderSSR(() => useScope({}))
+    expect(mock_createScope).not.toHaveBeenCalled()
+    expect(result.scope.value).toBeUndefined()
+  })
+
+  it("useSvg does not call any SVG helper just by being set up", async () => {
+    await renderSSR(() => useSvg())
+    expect(mock_createMotionPath).not.toHaveBeenCalled()
+    expect(mock_morphTo).not.toHaveBeenCalled()
+  })
+
+  // useRaw* are the documented exception: they create their instance immediately and
+  // unconditionally. These lock in that contract so a future "fix" can't silently change it.
+  it("useRawAnimate creates its animation immediately, even during SSR", async () => {
+    await renderSSR(() => useRawAnimate(".target", { opacity: [0, 1] }))
+    expect(mock_animate).toHaveBeenCalledOnce()
+  })
+
+  it("useRawAnimatable creates its animatable immediately, even during SSR", async () => {
+    await renderSSR(() => useRawAnimatable(".target"))
+    expect(mock_createAnimatable).toHaveBeenCalledOnce()
   })
 })
