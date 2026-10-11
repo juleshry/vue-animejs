@@ -232,7 +232,7 @@ describe("directives leave the DOM untouched until every onMounted has run", () 
     })
 
     const { container } = await hydrate(() => (tag === "path" ? h("svg", [h(Outer)]) : h(Outer)))
-    const server_html = (await renderToString(createSSRApp({ render: () => h(Outer) }))).replace(/<!--.*?-->/g, "")
+    const server_html = await renderToString(createSSRApp({ render: () => h(Outer) }))
     expect(seen.map(([name]) => name)).toEqual(["Inner", "Outer"])
     for (const [, html] of seen) expect(html).toBe(server_html)
     expect(container.querySelector(tag)!.outerHTML).not.toBe(server_html) // the directive did run, afterwards

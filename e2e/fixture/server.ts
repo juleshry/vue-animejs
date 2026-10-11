@@ -22,15 +22,19 @@ createHttpServer((req, res) => {
       const { pages, render } = await vite.ssrLoadModule("/entry-server.ts")
       if (!(name in pages)) {
         res.statusCode = 404
+        res.setHeader("Content-Type", "text/plain")
         return res.end(`Unknown page "${name}". Pages: ${Object.keys(pages).join(", ")}`)
       }
       const page_html = template.replace("<!--app-->", await render(name)).replace("<!--page-->", JSON.stringify(name))
       res.setHeader("Content-Type", "text/html")
       res.end(await vite.transformIndexHtml(url, page_html))
     } catch (error) {
+      // The stack goes to stderr, which Playwright pipes into the test output, not into the response
       vite.ssrFixStacktrace(error as Error)
+      console.error(error)
       res.statusCode = 500
-      res.end(String((error as Error).stack))
+      res.setHeader("Content-Type", "text/plain")
+      res.end("Internal Server Error")
     }
   })
 }).listen(PORT, () => console.log(`SSR fixture on http://localhost:${PORT}`))
