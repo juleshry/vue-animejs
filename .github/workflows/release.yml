@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.event.release.tag_name }}
       - uses: oven-sh/setup-bun@v2
       - uses: actions/cache@v4
         with:
@@ -35,4 +35,4 @@ jobs:
           package-manager-cache: false
       - run: bun install
       - run: bun run build
-      - run: npm publish
+      - run: npm publish --tag ${{ github.event.release.prerelease && 'beta' || 'latest' }}
