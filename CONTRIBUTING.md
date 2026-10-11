@@ -79,6 +79,13 @@ Coverage report:
 bun run test:coverage
 ```
 
+End-to-end SSR tests live in the `e2e/` folder and run with Playwright. A small Vite SSR server (`e2e/fixture/`) renders each page, then Chromium hydrates it, checking the server paint, hydration warnings, and every frame for a flash of the final state. Install the browser once, then run:
+
+```bash
+bunx playwright install chromium
+bun run test:e2e
+```
+
 ## Adding a composable
 
 1. Create `src/composables/use-my-feature.ts`

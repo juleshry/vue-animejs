@@ -101,6 +101,23 @@ describe("vWaapi", () => {
     expect(wrapper.element.style.cssText).toBe(original_style)
   })
 
+  // Regression: originalStyle used to be read after waapi.animate(), capturing the styles it writes
+  it("restores the style from before the animation was created on unmount", () => {
+    mock_waapi.animate.mockImplementationOnce(target => {
+      ;(target as HTMLElement).style.transform = "translateX(var(--translateX))"
+      return mock_animation as never
+    })
+    const wrapper = mount(
+      defineComponent({
+        directives: { waapi: vWaapi },
+        template: '<div v-waapi="{ translateX: 250 }" style="color: red;" />',
+      })
+    )
+    const element = wrapper.element as HTMLElement
+    wrapper.unmount()
+    expect(element.style.cssText).toBe("color: red;")
+  })
+
   it("cancels animation on unmount", () => {
     const wrapper = mountWithDirective({ translateX: 250 })
     mock_animation.cancel.mockClear()

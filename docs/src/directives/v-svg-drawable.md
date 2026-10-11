@@ -99,6 +99,9 @@ const options = computed(() => ({
  * Proxy and animates the `draw` property on mount. Re-creates it when the binding value changes
  * and reverts on unmount.
  *
+ * During SSR, renders the path's starting draw state (see `getInitialDraw`) so it doesn't show fully
+ * drawn before hydration.
+ *
  * @example
  * <path v-svg-drawable="{ draw: '0 1', duration: 1200 }" />
  * <path v-svg-drawable="{ draw: ['0 0', '0.5 1', '0 1'], ease: 'inOutQuad', loop: true }" />
@@ -113,6 +116,7 @@ export declare const vSvgDrawable: Directive<SVGGeometryElement, AnimationParams
 - On **mount**, the element is wrapped in a drawable Proxy and, if a binding value is provided, the `draw` animation is created immediately.
 - On **update**, if the binding value changed, the previous animation is **cancelled** and **reverted**, then a new drawable and animation are created from the new value.
 - On **unmount**, the animation is cancelled and reverted.
+- During **SSR**, the path is rendered in its starting draw state (`pathLength`, `stroke-dasharray`, `stroke-dashoffset`), so it doesn't show fully drawn before hydration. That's the `from` of `draw: [from, to]` / `draw: { from }`, or nothing drawn (`"0 0"`) otherwise, matching what `svg.createDrawable()` paints first. The attributes are removed again before the drawable is created on the client. See [SSR](/guide/guidelines#ssr).
 
 ::: tip
 `draw` values are normalised: `0` = start of path, `1` = end of path. The format is `"startPosition endPosition"` — e.g. `"0 1"` draws the full stroke, `"0.25 0.75"` draws only the middle half.

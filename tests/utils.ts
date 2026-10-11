@@ -1,5 +1,5 @@
 import { expect } from "vitest"
-import { createSSRApp, defineComponent, h, isProxy, isReactive, reactive } from "vue"
+import { type Component, createSSRApp, defineComponent, h, isProxy, isReactive, reactive } from "vue"
 import { mount, type VueWrapper } from "@vue/test-utils"
 import { renderToString } from "@vue/server-renderer"
 
@@ -33,6 +33,14 @@ export async function renderSSR<T>(setup: () => T): Promise<T> {
   )
   await renderToString(app)
   return result
+}
+
+/**
+ * Server-renders a full component (render function, directives included) and returns its HTML.
+ * Use this over `renderSSR` when the output itself matters, e.g. a directive's `getSSRProps`.
+ */
+export function renderSSRApp(component: Component): Promise<string> {
+  return renderToString(createSSRApp(component))
 }
 
 /**

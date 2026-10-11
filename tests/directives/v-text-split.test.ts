@@ -42,6 +42,11 @@ describe("vTextSplit", () => {
     expect(mock_split_text).toHaveBeenCalledWith(wrapper.element, { words: true })
   })
 
+  it("does not pass ssrHidden to splitText", () => {
+    const wrapper = mountWithDirective({ words: true, ssrHidden: true })
+    expect(mock_split_text).toHaveBeenCalledWith(wrapper.element, { words: true })
+  })
+
   it("calls splitText with empty object when no value is provided", () => {
     const wrapper = mountWithDirective(undefined)
     expect(mock_split_text).toHaveBeenCalledWith(wrapper.element, {})

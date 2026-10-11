@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>vue-animejs SSR fixture</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+      path {
+        stroke: #000;
+        stroke-width: 4;
+        fill: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"><!--app--></div>
+    <script>
+      window.__PAGE__ = <!--page-->
+    </script>
+    <script type="module" src="/entry-client.ts"></script>
+  </body>
+</html>

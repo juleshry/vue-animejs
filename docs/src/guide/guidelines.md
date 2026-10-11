@@ -70,12 +70,14 @@ This applies to all composables.
 
 ## SSR
 
-Every composable is safe to call during server-side rendering (Nuxt, `@vue/server-renderer`, `vite-ssr`) — Anime.js instances are only ever created once the component has actually mounted in a browser. During SSR, the returned instance ref (`animation`, `timer`, `timeline`, etc.) stays `undefined` and control methods (`play`, `pause`, …) are no-ops:
+Every composable and directive is SSR-safe: you can use them during server-side rendering (Nuxt, `@vue/server-renderer`, `vite-ssr`) without `<ClientOnly>`. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. During SSR, a composable's returned instance ref (`animation`, `timer`, `timeline`, etc.) stays `undefined` and control methods (`play`, `pause`, …) are no-ops:
 
 ```ts
 // Safe to call at the top level of setup(), even on the server
 const { animation, play } = useAnimate(".box", { translateX: 200 })
 ```
+
+Directives don't run on the server at all, apart from rendering their [initial state](#initial-state-on-the-server).
 
 ::: warning
 `useRawAnimate` is the one exception — it creates the Anime.js instance immediately and unconditionally, by design. Only call it from inside your own `onMounted`.
@@ -84,6 +86,55 @@ const { animation, play } = useAnimate(".box", { translateX: 200 })
 ::: tip
 [`useScroll`](/composables/use-scroll) is lazy rather than mount-gated — its `observer`/`autoplay`/`autoplayComputed` are computed and only create the underlying `ScrollObserver` the first time one of them is read, not automatically on mount. It's still SSR-safe (nothing is created server-side even if read), it just doesn't follow the "exists after mount" rule the other composables do.
 :::
+
+### Initial state on the server
+
+Since nothing animates on the server, the HTML it sends shows every element in its **final** state. Once the page hydrates, Anime.js jumps the element back to its "from" state and animates it in, so it briefly flashes fully visible first.
+
+[`v-animate`](/directives/v-animate) and [`v-waapi`](/directives/v-waapi) avoid this on their own: they render the animation's "from" values as an inline style on the server, and remove it again just before the animation starts on the client.
+
+```vue
+<template>
+  <!-- Server HTML: <div style="opacity:0;transform:translateY(20px);" data-anime-ssr="opacity,transform"> -->
+  <div v-animate="{ opacity: [0, 1], translateY: [20, 0] }" />
+</template>
+```
+
+Only values whose start is known without the browser are rendered:
+
+- `prop: [from, to]` and `prop: { from }` (or `{ from, to }`)
+- transforms (`translateX`, `x`, `rotate`, `scale`, …), with Anime.js's default units (`px`, `deg`) when you pass a number
+- unitless properties (`opacity`, `zIndex`, `flexGrow`, `flexShrink`, `order`, `fontWeight`) and CSS variables
+- other properties only with an explicit unit (`width: ["50%", "100%"]`, not `width: [50, 100]`)
+
+Anything else is skipped and renders nothing extra: single target values, function values, `stagger()`, keyframes, relative values (`"+=20"`) and colors. If the element also has a `:style` for the same property, the "from" value wins on the server, and your value is put back before the animation starts.
+
+[`v-svg-drawable`](/directives/v-svg-drawable) does the same for the stroke: the path is rendered in its starting draw state (the `from` of `draw`, or nothing drawn), so it doesn't show fully drawn first.
+
+[`v-text-split`](/directives/v-text-split) can't do this, because text can only be split in the browser. Set `ssrHidden: true` to hide the element on the server until its text is split and animated. It's opt-in, since the text stays invisible until JavaScript runs. See [Server-side rendering](/directives/v-text-split#server-side-rendering) for why.
+
+Composables don't own the element they animate, so they can't do this. Use CSS instead: give the element its "from" state in CSS, and only animate towards the target value.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from "vue"
+import { useAnimate } from "@juleshry/vue-animejs"
+
+const box = useTemplateRef<HTMLElement>("box")
+useAnimate(box, { opacity: 1, translateY: 0 })
+</script>
+
+<template>
+  <div ref="box" class="box" />
+</template>
+
+<style scoped>
+.box {
+  opacity: 0;
+  transform: translateY(20px);
+}
+</style>
+```
 
 ## Directives
 

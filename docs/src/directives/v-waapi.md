@@ -67,6 +67,9 @@ For all available options, see the [Anime.js WAAPI documentation](https://animej
  * Declarative WAAPI animation directive. Applies an Anime.js WAAPI animation to the element on
  * mount, re-creates it when the binding value changes, and reverts it on unmount.
  *
+ * During SSR, renders the animation's "from" state as an inline style (see `getInitialStyle`) so the
+ * element doesn't flash its final state before hydration.
+ *
  * @example
  * <div v-waapi="{ translateX: 250, duration: 800 }" />
  * <div v-waapi="reactiveOptions" />
@@ -81,6 +84,7 @@ export declare const vWaapi: Directive<HTMLElement, WAAPIAnimationParams>
 - On **mount**, the animation is created immediately from the binding value, and the element's original inline style is captured.
 - On **update**, if the binding value changed, the previous animation is **cancelled** and the element's original style is restored, then a new animation is created from the new value.
 - On **unmount**, the animation is cancelled and the element's original inline style is restored.
+- During **SSR**, the animation's "from" values (`prop: [from, to]` or `prop: { from }`) are rendered as an inline style, so the element starts in its initial state instead of flashing its final one before hydration. That style is removed again before the animation is created on the client. See [SSR](/guide/guidelines#ssr) for which values are supported.
 
 ::: tip
 Pass a `computed` when the options depend on other reactive state, so a new object is produced on every change and the directive picks it up.
