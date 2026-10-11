@@ -199,20 +199,26 @@ process.removeListener("exit", rollback)
 
 // ── optional netlify deploy ───────────────────────────────────────────────────
 
-const deploy = await p.confirm({ message: "Deploy docs to Netlify?", initialValue: false })
+// The docs site documents the latest stable version, so betas never deploy it
+if (is_prerelease) {
+  p.log.info("Beta release: skipping docs deploy.")
+} else {
+  const deploy = await p.confirm({ message: "Deploy docs to Netlify?", initialValue: false })
 
-if (!p.isCancel(deploy) && deploy) {
-  await p.tasks([
-    {
-      title: "Deploy docs to Netlify",
-      task: async () => {
-        await $`bun run deploy:docs`
+  if (!p.isCancel(deploy) && deploy) {
+    await p.tasks([
+      {
+        title: "Deploy docs to Netlify",
+        task: async () => {
+          await $`bun run deploy:docs`
+        },
       },
-    },
-  ])
+    ])
+  }
 }
 
 p.outro("Done.")
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 function versionOptions(types: semver.ReleaseType[]): { value: semver.ReleaseType; label: string; hint: string }[] {
