@@ -127,8 +127,8 @@ export declare function useLayout(
 
 ## Reactivity Behavior
 
-- When `root` is a **template ref** (`useTemplateRef`), the layout is created after the component mounts (`flush: 'post'`).
-- When `root` is a **plain value** (string selector, element), the layout is created immediately.
+- The layout is created once the component has **mounted**, whatever form `root` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the layout as soon as it resolves.
 - If either `root` or `params` changes, the current layout is **reverted** and a new one is created.
 - On component **unmount**, the layout watcher is stopped and the layout is reverted automatically.
 

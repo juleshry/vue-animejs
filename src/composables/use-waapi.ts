@@ -1,5 +1,6 @@
-import { isClient, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 import {
   type WAAPIAnimationParams,
   type DOMTargetsParam,
@@ -7,7 +8,7 @@ import {
   type WAAPIAnimation,
   type EasingFunction,
 } from "animejs"
-import { isRef, markRaw, type MaybeRef, shallowReadonly, ShallowRef, shallowRef, unref, watch } from "vue"
+import { markRaw, type MaybeRef, shallowReadonly, ShallowRef, shallowRef, unref } from "vue"
 
 export interface UseWaapiReturn {
   /** The underlying Anime.js WAAPI animation instance. `undefined` until the target is available. */
@@ -47,13 +48,9 @@ export interface UseWaapiReturn {
 export function useWaapi(targets: AnimationTargets, options: MaybeRef<WAAPIAnimationParams> = {}): UseWaapiReturn {
   const animation = shallowRef<WAAPIAnimation | undefined>()
 
-  const { stop } = watch(
-    [() => resolveTarget(targets), () => unref(options)],
-    ([el, opt]) => {
-      animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
-    },
-    { flush: "post", immediate: !isRef(targets) && isClient }
-  )
+  const { stop } = watchTarget(targets, options, (el, opt) => {
+    animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
+  })
 
   tryOnUnmounted(() => {
     stop()

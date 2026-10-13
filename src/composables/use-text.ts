@@ -1,18 +1,8 @@
 import { splitText, type TextSplitter, type TextSplitterParams } from "animejs"
-import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import {
-  computed,
-  isRef,
-  markRaw,
-  shallowReadonly,
-  shallowRef,
-  unref,
-  watch,
-  type ComputedRef,
-  type MaybeRef,
-  type ShallowRef,
-} from "vue"
+import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
+import { computed, markRaw, shallowReadonly, shallowRef, type ComputedRef, type MaybeRef, type ShallowRef } from "vue"
 
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
@@ -45,18 +35,14 @@ export function useText(
   const words = computed<HTMLElement[]>(() => splitter.value?.words ?? [])
   const chars = computed<HTMLElement[]>(() => splitter.value?.chars ?? [])
 
-  const { stop } = watch(
-    [() => resolveTarget(_target as AnimationTargets), () => unref(_params)],
-    ([el, params]) => {
-      revert()
-      splitter.value = undefined
+  const { stop } = watchTarget(_target as AnimationTargets, _params, (el, params) => {
+    revert()
+    splitter.value = undefined
 
-      if (!el) return
+    if (!el) return
 
-      splitter.value = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
-    },
-    { flush: "post", immediate: !isRef(_target) && isClient }
-  )
+    splitter.value = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
+  })
 
   tryOnUnmounted(() => {
     stop()

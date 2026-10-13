@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useAnimate } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeAnimationMock } from "../mocks"
 import { animate } from "animejs"
 
@@ -21,7 +21,7 @@ describe("useAnimate", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
-  it("creates animation immediately for a non-ref target", async () => {
+  it("creates animation on mount for a non-ref target", async () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useAnimate(el, { opacity: [0, 1] }))
     await nextTick()
@@ -36,7 +36,7 @@ describe("useAnimate", () => {
     expectInstanceStaysRaw(result.animation.value)
   })
 
-  it("does not create animation immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     withSetup(() => useAnimate(el_ref))
     await nextTick()
@@ -236,4 +236,18 @@ describe("useAnimate", () => {
     expect(mock_animate).not.toHaveBeenCalled()
     expect(console.warn).toHaveBeenCalledWith("Target element is null or undefined")
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref", "array of template refs"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_animate)
+      const wrapper = mountWithTarget(form, target => useAnimate(target, { opacity: [0, 1] }))
+      await nextTick()
+      expect(mock_animate).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })
