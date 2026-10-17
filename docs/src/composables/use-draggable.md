@@ -159,8 +159,8 @@ export declare function useDraggable(
 
 ## Reactivity Behavior
 
-- When `targets` is a **template ref** (`useTemplateRef`), the draggable is created after the component mounts (`flush: 'post'`).
-- When `targets` is a **plain value** (string selector, element), the draggable is created immediately.
+- The draggable is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the draggable as soon as it resolves.
 - If either `targets` or `options` changes, the current draggable is **reverted** and a new one is created.
 - On component **unmount**, the watcher and draggable instance are cleaned up automatically.
 

@@ -4,21 +4,11 @@ import {
   type AnimatableProperty,
   type AnimatablePropertyParamsOptions,
   createAnimatable,
-  type TargetsParam,
 } from "animejs"
-import {
-  computed,
-  isRef,
-  markRaw,
-  type MaybeRef,
-  shallowReadonly,
-  type ShallowRef,
-  shallowRef,
-  unref,
-  watch,
-} from "vue"
-import { isClient, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 
 /** The keys of `T` that represent animatable properties, excluding Anime.js's reserved config keys (`ease`, `duration`, `unit`, `modifier`, `composition`). */
 export type AnimatablePropertyKeys<T extends AnimatableParams> = Exclude<keyof T, keyof AnimatablePropertyParamsOptions>
@@ -47,26 +37,17 @@ export function useAnimatable<T extends AnimatableParams = AnimatableParams>(
 ): UseAnimatableReturn<T> {
   const animatable = shallowRef<TypedAnimatableObject<T>>()
 
-  const watch_target = computed<{ el: TargetsParam; opt: T }>(() => ({
-    el: resolveTarget(targets),
-    opt: unref(options),
-  }))
+  const { stop } = watchTarget(targets, options, (el, opt) => {
+    revert()
 
-  const { stop } = watch(
-    watch_target,
-    ({ el, opt }) => {
-      revert()
+    if (!el) {
+      console.warn("Targets element is null or undefined")
+      animatable.value = undefined
+      return
+    }
 
-      if (!el) {
-        console.warn("Targets element is null or undefined")
-        animatable.value = undefined
-        return
-      }
-
-      animatable.value = markRaw(createAnimatable(el, opt) as unknown as TypedAnimatableObject<T>)
-    },
-    { flush: "post", immediate: !isRef(targets) && isClient }
-  )
+    animatable.value = markRaw(createAnimatable(el, opt) as unknown as TypedAnimatableObject<T>)
+  })
 
   tryOnUnmounted(() => {
     stop()

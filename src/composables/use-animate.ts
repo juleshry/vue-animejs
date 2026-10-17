@@ -1,7 +1,8 @@
-import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
-import { isClient, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
@@ -43,13 +44,7 @@ export interface UseAnimateReturn {
 export function useAnimate(_target: AnimationTargets, _options: MaybeRef<AnimationParams> = {}): UseAnimateReturn {
   const animation = shallowRef<JSAnimation>()
 
-  const { stop } = watch(
-    [() => resolveTarget(_target), () => unref(_options)],
-    ([el, opt]) => {
-      createAnimation(el, opt)
-    },
-    { flush: "post", immediate: !isRef(_target) && isClient }
-  )
+  const { stop } = watchTarget(_target, _options, createAnimation)
 
   tryOnUnmounted(() => {
     stop()

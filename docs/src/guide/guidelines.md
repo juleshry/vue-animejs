@@ -77,6 +77,19 @@ Every composable and directive is SSR-safe: you can use them during server-side 
 const { animation, play } = useAnimate(".box", { translateX: 200 })
 ```
 
+Composables with a DOM target create their instance once the component has mounted, so they never touch the server-rendered HTML before Vue has hydrated it. This also means a selector target can point into the component's own template:
+
+```vue
+<script setup lang="ts">
+// "#box" doesn't exist yet when setup() runs: the animation is created once it has mounted
+const { animation } = useAnimate("#box", { translateX: 200 })
+</script>
+
+<template>
+  <div id="box" />
+</template>
+```
+
 Directives don't run on the server at all, apart from rendering their [initial state](#initial-state-on-the-server).
 
 ::: warning

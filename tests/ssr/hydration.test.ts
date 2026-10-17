@@ -10,12 +10,28 @@ import {
   nextTick,
   onMounted,
   ref,
+  type Ref,
   withDirectives,
 } from "vue"
 import { renderToString } from "@vue/server-renderer"
-import { vAnimate, vDraggable, vSvgDrawable, vTextSplit, vWaapi } from "@lib"
+import {
+  useAnimatable,
+  useAnimate,
+  useDraggable,
+  useLayout,
+  useSvgDrawable,
+  useText,
+  useWaapi,
+  vAnimate,
+  vDraggable,
+  vSvgDrawable,
+  vTextSplit,
+  vWaapi,
+} from "@lib"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
 import { getInitialStyle } from "@src/utils/initial-style.ts"
 import { SSR_ATTRS_ATTR, SSR_STYLE_ATTR, toSSRProps } from "@src/utils/ssr-props.ts"
+import { targetComponent, type TargetForm } from "../utils"
 
 // Real animejs, real hydration: server-render, put the HTML in the DOM, then hydrate over it.
 
@@ -236,5 +252,54 @@ describe("directives leave the DOM untouched until every onMounted has run", () 
     expect(seen.map(([name]) => name)).toEqual(["Inner", "Outer"])
     for (const [, html] of seen) expect(html).toBe(server_html)
     expect(container.querySelector(tag)!.outerHTML).not.toBe(server_html) // the directive did run, afterwards
+  })
+})
+
+// Regression: a non-ref target (selector, element, array of refs) used to build its Anime.js instance
+// synchronously in setup(). During hydration the server HTML is already in the document there, so
+// Anime.js wrote to DOM Vue hadn't hydrated yet: style mismatches, or a throw for useDraggable,
+// useLayout and useText. The first build now waits for mount.
+describe("composables with a DOM target hydrate without touching the server HTML first", () => {
+  const all_forms: TargetForm[] = ["selector", "template ref", "array of template refs"]
+  const single_forms: TargetForm[] = ["selector", "template ref"]
+  const motion = { opacity: [0, 1], translateY: [20, 0], duration: 1000 }
+
+  // Each case calls the composable and returns its instance ref
+  const cases: [string, (target: AnimationTargets) => Readonly<Ref<unknown>>, TargetForm[], string?][] = [
+    ["useAnimate", t => useAnimate(t, motion).animation, all_forms],
+    ["useWaapi", t => useWaapi(t, motion).animation, all_forms],
+    ["useAnimatable", t => useAnimatable(t, { opacity: 500 }).animatable, all_forms],
+    ["useDraggable", t => useDraggable(t).draggable, all_forms],
+    ["useLayout", t => useLayout(t as Parameters<typeof useLayout>[0]).layout, single_forms],
+    ["useText", t => useText(t as Parameters<typeof useText>[0], { words: true }).splitter, single_forms],
+    ["useSvgDrawable", t => useSvgDrawable(t as Parameters<typeof useSvgDrawable>[0]).drawable, single_forms, "path"],
+  ]
+
+  describe.each(cases)("%s", (_, use, forms, tag) => {
+    const variants = forms.flatMap(form => [
+      [form, "without"],
+      [form, "with"],
+    ])
+
+    it.each(variants)("%s target, %s a user :style", async (form, style) => {
+      let instance!: Readonly<Ref<unknown>>
+      const props = style === "with" ? { style: { color: "red", opacity: 0.5 } } : {}
+      const Comp = targetComponent(form as TargetForm, t => (instance = use(t)), { tag, props })
+
+      const error = vi.spyOn(console, "error").mockImplementation(() => {})
+      const { warn } = await hydrate(() => h(Comp))
+      expect(hydrationWarnings(warn)).toEqual([])
+      expect(error).not.toHaveBeenCalled()
+      expect(instance.value).toBeDefined()
+    })
+  })
+
+  it("useText splits the text only once hydration is done", async () => {
+    const Comp = targetComponent("selector", t => useText(t as Parameters<typeof useText>[0], { words: true }), {
+      tag: "p",
+    })
+    const { container, warn } = await hydrate(() => h(Comp))
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(container.querySelectorAll("#t [data-word]").length).toBe(2)
   })
 })
