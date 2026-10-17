@@ -17,6 +17,9 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
       - run: bun install
+      # lint type-checks docs/ and playground/, which have their own dependencies
+      - run: bun install --cwd docs
+      - run: bun install --cwd playground
       - run: bun run format:check
       - run: bun run lint
       - run: bun run test
