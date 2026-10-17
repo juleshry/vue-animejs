@@ -132,8 +132,8 @@ export declare function useSvgDrawable(
 
 ## Reactivity & Lifecycle
 
-- When `target` is a **template ref** (`useTemplateRef`), the drawable proxy is created after the component mounts (`flush: 'post'`), guaranteeing the element is in the DOM.
-- When `target` is a **plain value** (string selector, element), the proxy is created immediately.
+- The drawable proxy is created once the component has **mounted**, whatever form `target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the drawable proxy as soon as it resolves.
 - If `target` changes, the previous proxy is discarded and a new one is created for the new element.
 - On component **unmount**, the watcher is stopped and `drawable` is set to `undefined`.
 

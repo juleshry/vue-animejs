@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { nextTick, ref } from "vue"
 import { useAnimatable } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeAnimatableMock } from "../mocks"
 import { AnimatableParams, createAnimatable } from "animejs"
 
@@ -20,7 +20,7 @@ describe("useAnimatable", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
-  it("creates animatable immediately for a non-ref target", async () => {
+  it("creates animatable on mount for a non-ref target", async () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useAnimatable(el, { opacity: {} }))
     await nextTick()
@@ -35,7 +35,7 @@ describe("useAnimatable", () => {
     expectInstanceStaysRaw(result.animatable.value)
   })
 
-  it("does not create animatable immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     withSetup(() => useAnimatable(el_ref))
     await nextTick()
@@ -83,4 +83,18 @@ describe("useAnimatable", () => {
     await nextTick()
     expect(mock_createAnimatable).toHaveBeenCalledWith(el, { translateX: {} })
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref", "array of template refs"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_createAnimatable)
+      const wrapper = mountWithTarget(form, target => useAnimatable(target, { opacity: 500 }))
+      await nextTick()
+      expect(mock_createAnimatable).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })

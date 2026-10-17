@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { nextTick, ref } from "vue"
 import { useSvgDrawable } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { svg } from "animejs"
 
 const mock_svg = vi.mocked(svg)
@@ -20,7 +20,7 @@ describe("useSvgDrawable", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
-  it("creates drawable immediately for a non-ref target", async () => {
+  it("creates drawable on mount for a non-ref target", async () => {
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path") as SVGPathElement
     const [result] = withSetup(() => useSvgDrawable(path))
     await nextTick()
@@ -35,7 +35,7 @@ describe("useSvgDrawable", () => {
     expectInstanceStaysRaw(result.drawable.value)
   })
 
-  it("does not create drawable immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<SVGPathElement | null>(null)
     withSetup(() => useSvgDrawable(el_ref))
     await nextTick()
@@ -84,4 +84,22 @@ describe("useSvgDrawable", () => {
     expect(mock_svg.createDrawable).toHaveBeenCalledWith(path, 0, 0)
     expect(result.drawable.value).toBeDefined()
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_svg.createDrawable)
+      const wrapper = mountWithTarget(
+        form,
+        target => useSvgDrawable(target as Parameters<typeof useSvgDrawable>[0]),
+        "path"
+      )
+      await nextTick()
+      expect(mock_svg.createDrawable).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })

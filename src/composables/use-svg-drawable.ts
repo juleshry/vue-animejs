@@ -1,7 +1,8 @@
 import { svg, type DrawableSVGGeometry, type DOMTargetSelector } from "animejs"
-import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref } from "vue"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 
 export interface UseSvgDrawableReturn {
   /**
@@ -25,18 +26,15 @@ export function useSvgDrawable(
 ): UseSvgDrawableReturn {
   const drawable = shallowRef<DrawableSVGGeometry | undefined>()
 
-  const { stop } = watch(
-    () => resolveTarget(target as AnimationTargets),
-    el => {
-      drawable.value = undefined
-      if (!el) {
-        console.warn("[useSvgDrawable] Target element is null or undefined")
-        return
-      }
-      drawable.value = markRaw(svg.createDrawable(el as DOMTargetSelector, unref(start), unref(end))[0])
-    },
-    { flush: "post", immediate: !isRef(target) && isClient }
-  )
+  // `start` / `end` only set the initial draw: changing them later doesn't rebuild the drawable
+  const { stop } = watchTarget(target as AnimationTargets, undefined, el => {
+    drawable.value = undefined
+    if (!el) {
+      console.warn("[useSvgDrawable] Target element is null or undefined")
+      return
+    }
+    drawable.value = markRaw(svg.createDrawable(el as DOMTargetSelector, unref(start), unref(end))[0])
+  })
 
   tryOnUnmounted(() => {
     stop()

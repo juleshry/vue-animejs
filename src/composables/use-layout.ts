@@ -1,5 +1,6 @@
-import { isClient, type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 import {
   type AutoLayout,
   type AutoLayoutParams,
@@ -8,7 +9,7 @@ import {
   type LayoutAnimationParams,
   type Timeline,
 } from "animejs"
-import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 
 export interface UseLayoutReturn {
   /** The underlying Anime.js `AutoLayout` instance. `undefined` until the root element is available. */
@@ -35,21 +36,17 @@ export function useLayout(
 ): UseLayoutReturn {
   const layout = shallowRef<AutoLayout | undefined>()
 
-  const { stop } = watch(
-    [() => resolveTarget(root as AnimationTargets), () => unref(params)],
-    ([el, opt]) => {
-      revert()
+  const { stop } = watchTarget(root as AnimationTargets, params, (el, opt) => {
+    revert()
 
-      if (!el) {
-        console.warn("Target element is null or undefined")
-        layout.value = undefined
-        return
-      }
+    if (!el) {
+      console.warn("Target element is null or undefined")
+      layout.value = undefined
+      return
+    }
 
-      layout.value = markRaw(createLayout(el as DOMTargetSelector, opt))
-    },
-    { flush: "post", immediate: !isRef(root) && isClient }
-  )
+    layout.value = markRaw(createLayout(el as DOMTargetSelector, opt))
+  })
 
   tryOnUnmounted(() => {
     revert()

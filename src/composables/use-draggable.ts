@@ -1,7 +1,8 @@
-import { isRef, markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
-import { isClient, tryOnUnmounted } from "@vueuse/core"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
 import { type Draggable, type DraggableParams, createDraggable, type EasingParam } from "animejs"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { type AnimationTargets } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 
 export interface UseDraggableReturn {
   /** The underlying Anime.js draggable instance. `undefined` until the target is available. */
@@ -37,21 +38,17 @@ export interface UseDraggableReturn {
 export function useDraggable(targets: AnimationTargets, options: MaybeRef<DraggableParams> = {}): UseDraggableReturn {
   const draggable = shallowRef<Draggable>()
 
-  const { stop: stopWatch } = watch(
-    [() => resolveTarget(targets), () => unref(options)],
-    ([el, opt]) => {
-      revert()
+  const { stop: stopWatch } = watchTarget(targets, options, (el, opt) => {
+    revert()
 
-      if (!el) {
-        console.warn("Targets element is null or undefined")
-        draggable.value = undefined
-        return
-      }
+    if (!el) {
+      console.warn("Targets element is null or undefined")
+      draggable.value = undefined
+      return
+    }
 
-      draggable.value = markRaw(createDraggable(el, opt))
-    },
-    { flush: "post", immediate: !isRef(targets) && isClient }
-  )
+    draggable.value = markRaw(createDraggable(el, opt))
+  })
 
   tryOnUnmounted(() => {
     revert()

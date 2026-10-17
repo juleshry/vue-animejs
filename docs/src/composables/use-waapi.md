@@ -198,8 +198,8 @@ export declare function useWaapi(
 
 ## Reactivity Behavior
 
-- When `targets` is a **template ref** (`useTemplateRef`), the animation is created after the component mounts (`flush: 'post'`).
-- When `targets` is a **plain value** (string selector, element), the animation is created immediately.
+- The animation is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animation as soon as it resolves.
 - If either `targets` or `options` changes, the current animation is **cancelled** and a new one is created.
 - On component **unmount**, the watcher is stopped automatically.
 

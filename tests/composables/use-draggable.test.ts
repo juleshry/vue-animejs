@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { nextTick, ref } from "vue"
 import { useDraggable } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeDraggableMock } from "../mocks"
 import { createDraggable } from "animejs"
 
@@ -20,7 +20,7 @@ describe("useDraggable", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
-  it("creates draggable immediately for a non-ref target", async () => {
+  it("creates draggable on mount for a non-ref target", async () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useDraggable(el, { container: document.body }))
     await nextTick()
@@ -35,7 +35,7 @@ describe("useDraggable", () => {
     expectInstanceStaysRaw(result.draggable.value)
   })
 
-  it("does not create draggable immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     withSetup(() => useDraggable(el_ref))
     await nextTick()
@@ -137,4 +137,18 @@ describe("useDraggable", () => {
     result.refresh()
     expect(mock_draggable.refresh).toHaveBeenCalledOnce()
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref", "array of template refs"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_createDraggable)
+      const wrapper = mountWithTarget(form, target => useDraggable(target))
+      await nextTick()
+      expect(mock_createDraggable).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })

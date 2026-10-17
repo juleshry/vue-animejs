@@ -131,6 +131,7 @@ export declare function useText(
 
 ## Reactivity & Lifecycle
 
+- The text is split once the component has **mounted**, whatever form `_target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered text is never split before hydration.
 - `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs.
 - If `_target` or `_params` changes, the DOM is reverted and `splitText()` is called again.
 - On component **unmount**, the watcher is stopped and the DOM is reverted automatically.

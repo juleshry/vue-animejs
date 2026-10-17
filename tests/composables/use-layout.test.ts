@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useLayout } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeLayoutMock } from "../mocks"
 import { AutoLayoutParams, createLayout } from "animejs"
 
@@ -21,7 +21,7 @@ describe("useLayout", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {})
   })
 
-  it("creates layout immediately for a non-ref target", async () => {
+  it("creates layout on mount for a non-ref target", async () => {
     const el = document.createElement("div")
     const params: AutoLayoutParams = { properties: ["boxShadow"] }
     const [result] = withSetup(() => useLayout(el, params))
@@ -38,7 +38,7 @@ describe("useLayout", () => {
     expectInstanceStaysRaw(result.layout.value)
   })
 
-  it("does not create layout immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     withSetup(() => useLayout(el_ref, {}))
     await nextTick()
@@ -109,4 +109,18 @@ describe("useLayout", () => {
     await nextTick()
     expect(mock_createLayout).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, {})
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_createLayout)
+      const wrapper = mountWithTarget(form, target => useLayout(target as Parameters<typeof useLayout>[0]))
+      await nextTick()
+      expect(mock_createLayout).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })

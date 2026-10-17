@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useText } from "@lib"
-import { expectInstanceStaysRaw, withSetup } from "../utils"
+import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeTextSplitterMock } from "../mocks"
 import { splitText } from "animejs"
 
@@ -21,7 +21,7 @@ describe("useText", () => {
     mock_splitter.refresh.mockClear()
   })
 
-  it("creates splitter immediately for a non-ref target", async () => {
+  it("creates splitter on mount for a non-ref target", async () => {
     const el = document.createElement("p")
     el.textContent = "Hello world"
     const [result] = withSetup(() => useText(el))
@@ -38,7 +38,7 @@ describe("useText", () => {
     expectInstanceStaysRaw(result.splitter.value)
   })
 
-  it("does not create splitter immediately when target is a ref", async () => {
+  it("waits for a ref target that is still empty at mount", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     withSetup(() => useText(el_ref))
     await nextTick()
@@ -131,4 +131,18 @@ describe("useText", () => {
     await nextTick()
     expect(mock_splitText).toHaveBeenCalledWith(wrapper.findComponent(ChildComp).element, undefined)
   })
+
+  // Regression: a non-ref target used to be resolved in setup(), before the component's own template
+  // existed (and during hydration, before Vue had hydrated the server HTML).
+  it.each<TargetForm>(["selector", "template ref"])(
+    "builds exactly once on mount from the component's own template (%s)",
+    async form => {
+      const record = recordTargetFound(mock_splitText)
+      const wrapper = mountWithTarget(form, target => useText(target as Parameters<typeof useText>[0], { words: true }))
+      await nextTick()
+      expect(mock_splitText).toHaveBeenCalledOnce()
+      expect(record.found).toBe(true)
+      wrapper.unmount()
+    }
+  )
 })

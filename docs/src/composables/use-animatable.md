@@ -118,8 +118,8 @@ export declare function useAnimatable<T extends AnimatableParams = AnimatablePar
 
 ## Reactivity Behavior
 
-- When `targets` is a **template ref** (`useTemplateRef`), the animatable is created after the component mounts (`flush: 'post'`).
-- When `targets` is a **plain value** (string selector, element), the animatable is created immediately.
+- The animatable is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animatable as soon as it resolves.
 - If either `targets` or `options` changes, the current animatable is **reverted** and a new one is created.
 - On component **unmount**, the watcher and animatable are cleaned up automatically via `revert()`.
 - The properties available on `animatable.value` are inferred from the shape of `options` passed at the call site — calling a property that wasn't configured (or a reserved config key like `ease`) is a type error.
