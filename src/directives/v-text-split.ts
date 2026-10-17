@@ -35,7 +35,7 @@ function create(el: HTMLElement, value: VTextSplitValue | undefined, userProps: 
   if (anim_params) {
     if (splitter_params.lines) {
       // Line detection waits for document.fonts.ready — defer animation until splitter.lines is populated.
-      ;(document.fonts?.ready ?? Promise.resolve()).then(() => {
+      void (document.fonts?.ready ?? Promise.resolve()).then(() => {
         if (instances.get(el) === entry) {
           entry.animation = animate(splitter.lines, anim_params)
           stripSSRProps(el, userProps)

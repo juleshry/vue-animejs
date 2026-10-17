@@ -191,7 +191,7 @@ try {
     },
   ])
 } catch (err) {
-  p.cancel(`Release failed: ${err}`)
+  p.cancel(`Release failed: ${err instanceof Error ? err.message : String(err)}`)
   process.exit(1)
 }
 

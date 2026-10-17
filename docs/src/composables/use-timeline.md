@@ -124,17 +124,25 @@ For all available options, see the [Anime.js timeline documentation](https://ani
 ::: details Show Type Declarations
 
 ```ts
+/**
+ * What `add`, `set` and `remove` return: the live timeline, with its own `add` / `set` / `remove` swapped for the
+ * composable's queueing ones. Before mount there's no timeline yet, so only `add` / `set` / `remove` are available.
+ */
 export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
-    targets: MaybeRef<TargetsParam>,
-    params: AnimationParams,
+    targets: AnimationTargets,
+    params: MaybeRefOrGetter<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
-  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (
+    targets: AnimationTargets,
+    params: MaybeRefOrGetter<AnimationParams>,
+    position?: TimelinePosition
+  ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
-  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
 }
 
 export interface UseTimelineReturn {
@@ -142,14 +150,18 @@ export interface UseTimelineReturn {
   timeline: Readonly<ShallowRef<Timeline | undefined>>
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
-    targets: MaybeRef<TargetsParam>,
-    params: AnimationParams,
+    targets: AnimationTargets,
+    params: MaybeRefOrGetter<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
-  set: (targets: MaybeRef<TargetsParam>, params: AnimationParams, position?: TimelinePosition) => TimelineChain
+  set: (
+    targets: AnimationTargets,
+    params: MaybeRefOrGetter<AnimationParams>,
+    position?: TimelinePosition
+  ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
-  remove: (targets: MaybeRef<TargetsParam>, propertyName?: string) => TimelineChain
+  remove: (targets: AnimationTargets, propertyName?: string) => TimelineChain
   /** Synchronises another tickable (animation, timer) into the timeline at the given position. */
   sync: (synced?: Tickable, position?: TimelinePosition) => Timeline | undefined
   /** Adds a named label at a position so it can be referenced by `.add()` or `.seek()`. */
@@ -205,13 +217,16 @@ export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTime
 - On component **unmount**, the watcher and timeline are cleaned up automatically.
 
 ::: tip
-`add` returns a `TimelineChain` object so you can chain multiple `.add()` and `.set()` calls fluently:
+`add`, `set` and `remove` return a `TimelineChain`: the live timeline, so you can chain `.add()` / `.set()` calls fluently and still reach every timeline method and property (`play()`, `seek()`, `duration`, ...). Before mount, only `.add()`, `.set()` and `.remove()` exist on it.
 
 ```ts
-const { add } = useTimeline()
-add(box1, { translateX: 100, duration: 400 })
-  .add(box2, { translateY: 100, duration: 400 })
-  .add(box3, { rotate: 360, duration: 400 })
+const { add } = useTimeline({ autoplay: false })
+onMounted(() => {
+  add(box1, { translateX: 100, duration: 400 })
+    .add(box2, { translateY: 100, duration: 400 })
+    .add(box3, { rotate: 360, duration: 400 })
+    .play()
+})
 ```
 :::
 

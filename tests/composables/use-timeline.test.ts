@@ -253,6 +253,30 @@ describe("useTimeline", () => {
     expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
   })
 
+  it("keeps the timeline's prototype methods and accessors on the returned chain (regression: spread dropped them)", () => {
+    class FakeTimeline {
+      private _time = 0
+      get currentTime() {
+        return this._time
+      }
+      set currentTime(value: number) {
+        this._time = value
+      }
+      play() {
+        return this
+      }
+    }
+    const instance = new FakeTimeline()
+    mock_timeline.add.mockReturnValueOnce(instance)
+    const [result] = withSetup(() => useTimeline())
+    const chain = result.add(document.createElement("div"), { opacity: 1 })
+    expect(chain.play()).toBe(instance)
+    chain.currentTime = 250
+    expect(chain.currentTime).toBe(250)
+    expect(instance.currentTime).toBe(250)
+    expect(chain.add).toBe(result.add)
+  })
+
   it("delegates set directly when already mounted", () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useTimeline())

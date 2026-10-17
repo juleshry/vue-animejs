@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi } from "vite-plus/test"
 import { defineComponent, h, nextTick, ref, useTemplateRef } from "vue"
 import { mount } from "@vue/test-utils"
 import { watchTarget } from "@src/utils/watch-target.ts"

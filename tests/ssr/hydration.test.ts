@@ -40,6 +40,7 @@ let app: App | undefined
 // happy-dom rejects `Animation.finished` on cancel() as an unhandled rejection; browsers mark that
 // promise as handled. Mirror the browser so WAAPI teardown doesn't surface as a test error.
 beforeAll(() => {
+  // oxlint-disable-next-line typescript/unbound-method -- re-bound with `.call(this)` below
   const cancel = Animation.prototype.cancel
   Animation.prototype.cancel = function (this: Animation) {
     this.finished.catch(() => {})

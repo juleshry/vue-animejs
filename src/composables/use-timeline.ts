@@ -33,6 +33,10 @@ type QueueEntry =
   | { type: "set"; targets: AnimationTargets; params: MaybeRefOrGetter<AnimationParams>; position?: TimelinePosition }
   | { type: "call"; callback: Callback<Timer>; position?: TimelinePosition }
 
+/**
+ * What `add`, `set` and `remove` return: the live timeline, with its own `add` / `set` / `remove` swapped for the
+ * composable's queueing ones. Before mount there's no timeline yet, so only `add` / `set` / `remove` are available.
+ */
 export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
@@ -163,40 +167,43 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   ) {
     queue.push({ type: "add", targets, params: _params, position })
 
-    if (is_mounted) {
-      return {
-        ...timeline.value?.add(resolveTarget(targets), toValue(_params), position),
-        add,
-        set,
-        remove,
-      } as TimelineChain
-    }
-
-    return { ...timeline.value, add, set, remove } as TimelineChain
+    if (is_mounted) return toChain(timeline.value?.add(resolveTarget(targets), toValue(_params), position))
+    return toChain(timeline.value)
   }
 
   function set(targets: AnimationTargets, _params: MaybeRefOrGetter<AnimationParams>, position?: TimelinePosition) {
     queue.push({ type: "set", targets, params: _params, position })
 
-    if (is_mounted) {
-      return {
-        ...timeline.value?.set(resolveTarget(targets), toValue(_params), position),
-        add,
-        set,
-        remove,
-      } as TimelineChain
-    }
-
-    return { ...timeline.value, add, set, remove } as TimelineChain
+    if (is_mounted) return toChain(timeline.value?.set(resolveTarget(targets), toValue(_params), position))
+    return toChain(timeline.value)
   }
 
   function remove(targets: AnimationTargets, propertyName?: string) {
     if (!is_mounted) {
       console.warn("Cannot remove from timeline before mount")
-      return { ...timeline.value, add, set, remove } as TimelineChain
+      return toChain(timeline.value)
     }
 
-    return { ...timeline.value?.remove(resolveTarget(targets), propertyName), add, set, remove } as TimelineChain
+    return toChain(timeline.value?.remove(resolveTarget(targets), propertyName))
+  }
+
+  /**
+   * Overlays the queueing `add` / `set` / `remove` on a timeline instance. A Proxy rather than a spread:
+   * Timeline's methods and accessors (`play`, `currentTime`, ...) live on its prototype, which a spread drops.
+   */
+  function toChain(instance: Timeline | undefined): TimelineChain {
+    const overrides = { add, set, remove }
+    // Before mount there's no instance yet: only the queueing methods work, as before.
+    if (!instance) return overrides as unknown as TimelineChain
+
+    return new Proxy(instance, {
+      get(target, key) {
+        if (key === "add" || key === "set" || key === "remove") return overrides[key]
+        const value: unknown = Reflect.get(target, key, target)
+        return typeof value === "function" ? value.bind(target) : value
+      },
+      set: (target, key, value) => Reflect.set(target, key, value, target),
+    }) as TimelineChain
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {

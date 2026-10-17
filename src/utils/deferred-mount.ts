@@ -34,7 +34,7 @@ export function deferMount<E extends Element, V>(mount: MountHook<E, V>): Deferr
   return {
     mounted(el, binding, vnode) {
       pending.set(el, [binding, vnode])
-      nextTick(() => {
+      void nextTick(() => {
         const args = pending.get(el)
         if (!args) return // unmounted first
         pending.delete(el)

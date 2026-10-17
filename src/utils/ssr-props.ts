@@ -70,8 +70,9 @@ export function stripSSRProps(
   if (attr_keys !== null) {
     for (const key of attr_keys.split(",")) {
       const user_value = userProps?.[key]
-      // Vue's rule for non-boolean attributes: only null / undefined remove, `false` renders as "false"
-      if (user_value != null) el.setAttribute(key, String(user_value))
+      // Vue's rule for non-boolean attributes: only null / undefined remove, `false` renders as "false".
+      // Like Vue's patchAttr, hand the raw value to setAttribute and let the DOM stringify it.
+      if (user_value != null) el.setAttribute(key, user_value as string)
       else el.removeAttribute(key)
     }
     el.removeAttribute(SSR_ATTRS_ATTR)
