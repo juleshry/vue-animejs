@@ -123,7 +123,7 @@ See the [Documentation Rules](/guide/getting-started) for the expected page stru
 
 ## Code Style
 
-Formatting is handled by [oxfmt](https://github.com/oxc-project/oxc) and linting by [oxlint](https://oxc.rs/docs/guide/usage/linter.html). Run both before committing:
+Formatting, linting and type checking are handled by [Vite+](https://viteplus.dev/), which runs [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) and [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) (type-aware, with a type check). A pre-commit hook runs `vp check --fix` on staged files. To run them yourself:
 
 ```sh
 bun run format

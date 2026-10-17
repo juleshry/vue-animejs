@@ -1,4 +1,4 @@
-import { expect } from "vitest"
+import { expect } from "vite-plus/test"
 import { type Component, createSSRApp, defineComponent, h, isProxy, isReactive, nextTick, reactive } from "vue"
 import { mount, type VueWrapper } from "@vue/test-utils"
 import { renderToString } from "@vue/server-renderer"

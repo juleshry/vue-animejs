@@ -96,4 +96,4 @@ bun run test:e2e
 
 ## Code style
 
-Formatting is handled by `oxfmt` and runs automatically via a pre-commit hook installed by `bun install` (the `prepare` script). No manual step needed.
+Formatting, linting and type checking are handled by [Vite+](https://viteplus.dev/) (`vp check`, which runs Oxfmt, Oxlint and a type check). A pre-commit hook installed by `bun install` (the `prepare` script runs `vp config`) runs `vp check --fix` on staged files. No manual step needed.

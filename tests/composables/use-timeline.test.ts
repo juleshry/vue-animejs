@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { computed, defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useTimeline } from "@lib"

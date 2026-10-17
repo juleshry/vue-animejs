@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { nextTick, ref } from "vue"
 import { useSvgDrawable } from "@lib"
 import { expectInstanceStaysRaw, withSetup } from "../utils"

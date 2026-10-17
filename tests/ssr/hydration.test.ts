@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach, beforeAll, type MockInstance } from "vitest"
+import { describe, it, expect, vi, afterEach, beforeAll, type MockInstance } from "vite-plus/test"
 import {
   type App,
   type Directive,

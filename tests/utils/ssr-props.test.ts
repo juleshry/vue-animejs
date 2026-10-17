@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { ssrRenderAttrs } from "@vue/server-renderer"
 import type { StyleValue } from "vue"
 import { SSR_ATTRS_ATTR, SSR_STYLE_ATTR, stripSSRProps, toDeclaration, toSSRProps } from "@src/utils/ssr-props.ts"

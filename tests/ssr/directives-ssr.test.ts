@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { type Directive, defineComponent, h, withDirectives } from "vue"
 import { vAnimate, vSvgDrawable, vTextSplit, vWaapi } from "@lib"
 import { renderSSRApp } from "../utils"

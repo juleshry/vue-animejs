@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { defineComponent, h, ref, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { resolveTarget } from "@src/utils/resolve-target.ts"

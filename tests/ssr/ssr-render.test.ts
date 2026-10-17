@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { type Component, defineComponent, h, onMounted, useTemplateRef, withDirectives } from "vue"
 import * as lib from "@lib"
 import {

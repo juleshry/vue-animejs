@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { animate, stagger, svg, type AnimationParams } from "animejs"
 import { reactive, readonly } from "vue"
 import { getDrawFrom, getInitialDraw, parseDraw } from "@src/utils/initial-draw.ts"

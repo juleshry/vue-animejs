@@ -34,15 +34,15 @@
     }
   },
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.json",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
-    "lint": "oxlint .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "build": "vp build && vue-tsc -p tsconfig.build.json",
+    "format": "vp fmt .",
+    "format:check": "vp fmt --check .",
+    "lint": "vp lint .",
+    "test": "vp test run",
+    "test:watch": "vp test",
+    "test:coverage": "vp test run --coverage",
     "test:e2e": "playwright test -c e2e",
-    "prepare": "[ -d .git/hooks ] && cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit || true",
+    "prepare": "vp config",
     "deploy:docs": "bun --env-file=.env scripts/deploy-docs.ts",
     "release": "bun --env-file=.env scripts/release.ts"
   },
@@ -52,19 +52,18 @@
     "@types/node": "^26.6.0",
     "@types/semver": "^7.8.0",
     "@vitejs/plugin-vue": "^6.0.10",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "5.0.4",
     "@vue/server-renderer": "^3.5.42",
     "@vue/test-utils": "^2.5.0",
     "@vueuse/core": "^14.4.0",
     "animejs": "4.5.0",
     "bun-types": "^1.4.2",
     "happy-dom": "^20.14.5",
-    "oxfmt": "^0.68.0",
-    "oxlint": "^1.83.0",
     "semver": "^7.8.5",
     "typescript": "^6.0.3",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.1",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0",
+    "vite-plus": "1.2.0",
+    "vitest": "5.0.4",
     "vue": "^3.5.42",
     "vue-tsc": "^3.3.11"
   },
@@ -72,5 +71,9 @@
     "@vueuse/core": ">=14",
     "animejs": ">=4",
     "vue": ">=3.5"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0",
+    "vitest": "5.0.4"
   }
 }

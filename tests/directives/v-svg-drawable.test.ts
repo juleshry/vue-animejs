@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { defineComponent, nextTick, ref } from "vue"
 import { vSvgDrawable } from "@lib"
 import { makeAnimationMock } from "../mocks"

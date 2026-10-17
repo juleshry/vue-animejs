@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest"
+import { describe, it, expect, vi } from "vite-plus/test"
 import { type Directive, defineComponent, h, nextTick, onMounted, ref, withDirectives } from "vue"
 import { mount } from "@vue/test-utils"
 import { deferMount } from "@src/utils/deferred-mount.ts"

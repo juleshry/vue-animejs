@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect } from "vite-plus/test"
 import { animate, stagger, type AnimationParams } from "animejs"
 import { reactive, ref } from "vue"
 import { asPrimitive, getFrom, getInitialStyle, isNumeric, transformUnit, withUnit } from "@src/utils/initial-style.ts"
