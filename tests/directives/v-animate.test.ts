@@ -77,6 +77,42 @@ describe("vAnimate", () => {
     expect(mock_animate).not.toHaveBeenCalled()
   })
 
+  it("does not recreate animation when an inline binding re-renders with the same content (regression: restarted on every re-render)", async () => {
+    const trigger = ref(0)
+    await mountDirective(
+      defineComponent({
+        directives: { animate: vAnimate },
+        template: '<div v-animate="{ translateX: [0, 250], delay: (el, i) => i * 60 }" :data-x="trigger" />',
+        setup() {
+          return { trigger }
+        },
+      })
+    )
+    mock_animate.mockClear()
+    mock_animation.revert.mockClear()
+    trigger.value++
+    await nextTick()
+    expect(mock_animate).not.toHaveBeenCalled()
+    expect(mock_animation.revert).not.toHaveBeenCalled()
+  })
+
+  it("recreates animation when an inline binding's content changes", async () => {
+    const distance = ref(100)
+    const wrapper = await mountDirective(
+      defineComponent({
+        directives: { animate: vAnimate },
+        template: '<div v-animate="{ translateX: distance }" />',
+        setup() {
+          return { distance }
+        },
+      })
+    )
+    mock_animate.mockClear()
+    distance.value = 200
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledWith(wrapper.element, { translateX: 200 })
+  })
+
   it("cancels and reverts previous animation before recreating", async () => {
     const options = ref({ translateX: 100 })
     await mountDirective(

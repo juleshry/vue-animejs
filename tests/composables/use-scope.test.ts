@@ -123,6 +123,35 @@ describe("useScope", () => {
     expect(mock_scope.revert).toHaveBeenCalled()
   })
 
+  it("replays every registered method on the new scope when params change (regression: they were dropped)", async () => {
+    const params = ref({})
+    const before_mount = vi.fn()
+    const named = vi.fn()
+    const once = vi.fn()
+    const after_mount = vi.fn()
+    let scope_api!: ReturnType<typeof useScope>
+    mount(
+      defineComponent({
+        setup() {
+          scope_api = useScope(params)
+          scope_api.add(before_mount)
+          scope_api.registerMethod("named", named)
+          scope_api.addOnce(once)
+          return () => h("div")
+        },
+      })
+    )
+    scope_api.add(after_mount)
+    mock_scope.add.mockClear()
+    mock_scope.addOnce.mockClear()
+
+    params.value = { defaults: { duration: 500 } }
+    await nextTick()
+
+    expect(mock_scope.add.mock.calls).toEqual([[before_mount], ["named", named], [after_mount]])
+    expect(mock_scope.addOnce).toHaveBeenCalledWith(once)
+  })
+
   it("does not recreate scope for plain object params", async () => {
     withSetup(() => useScope({ defaults: { duration: 500 } }))
     mock_createScope.mockClear()

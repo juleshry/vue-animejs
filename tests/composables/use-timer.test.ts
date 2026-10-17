@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
-import { computed, defineComponent, h, nextTick, ref } from "vue"
+import { computed, defineComponent, h, nextTick, onMounted, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { useTimer } from "@lib"
 import { expectInstanceStaysRaw, withSetup } from "../utils"
@@ -65,6 +65,41 @@ describe("useTimer", () => {
     options.value = { duration: 1000 }
     await nextTick()
     expect(mock_createTimer).toHaveBeenCalledWith({ duration: 1000 })
+  })
+
+  it("does not create the timer before mount when options change between setup() and mount (regression: pre-flush watcher)", async () => {
+    let mounted = false
+    const created_while_mounted: boolean[] = []
+    mock_createTimer.mockImplementation(() => {
+      created_while_mounted.push(mounted)
+      return mock_timer as unknown as ReturnType<typeof createTimer>
+    })
+    const show = ref(false)
+    const Child = defineComponent({
+      setup() {
+        onMounted(() => (mounted = true))
+        const options = ref({ duration: 500 })
+        useTimer(options)
+        options.value = { duration: 1000 }
+        return () => h("div")
+      },
+    })
+    mount(defineComponent({ setup: () => () => (show.value ? h(Child) : h("div")) }))
+    show.value = true
+    await nextTick()
+    expect(created_while_mounted).toEqual([true])
+    expect(mock_createTimer).toHaveBeenCalledWith({ duration: 1000 })
+    mock_createTimer.mockImplementation(() => mock_timer as unknown as ReturnType<typeof createTimer>)
+  })
+
+  it("recreates the timer when the options object is mutated in place (regression: deep watch was deduped away)", async () => {
+    const options = ref({ duration: 500 })
+    withSetup(() => useTimer(options))
+    mock_createTimer.mockClear()
+    options.value.duration = 1000
+    await nextTick()
+    expect(mock_createTimer).toHaveBeenCalledOnce()
+    expect(mock_createTimer).toHaveBeenCalledWith(expect.objectContaining({ duration: 1000 }))
   })
 
   it("cancels the previous timer before recreating", async () => {

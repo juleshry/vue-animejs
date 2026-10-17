@@ -1,6 +1,7 @@
 import { createDraggable, type Draggable, type DraggableParams } from "animejs"
 import type { Directive } from "vue"
 import { deferMount } from "@src/utils/deferred-mount.ts"
+import { isSameBinding } from "@src/utils/same-binding.ts"
 
 const instances = new WeakMap<HTMLElement, Draggable>()
 
@@ -20,7 +21,7 @@ const deferred = deferMount<HTMLElement, DraggableParams | undefined>((el, bindi
 export const vDraggable: Directive<HTMLElement, DraggableParams | undefined> = {
   mounted: deferred.mounted,
   updated(el, binding, vnode) {
-    if (binding.value === binding.oldValue) return
+    if (isSameBinding(binding.value, binding.oldValue)) return
     if (deferred.reschedule(el, binding, vnode)) return
     instances.get(el)?.revert()
     instances.set(el, createDraggable(el, binding.value ?? {}))

@@ -158,7 +158,7 @@ For all available options, see the [Anime.js onScroll documentation](https://ani
 
 ```ts
 export interface UseScrollReturn {
-  /** The underlying Anime.js ScrollObserver. `undefined` until both container and target are available. */
+  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
   observer: ComputedRef<ScrollObserver | undefined>
   /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option. */
   autoplay: ComputedRef<ScrollObserver | false>
@@ -175,10 +175,12 @@ export interface UseScrollReturn {
   /** Links a tickable (animation, timer, timeline) or WAAPI animation to be driven by this observer. */
   link: (linked: Tickable | WAAPIAnimation) => ScrollObserver | undefined
 }
-
 /**
- * Wraps Anime.js `onScroll()` into a Vue composable. Reactively re-creates the ScrollObserver
+ * Wraps Anime.js `onScroll()` into a Vue composable. Creates the ScrollObserver on mount, reactively re-creates it
  * when the container, target, or options change, and reverts it automatically on unmount.
+ *
+ * Call it before the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`): its mount hook
+ * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
@@ -195,11 +197,12 @@ export declare function useScroll(
 
 ## Reactivity & Lifecycle Behavior
 
-- Unlike other composables, `observer`/`autoplay`/`autoplayComputed` are **computed, not eagerly created on mount** — nothing is created until one of them is read. This keeps the resolved `ScrollObserver` identical across every reader within the same reactive tick (for example a consuming `useTimeline`'s own mount-time watch and `tryOnMounted`), instead of exposing a transient `undefined` that flips to the real observer a tick later and makes the consumer build twice.
-- The observer is created the moment `container` and `target` both resolve to a real element. Reading `observer`/`autoplay`/`autoplayComputed` before then returns `undefined` / `false` / `{ autoplay: false }`.
+- The observer is created once the component has **mounted**, like every other composable with a DOM target, so a selector can point into the component's own template and server-rendered HTML is never touched before hydration. Until then, `observer`/`autoplay`/`autoplayComputed` are `undefined` / `false` / `{ autoplay: false }`.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the observer as soon as both `container` and `target` resolve.
+- Call `useScroll` **before** the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`). Mount hooks run in registration order, so the observer exists by the time the consumer builds, and it's built once, with the observer already in place.
 - If `container`, `target`, or `options` changes, the previous observer is **reverted** before the new one is created.
-- On component **unmount**, the last created observer is reverted automatically.
-- Safe to call during SSR — the observer is never created server-side (`window`/`document` aren't touched), regardless of whether `observer`/`autoplay` is read.
+- On component **unmount**, the watcher is stopped and the observer is reverted automatically.
+- Safe to call during SSR — the observer is never created server-side (`window`/`document` aren't touched).
 
 ::: tip
 `autoplayComputed` exists so you don't have to write `computed(() => ({ autoplay: autoplay.value }))` yourself. If you need to combine it with other options, wrap it in your own `computed` instead: `computed(() => ({ ...autoplayComputed.value, loop: true }))`.

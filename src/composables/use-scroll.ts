@@ -1,10 +1,18 @@
-import { computed, type ComputedRef, markRaw, type MaybeRef, unref } from "vue"
-import { isClient, tryOnUnmounted } from "@vueuse/core"
-import { onScroll, type ScrollObserver, type ScrollObserverParams, type Tickable, type WAAPIAnimation } from "animejs"
+import { computed, type ComputedRef, markRaw, type MaybeRef, shallowRef } from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
+import {
+  onScroll,
+  type ScrollObserver,
+  type ScrollObserverParams,
+  type TargetsParam,
+  type Tickable,
+  type WAAPIAnimation,
+} from "animejs"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { watchTarget } from "@src/utils/watch-target.ts"
 
 export interface UseScrollReturn {
-  /** The underlying Anime.js ScrollObserver. `undefined` until both container and target are available. */
+  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
   observer: ComputedRef<ScrollObserver | undefined>
   /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option. */
   autoplay: ComputedRef<ScrollObserver | false>
@@ -23,8 +31,11 @@ export interface UseScrollReturn {
 }
 
 /**
- * Wraps Anime.js `onScroll()` into a Vue composable. Reactively re-creates the ScrollObserver
+ * Wraps Anime.js `onScroll()` into a Vue composable. Creates the ScrollObserver on mount, reactively re-creates it
  * when the container, target, or options change, and reverts it automatically on unmount.
+ *
+ * Call it before the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`): its mount hook
+ * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
@@ -35,34 +46,32 @@ export function useScroll(
   target: AnimationTargets,
   options: MaybeRef<Omit<ScrollObserverParams, "container" | "target">> = {}
 ): UseScrollReturn {
-  let current: ScrollObserver | undefined
+  const instance = shallowRef<ScrollObserver>()
 
-  // Resolved inline in the computed (not via a `watch` writing to a separate ref) so every
-  // reader — including a consumer composable's own mount-time watch and `tryOnMounted`, which
-  // both read this in the same flush — observes the same memoized instance instead of a
-  // transient `undefined` that flips to the real observer a tick later. That transient step
-  // is what used to make `useTimeline`'s `autoplay` option change twice on mount, defeating its
-  // same-reference dedup and building two timelines from one ScrollObserver (see the
-  // "Scroll-driven timeline (regression)" demo in the playground).
-  const observer = computed<ScrollObserver | undefined>(() => {
-    current?.revert()
-    current = undefined
-
-    if (!isClient) return undefined
-
+  // Both elements in one target, so watchTarget builds once they have both resolved, and rebuilds when either changes
+  const both = () => {
     const container_el = resolveTarget(container)
     const target_el = resolveTarget(target)
+    return container_el && target_el ? [container_el, target_el] : undefined
+  }
 
-    if (!container_el || !target_el) return undefined
+  const { stop } = watchTarget(both as AnimationTargets, options, (els, opt) => {
+    instance.value?.revert()
+    instance.value = undefined
+    if (!els) return
 
-    current = markRaw(onScroll({ ...unref(options), container: container_el, target: target_el }))
-    return current
+    const [container_el, target_el] = els as [TargetsParam, TargetsParam]
+    instance.value = markRaw(onScroll({ ...opt, container: container_el, target: target_el }))
   })
 
-  const autoplay = computed<ScrollObserver | false>(() => observer.value ?? false)
-  const autoplay_computed = computed(() => ({ autoplay: autoplay.value }))
+  tryOnUnmounted(() => {
+    stop()
+    instance.value?.revert()
+  })
 
-  tryOnUnmounted(() => current?.revert())
+  const observer = computed(() => instance.value)
+  const autoplay = computed<ScrollObserver | false>(() => instance.value ?? false)
+  const autoplay_computed = computed(() => ({ autoplay: autoplay.value }))
 
   function refresh() {
     return observer.value?.refresh()

@@ -46,8 +46,8 @@ export function useText(
 
   tryOnUnmounted(() => {
     stop()
-    splitter.value = undefined
     revert()
+    splitter.value = undefined
   })
 
   function revert() {

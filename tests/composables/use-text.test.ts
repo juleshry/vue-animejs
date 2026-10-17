@@ -107,6 +107,15 @@ describe("useText", () => {
     expect(result.splitter.value).toBeUndefined()
   })
 
+  it("reverts the split DOM on unmount (regression: splitter was cleared before revert)", async () => {
+    const el = document.createElement("p")
+    const [, wrapper] = withSetup(() => useText(el))
+    await nextTick()
+    mock_splitter.revert.mockClear()
+    wrapper.unmount()
+    expect(mock_splitter.revert).toHaveBeenCalledOnce()
+  })
+
   it("skips splitText when element resolves to null", async () => {
     const el_ref = ref<HTMLElement | null>(null)
     const params = ref({})

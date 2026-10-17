@@ -49,11 +49,20 @@ export function useWaapi(targets: AnimationTargets, options: MaybeRef<WAAPIAnima
   const animation = shallowRef<WAAPIAnimation | undefined>()
 
   const { stop } = watchTarget(targets, options, (el, opt) => {
+    revert()
+
+    if (!el) {
+      console.warn("Target element is null or undefined")
+      animation.value = undefined
+      return
+    }
+
     animation.value = markRaw(waapi.animate(el as DOMTargetsParam, opt))
   })
 
   tryOnUnmounted(() => {
     stop()
+    cancel()
   })
 
   function resume() {

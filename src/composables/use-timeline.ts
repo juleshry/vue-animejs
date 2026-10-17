@@ -6,8 +6,6 @@ import {
   type ShallowRef,
   shallowRef,
   toValue,
-  unref,
-  watch,
 } from "vue"
 import {
   type AnimationParams,
@@ -20,18 +18,9 @@ import {
   type TimelinePosition,
   type Timer,
 } from "animejs"
-import { isClient, tryOnMounted, tryOnUnmounted } from "@vueuse/core"
+import { tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-
-type QueueEntry =
-  | {
-      type: "add"
-      targets: AnimationTargets
-      params: MaybeRefOrGetter<AnimationParams>
-      position?: TimelinePosition | StaggerFunction<number | string>
-    }
-  | { type: "set"; targets: AnimationTargets; params: MaybeRefOrGetter<AnimationParams>; position?: TimelinePosition }
-  | { type: "call"; callback: Callback<Timer>; position?: TimelinePosition }
+import { watchOptions } from "@src/utils/watch-options.ts"
 
 /**
  * What `add`, `set` and `remove` return: the live timeline, with its own `add` / `set` / `remove` swapped for the
@@ -110,49 +99,21 @@ export interface UseTimelineReturn {
 /**
  * Wraps Anime.js `createTimeline()` into a Vue composable. Reactively re-creates the timeline when options change, and cancels it automatically on unmount.
  *
+ * `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order: made before mount, they apply once
+ * the timeline exists, and when options change they're all replayed on the new timeline.
+ *
  * @param options - Anime.js timeline parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
-  let is_mounted = false
-  // Guards against the mount-time watch tick and tryOnMounted both building from the same options.
-  let last_built_from: TimelineParams | undefined
-
-  const queue: QueueEntry[] = []
+  // Every call that builds the timeline's content, in order, so a re-created timeline gets it all back
+  const queue: ((instance: Timeline) => Timeline)[] = []
 
   const timeline = shallowRef<Timeline>()
 
-  function replayQueue() {
-    for (const entry of queue) {
-      if (entry.type === "add") {
-        timeline.value?.add(resolveTarget(entry.targets), toValue(entry.params), entry.position)
-      } else if (entry.type === "set") {
-        timeline.value?.set(resolveTarget(entry.targets), toValue(entry.params), entry.position)
-      } else {
-        timeline.value?.call(entry.callback, entry.position)
-      }
-    }
-  }
-
-  function createFromOptions(_options: TimelineParams) {
-    if (_options === last_built_from) return
-    last_built_from = _options
+  const { stop } = watchOptions(options, opt => {
     revert()
-    timeline.value = markRaw(createTimeline(_options))
-    replayQueue()
-  }
-
-  const { stop } = watch(
-    () => unref(options),
-    _options => {
-      if (!isClient) return
-      createFromOptions(_options)
-    },
-    { flush: "post", deep: 1 }
-  )
-
-  tryOnMounted(() => {
-    createFromOptions(unref(options))
-    is_mounted = true
+    timeline.value = markRaw(createTimeline(opt))
+    for (const apply of queue) apply(timeline.value)
   })
 
   tryOnUnmounted(() => {
@@ -160,31 +121,26 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
     cancel()
   })
 
+  /** Records `apply` for replay, and runs it now if the timeline exists. */
+  function enqueue(apply: (instance: Timeline) => Timeline): Timeline | undefined {
+    queue.push(apply)
+    return timeline.value && apply(timeline.value)
+  }
+
   function add(
     targets: AnimationTargets,
     _params: MaybeRefOrGetter<AnimationParams>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
-    queue.push({ type: "add", targets, params: _params, position })
-
-    if (is_mounted) return toChain(timeline.value?.add(resolveTarget(targets), toValue(_params), position))
-    return toChain(timeline.value)
+    return toChain(enqueue(instance => instance.add(resolveTarget(targets), toValue(_params), position)))
   }
 
   function set(targets: AnimationTargets, _params: MaybeRefOrGetter<AnimationParams>, position?: TimelinePosition) {
-    queue.push({ type: "set", targets, params: _params, position })
-
-    if (is_mounted) return toChain(timeline.value?.set(resolveTarget(targets), toValue(_params), position))
-    return toChain(timeline.value)
+    return toChain(enqueue(instance => instance.set(resolveTarget(targets), toValue(_params), position)))
   }
 
   function remove(targets: AnimationTargets, propertyName?: string) {
-    if (!is_mounted) {
-      console.warn("Cannot remove from timeline before mount")
-      return toChain(timeline.value)
-    }
-
-    return toChain(timeline.value?.remove(resolveTarget(targets), propertyName))
+    return toChain(enqueue(instance => instance.remove(resolveTarget(targets), propertyName)))
   }
 
   /**
@@ -207,16 +163,15 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
   }
 
   function sync(synced?: Tickable, position?: TimelinePosition) {
-    return timeline.value?.sync(synced, position)
+    return enqueue(instance => instance.sync(synced, position))
   }
 
   function label(labelName: string, position?: TimelinePosition) {
-    return timeline.value?.label(labelName, position)
+    return enqueue(instance => instance.label(labelName, position))
   }
 
   function call(callback: Callback<Timer>, position?: TimelinePosition) {
-    queue.push({ type: "call", callback, position })
-    return timeline.value?.call(callback, position)
+    return enqueue(instance => instance.call(callback, position))
   }
 
   function init(internalRender?: boolean) {

@@ -84,6 +84,7 @@ export declare const vWaapi: Directive<HTMLElement, WAAPIAnimationParams>
 
 - On **mount**, the animation is created from the binding value, and the element's original inline style is captured. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous animation is **cancelled** and the element's original style is restored, then a new animation is created from the new value.
+- The binding value is compared by **content**, not by reference: an inline object (`v-waapi="{ … }"`) that re-renders with the same values doesn't restart anything. Functions count as unchanged when their source is the same, so an inline `stagger(60)` doesn't restart on every render either, but changing only its argument isn't picked up. Add a `:key` to the element to force a fresh start in that case.
 - On **unmount**, the animation is cancelled and the element's original inline style is restored.
 - During **SSR**, the animation's "from" values (`prop: [from, to]` or `prop: { from }`) are rendered as an inline style, so the element starts in its initial state instead of flashing its final one before hydration. That style is removed again before the animation is created on the client. See [SSR](/guide/guidelines#ssr) for which values are supported.
 

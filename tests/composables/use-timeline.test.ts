@@ -87,18 +87,21 @@ describe("useTimeline", () => {
     expect(mock_timeline.call).toHaveBeenCalledWith(cb, 0)
   })
 
-  it("warns when remove is called before mount", () => {
+  it("applies a remove made before mount once mounted, after the adds before it", () => {
     const el = document.createElement("div")
     mount(
       defineComponent({
         setup() {
           const tl = useTimeline()
-          tl.remove(el)
+          tl.add(el, { opacity: 1 })
+          tl.remove(el, "opacity")
           return () => h("div")
         },
       })
     )
-    expect(console.warn).toHaveBeenCalledWith("Cannot remove from timeline before mount")
+    expect(mock_timeline.add).toHaveBeenCalledWith(el, { opacity: 1 }, undefined)
+    expect(mock_timeline.remove).toHaveBeenCalledWith(el, "opacity")
+    expect(mock_timeline.add.mock.invocationCallOrder[0]).toBeLessThan(mock_timeline.remove.mock.invocationCallOrder[0])
   })
 
   it("unwraps ref targets when flushing the queue", () => {
@@ -251,6 +254,40 @@ describe("useTimeline", () => {
     options.value = { loop: true }
     await nextTick()
     expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
+  })
+
+  it("replays remove, label and sync calls in order when options change (regression: rebuild resurrected removed targets)", async () => {
+    const el = document.createElement("div")
+    const synced = { id: "synced" } as unknown as Parameters<ReturnType<typeof useTimeline>["sync"]>[0]
+    const options = ref({ loop: false })
+    const [result] = withSetup(() => useTimeline(options))
+    result.add(el, { translateX: 100 })
+    result.label("mid", 500)
+    result.sync(synced, "mid")
+    result.remove(el)
+    Object.values(mock_timeline).forEach(fn => fn.mockClear())
+
+    options.value = { loop: true }
+    await nextTick()
+
+    expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
+    expect(mock_timeline.label).toHaveBeenCalledWith("mid", 500)
+    expect(mock_timeline.sync).toHaveBeenCalledWith(synced, "mid")
+    expect(mock_timeline.remove).toHaveBeenCalledWith(el, undefined)
+    const order = [mock_timeline.add, mock_timeline.label, mock_timeline.sync, mock_timeline.remove].map(
+      fn => fn.mock.invocationCallOrder[0]
+    )
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+  })
+
+  it("recreates the timeline when the options object is mutated in place (regression: deep watch was deduped away)", async () => {
+    const options = ref({ loop: false })
+    withSetup(() => useTimeline(options))
+    mock_createTimeline.mockClear()
+    options.value.loop = true
+    await nextTick()
+    expect(mock_createTimeline).toHaveBeenCalledOnce()
+    expect(mock_createTimeline).toHaveBeenCalledWith(expect.objectContaining({ loop: true }))
   })
 
   it("keeps the timeline's prototype methods and accessors on the returned chain (regression: spread dropped them)", () => {

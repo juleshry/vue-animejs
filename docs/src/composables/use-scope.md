@@ -134,26 +134,28 @@ function trigger() {
 
 ```ts
 export interface UseScopeReturn {
-  /** The underlying Anime.js Scope instance. */
+  /** The underlying Anime.js `Scope` instance. */
   scope: Readonly<ShallowRef<Scope | undefined>>
-  /** Adds a constructor callback to the scope. Animations created inside the callback are tracked by the scope. Deferred until mount if called before the component is mounted. */
+  /** Registers an anonymous method on the scope. Queued automatically if called before mount. */
   add: (method: ScopeMethod) => void
-  /** Registers a named method on the scope, accessible via `scope.value.methods[name]`. Deferred until mount if called before the component is mounted. */
+  /** Registers a named method on the scope so it can be called via `scope.methods[name]()`. Queued automatically if called before mount. */
   registerMethod: (methodName: string, method: ScopeMethod) => void
-  /** Adds a constructor callback that runs only once. Deferred until mount if called before the component is mounted. */
+  /** Registers a method that runs exactly once on the scope. Queued automatically if called before mount. */
   addOnce: (method: ScopeMethod) => void
-  /** Keeps the timing of a tickable in sync with the scope. */
+  /** Keeps the time of another tickable (animation, timer) in sync with this scope. */
   keepTime: (method: (scope: Scope) => Tickable) => void
-  /** Reverts all tickables and revertibles registered to the scope, restoring the original DOM state. */
+  /** Cancels the scope and reverts all animations and tickables it owns. */
   revert: () => void
-  /** Re-runs all constructor callbacks, refreshing the scope's state. */
+  /** Re-reads default values and media-query breakpoints for the scope. */
   refresh: () => void
 }
-
 /**
- * Wraps Anime.js `createScope()` into a Vue composable. Groups animations so they can all be reverted at once, and cleans up the scope automatically on unmount.
+ * Wraps Anime.js `createScope()` into a Vue composable. Reactively re-creates the scope when params change, replays all registered methods, and reverts it automatically on unmount.
  *
- * @param params - Anime.js scope parameters. Accepts a plain object or a reactive ref.
+ * Methods added before mount are queued and replayed once the component is mounted. When `params` change, every
+ * method registered so far is replayed on the new scope.
+ *
+ * @param params - Anime.js scope parameters. Accepts a plain object or a reactive ref / computed.
  */
 export declare function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn
 ```
@@ -162,8 +164,8 @@ export declare function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn
 
 ## Reactivity & Lifecycle
 
-- The scope is created immediately when `useScope` is called.
-- If `params` is a `ref` or `computed` and its value changes, the current scope is **reverted** and a new one is created with the updated parameters.
+- The scope is created once the component has **mounted** — `scope` is `undefined` until then.
+- If `params` is a `ref` or `computed` and its value changes (including a property mutated in place), the current scope is **reverted** and a new one is created with the updated parameters. Every method registered so far through `add()`, `registerMethod()` and `addOnce()` is replayed on the new scope, in registration order.
 - Calls to `add()`, `registerMethod()`, and `addOnce()` made before the component mounts are **queued** and executed in `onMounted` — so calling `add()` at the top level of `<script setup>` is safe and idiomatic.
 - When `mediaQueries` are provided, the scope automatically calls `refresh()` whenever a media query match changes.
 - On component **unmount**, `scope.revert()` is called automatically, removing all tracked animations from the DOM.

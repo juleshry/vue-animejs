@@ -80,6 +80,25 @@ describe("vDraggable", () => {
     expect(mock_create_draggable).not.toHaveBeenCalled()
   })
 
+  it("does not recreate when an inline binding re-renders with the same content", async () => {
+    const trigger = ref(0)
+    await mountDirective(
+      defineComponent({
+        directives: { draggable: vDraggable },
+        template: '<div v-draggable="{ snap: [0, 100] }" :data-x="trigger" />',
+        setup() {
+          return { trigger }
+        },
+      })
+    )
+    mock_create_draggable.mockClear()
+    mock_draggable.revert.mockClear()
+    trigger.value++
+    await nextTick()
+    expect(mock_create_draggable).not.toHaveBeenCalled()
+    expect(mock_draggable.revert).not.toHaveBeenCalled()
+  })
+
   it("reverts instance on unmount", async () => {
     const wrapper = await mountWithDirective({ snap: [0, 100] })
     mock_draggable.revert.mockClear()

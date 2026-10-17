@@ -200,8 +200,9 @@ export declare function useWaapi(
 
 - The animation is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animation as soon as it resolves.
-- If either `targets` or `options` changes, the current animation is **cancelled** and a new one is created.
-- On component **unmount**, the watcher is stopped automatically.
+- If either `targets` or `options` changes, the current animation is **reverted** and a new one is created.
+- If `targets` resolves to nothing, a warning is logged and `animation` stays `undefined`.
+- On component **unmount**, the watcher is stopped and the animation is **cancelled** automatically.
 
 ::: tip
 Always use `useTemplateRef<HTMLElement>('refName')` for DOM targets — not `ref<HTMLElement | null>(null)`. The composable uses [`unrefElement`](https://vueuse.org/core/unrefElement/) from [`@vueuse/core`](https://vueuse.org/) to resolve it correctly.

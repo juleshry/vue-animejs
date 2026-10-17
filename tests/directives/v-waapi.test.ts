@@ -81,6 +81,23 @@ describe("vWaapi", () => {
     expect(mock_waapi.animate).not.toHaveBeenCalled()
   })
 
+  it("does not recreate when an inline binding re-renders with the same content", async () => {
+    const trigger = ref(0)
+    await mountDirective(
+      defineComponent({
+        directives: { waapi: vWaapi },
+        template: '<div v-waapi="{ translateX: [0, 250], duration: 800 }" :data-x="trigger" />',
+        setup() {
+          return { trigger }
+        },
+      })
+    )
+    mock_waapi.animate.mockClear()
+    trigger.value++
+    await nextTick()
+    expect(mock_waapi.animate).not.toHaveBeenCalled()
+  })
+
   it("restores originalStyle and cancels animation on update", async () => {
     const options = ref<object | undefined>({ translateX: 250 })
     const wrapper = await mountDirective(

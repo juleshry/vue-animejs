@@ -56,26 +56,42 @@ export function stripSSRProps(
   userProps: Record<string, unknown> | null | undefined
 ): void {
   const style_keys = el.getAttribute(SSR_STYLE_ATTR)
-  if (style_keys !== null) {
+  const attr_keys = el.getAttribute(SSR_ATTRS_ATTR)
+  restoreUserProps(el, userProps, style_keys?.split(",") ?? [], attr_keys?.split(",") ?? [])
+  el.removeAttribute(SSR_STYLE_ATTR)
+  el.removeAttribute(SSR_ATTRS_ATTR)
+}
+
+/**
+ * Puts the given style declarations and attributes back to what the user's own props set, removing
+ * the ones the user doesn't set, so the element is as Vue rendered it before anything wrote to it.
+ *
+ * @param el - The element to restore.
+ * @param userProps - The element's own props (`vnode.props`).
+ * @param styleKeys - Kebab-case style properties to restore.
+ * @param attrKeys - Attributes to restore.
+ */
+export function restoreUserProps(
+  el: HTMLElement | SVGElement,
+  userProps: Record<string, unknown> | null | undefined,
+  styleKeys: string[],
+  attrKeys: string[]
+): void {
+  if (styleKeys.length) {
     const user_style = toDeclaration(userProps?.style as StyleValue | undefined)
-    for (const key of style_keys.split(",")) {
+    for (const key of styleKeys) {
       const user_value = user_style.getPropertyValue(key)
       if (user_value) el.style.setProperty(key, user_value, user_style.getPropertyPriority(key))
       else el.style.removeProperty(key)
     }
-    el.removeAttribute(SSR_STYLE_ATTR)
   }
 
-  const attr_keys = el.getAttribute(SSR_ATTRS_ATTR)
-  if (attr_keys !== null) {
-    for (const key of attr_keys.split(",")) {
-      const user_value = userProps?.[key]
-      // Vue's rule for non-boolean attributes: only null / undefined remove, `false` renders as "false".
-      // Like Vue's patchAttr, hand the raw value to setAttribute and let the DOM stringify it.
-      if (user_value != null) el.setAttribute(key, user_value as string)
-      else el.removeAttribute(key)
-    }
-    el.removeAttribute(SSR_ATTRS_ATTR)
+  for (const key of attrKeys) {
+    const user_value = userProps?.[key]
+    // Vue's rule for non-boolean attributes: only null / undefined remove, `false` renders as "false".
+    // Like Vue's patchAttr, hand the raw value to setAttribute and let the DOM stringify it.
+    if (user_value != null) el.setAttribute(key, user_value as string)
+    else el.removeAttribute(key)
   }
 }
 

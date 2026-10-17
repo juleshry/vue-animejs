@@ -1,6 +1,7 @@
 import { animate, type AnimationParams, type JSAnimation } from "animejs"
 import type { Directive } from "vue"
 import { deferMount } from "@src/utils/deferred-mount.ts"
+import { isSameBinding } from "@src/utils/same-binding.ts"
 import { getInitialStyle } from "@src/utils/initial-style.ts"
 import { stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
 
@@ -34,7 +35,7 @@ export const vAnimate: Directive<HTMLElement, AnimationParams> = {
   },
   mounted: deferred.mounted,
   updated(el, binding, vnode) {
-    if (binding.value === binding.oldValue) return
+    if (isSameBinding(binding.value, binding.oldValue)) return
     if (deferred.reschedule(el, binding, vnode)) return
     const prev = instances.get(el)
     prev?.cancel()

@@ -97,7 +97,7 @@ Directives don't run on the server at all, apart from rendering their [initial s
 :::
 
 ::: tip
-[`useScroll`](/composables/use-scroll) is lazy rather than mount-gated — its `observer`/`autoplay`/`autoplayComputed` are computed and only create the underlying `ScrollObserver` the first time one of them is read, not automatically on mount. It's still SSR-safe (nothing is created server-side even if read), it just doesn't follow the "exists after mount" rule the other composables do.
+[`useScroll`](/composables/use-scroll) follows the same rule: its `ScrollObserver` is created on mount. Call it before the composable that consumes its `autoplay` / `autoplayComputed` (e.g. `useTimeline`), so the observer already exists when that one builds on mount.
 :::
 
 ### Initial state on the server
@@ -183,7 +183,7 @@ const options = computed(() => ({ translateX: 200, duration: duration.value }))
 ```
 
 ::: warning
-Changing the binding value recreates the underlying Anime.js instance from scratch, same as changing a composable's reactive options.
+Changing the binding value recreates the underlying Anime.js instance from scratch, same as changing a composable's reactive options. The value is compared by content, so an inline object that re-renders with the same values doesn't restart anything. Functions with the same source (e.g. an inline `stagger(60)`) count as unchanged, so changing only a stagger's argument needs a `:key` on the element to take effect.
 :::
 
 Reach for a directive when the animation has no imperative control needs (no `play` / `pause` / `restart` from script) and the options can be expressed inline. Reach for the composable instead when you need to control playback, read animation state, or share the instance across multiple elements.

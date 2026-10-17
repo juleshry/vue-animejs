@@ -165,4 +165,24 @@ describe("vTextSplit", () => {
     expect(mock_split_text).not.toHaveBeenCalled()
     expect(mock_animate).not.toHaveBeenCalled()
   })
+
+  it("does not re-split when an inline binding with a function value re-renders with the same content", async () => {
+    const trigger = ref(0)
+    await mountDirective(
+      defineComponent({
+        directives: { textSplit: vTextSplit },
+        template:
+          '<p v-text-split="{ words: true, animation: { opacity: [0, 1], delay: (el, i) => i * 60 } }" :data-t="trigger">Hello</p>',
+        setup() {
+          return { trigger }
+        },
+      })
+    )
+    mock_split_text.mockClear()
+    mock_animate.mockClear()
+    trigger.value++
+    await nextTick()
+    expect(mock_split_text).not.toHaveBeenCalled()
+    expect(mock_animate).not.toHaveBeenCalled()
+  })
 })

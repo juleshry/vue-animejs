@@ -1,8 +1,9 @@
 import { animate, svg, type AnimationParams, type DrawableSVGGeometry, type JSAnimation } from "animejs"
 import type { Directive } from "vue"
 import { deferMount } from "@src/utils/deferred-mount.ts"
+import { isSameBinding } from "@src/utils/same-binding.ts"
 import { getInitialDraw } from "@src/utils/initial-draw.ts"
-import { stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
+import { restoreUserProps, stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
 
 interface Entry {
   drawable: DrawableSVGGeometry
@@ -47,11 +48,14 @@ export const vSvgDrawable: Directive<SVGGeometryElement, AnimationParams | undef
   },
   mounted: deferred.mounted,
   updated(el, binding, vnode) {
-    if (binding.value === binding.oldValue) return
+    if (isSameBinding(binding.value, binding.oldValue)) return
     if (deferred.reschedule(el, binding, vnode)) return
     const entry = instances.get(el)
     entry?.animation?.cancel()
     entry?.animation?.revert()
+    // What createDrawable() wrote: with `pathLength` left set, the new drawable would skip its first
+    // paint and start from wherever the previous animation stopped, not from a fresh mount's state
+    restoreUserProps(el, vnode.props, ["stroke-linecap"], ["pathLength", "stroke-dasharray", "stroke-dashoffset"])
     instances.set(el, create(el, binding.value))
   },
   unmounted(el) {

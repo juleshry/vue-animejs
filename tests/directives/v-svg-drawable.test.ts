@@ -77,6 +77,41 @@ describe("vSvgDrawable", () => {
     expect(mock_animate).toHaveBeenCalledWith(mock_drawable, { draw: "0 0.5" })
   })
 
+  it("resets what createDrawable wrote before recreating, keeping the user's own attributes (regression: skipped its first paint)", async () => {
+    const options = ref<object>({ draw: "0 1" })
+    const wrapper = await mountDirective(
+      defineComponent({
+        directives: { svgDrawable: vSvgDrawable },
+        template: '<svg><path v-svg-drawable="options" stroke-dasharray="4 2" /></svg>',
+        setup() {
+          return { options }
+        },
+      })
+    )
+    const path = wrapper.find("path").element as SVGPathElement
+    let attrs_at_recreate: Record<string, string | null> = {}
+    mock_svg.createDrawable.mockImplementationOnce((el: unknown) => {
+      const target = el as SVGPathElement
+      attrs_at_recreate = {
+        pathLength: target.getAttribute("pathLength"),
+        dasharray: target.getAttribute("stroke-dasharray"),
+        dashoffset: target.getAttribute("stroke-dashoffset"),
+        linecap: target.style.getPropertyValue("stroke-linecap"),
+      }
+      return [mock_drawable] as never
+    })
+    // What a real createDrawable() + animation leave on the element
+    path.setAttribute("pathLength", "1000")
+    path.setAttribute("stroke-dasharray", "500 510")
+    path.setAttribute("stroke-dashoffset", "-250")
+    path.style.setProperty("stroke-linecap", "butt")
+
+    options.value = { draw: "0 0.5" }
+    await nextTick()
+
+    expect(attrs_at_recreate).toEqual({ pathLength: null, dasharray: "4 2", dashoffset: null, linecap: "" })
+  })
+
   it("does not recreate when binding value reference is unchanged", async () => {
     const stable_opts = { draw: "0 1" }
     const trigger = ref(0)
@@ -95,6 +130,23 @@ describe("vSvgDrawable", () => {
     await nextTick()
     expect(mock_svg.createDrawable).not.toHaveBeenCalled()
     expect(mock_animate).not.toHaveBeenCalled()
+  })
+
+  it("does not recreate when an inline binding re-renders with the same content", async () => {
+    const trigger = ref(0)
+    await mountDirective(
+      defineComponent({
+        directives: { svgDrawable: vSvgDrawable },
+        template: `<svg><path v-svg-drawable="{ draw: ['0 0', '0 1'], duration: 800 }" :data-x="trigger" /></svg>`,
+        setup() {
+          return { trigger }
+        },
+      })
+    )
+    mock_svg.createDrawable.mockClear()
+    trigger.value++
+    await nextTick()
+    expect(mock_svg.createDrawable).not.toHaveBeenCalled()
   })
 
   it("cancels and reverts animation on unmount", async () => {

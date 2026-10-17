@@ -1,6 +1,7 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
-import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref, watch } from "vue"
-import { isClient, tryOnMounted, tryOnUnmounted } from "@vueuse/core"
+import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { tryOnUnmounted } from "@vueuse/core"
+import { watchOptions } from "@src/utils/watch-options.ts"
 
 export interface UseTimerReturn {
   /** The underlying Anime.js timer instance. `undefined` until mounted. */
@@ -38,28 +39,11 @@ export interface UseTimerReturn {
  */
 export function useTimer(options: MaybeRef<TimerParams> = {}): UseTimerReturn {
   const timer = shallowRef<Timer>()
-  // Guards against the mount-time watch tick and tryOnMounted both building from the same options.
-  let last_built_from: TimerParams | undefined
 
-  function createFromOptions(_options: TimerParams) {
-    if (_options === last_built_from) return
-    last_built_from = _options
+  const { stop } = watchOptions(options, opt => {
     cancel()
-    timer.value = markRaw(createTimer(_options))
-  }
-
-  tryOnMounted(() => {
-    createFromOptions(unref(options))
+    timer.value = markRaw(createTimer(opt))
   })
-
-  const { stop } = watch(
-    () => unref(options),
-    options => {
-      if (!isClient) return
-      createFromOptions(options)
-    },
-    { deep: 1 }
-  )
 
   tryOnUnmounted(() => {
     stop()

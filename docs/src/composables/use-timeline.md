@@ -88,7 +88,7 @@ set(box, { opacity: 0 })
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the argument to control timeline-level parameters reactively. When options change the timeline is recreated and all previously registered `add`/`set`/`call` calls are replayed automatically.
+Pass a `ref` or `computed` as the argument to control timeline-level parameters reactively. When options change the timeline is recreated and all previously recorded `add`/`set`/`remove`/`call`/`label`/`sync` calls are replayed automatically.
 
 ```vue
 <script setup lang="ts">
@@ -201,6 +201,9 @@ export interface UseTimelineReturn {
 /**
  * Wraps Anime.js `createTimeline()` into a Vue composable. Reactively re-creates the timeline when options change, and cancels it automatically on unmount.
  *
+ * `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order: made before mount, they apply once
+ * the timeline exists, and when options change they're all replayed on the new timeline.
+ *
  * @param options - Anime.js timeline parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
  */
 export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTimelineReturn
@@ -211,9 +214,8 @@ export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTime
 ## Reactivity & Lifecycle Behavior
 
 - The timeline is created **on mount**, not at `setup()` time — `timeline` is `undefined` until then (this keeps `useTimeline` safe to call during SSR, where `onMounted` never runs). Control methods other than `add`/`set`/`call`/`remove` are no-ops and return `undefined` while `timeline` is unset.
-- `add`, `set`, and `call` calls made **before mount** are queued and replayed once the component mounts — safe to call at the top level of `<script setup>`.
-- `remove` **cannot** be called before mount; it logs a warning and is a no-op.
-- If `options` changes after mount, the current timeline is **reverted** and recreated. All registered `add`/`set`/`call` calls are replayed automatically on the new timeline.
+- `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order. Made **before mount**, they're applied once the component mounts — safe to call at the top level of `<script setup>`.
+- If `options` changes after mount, including a deep change to the options object, the current timeline is **reverted** and recreated. Every recorded call is replayed on the new timeline in the original order, so a target you `remove`d stays removed and labels still resolve.
 - On component **unmount**, the watcher and timeline are cleaned up automatically.
 
 ::: tip

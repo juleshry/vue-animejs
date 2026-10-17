@@ -121,7 +121,7 @@ export declare function useTimer(options?: MaybeRef<TimerParams>): UseTimerRetur
 ## Reactivity Behavior
 
 - The timer is created **on mount**, not at `setup()` time — `timer` is `undefined` until then (this keeps `useTimer` safe to call during SSR, where `onMounted` never runs). Control methods are no-ops and return `undefined` while `timer` is unset.
-- If `options` changes, the current timer is **cancelled** and a new one is created with the new parameters.
+- If `options` changes, including a deep change to the options object (`options.value.duration = 1000`), the current timer is **cancelled** and a new one is created with the new parameters.
 - On component **unmount**, the watcher and timer are cleaned up automatically.
 
 ::: tip

@@ -185,6 +185,7 @@ export declare const vTextSplit: Directive<HTMLElement, VTextSplitValue | undefi
 
 - On **mount**, the text is split. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous split is **reverted** and its animation **cancelled**, then the text is split and animated again from the new value.
+- The binding value is compared by **content**, not by reference: an inline object (`v-text-split="{ … }"`) that re-renders with the same values doesn't restart anything. Functions count as unchanged when their source is the same, so an inline `stagger(60)` doesn't restart on every render either, but changing only its argument isn't picked up. Add a `:key` to the element to force a fresh start in that case.
 - On **unmount**, the animation is cancelled and the split is reverted, restoring the original text content.
 - During **SSR**, the text is rendered unsplit. With `ssrHidden: true`, the element also gets `visibility: hidden`, removed on the client right after the animation is created (after `document.fonts.ready` for `lines`), or right after the split when there's no `animation`.
 

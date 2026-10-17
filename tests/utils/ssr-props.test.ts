@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vite-plus/test"
 import { ssrRenderAttrs } from "@vue/server-renderer"
 import type { StyleValue } from "vue"
-import { SSR_ATTRS_ATTR, SSR_STYLE_ATTR, stripSSRProps, toDeclaration, toSSRProps } from "@src/utils/ssr-props.ts"
+import {
+  restoreUserProps,
+  SSR_ATTRS_ATTR,
+  SSR_STYLE_ATTR,
+  stripSSRProps,
+  toDeclaration,
+  toSSRProps,
+} from "@src/utils/ssr-props.ts"
 
 describe("toSSRProps", () => {
   it("returns the style and a marker listing its keys", () => {
@@ -262,6 +269,30 @@ describe("stripSSRProps", () => {
     stripSSRProps(el, null)
     expect(el.style.cssText).toBe("opacity: 0;")
     expect(el.getAttribute("title")).toBe("x")
+  })
+})
+
+describe("restoreUserProps", () => {
+  it("removes the listed style and attributes the user doesn't set, and restores the ones they do", () => {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    el.setAttribute("pathLength", "1000")
+    el.setAttribute("stroke-dasharray", "500 510")
+    el.setAttribute("fill", "red")
+    el.style.setProperty("stroke-linecap", "butt")
+    el.style.setProperty("opacity", "0.5")
+
+    restoreUserProps(
+      el,
+      { "stroke-dasharray": "4 2", style: { opacity: 0.2 } },
+      ["stroke-linecap", "opacity"],
+      ["pathLength", "stroke-dasharray"]
+    )
+
+    expect(el.getAttribute("pathLength")).toBeNull()
+    expect(el.getAttribute("stroke-dasharray")).toBe("4 2")
+    expect(el.getAttribute("fill")).toBe("red")
+    expect(el.style.getPropertyValue("stroke-linecap")).toBe("")
+    expect(el.style.getPropertyValue("opacity")).toBe("0.2")
   })
 })
 

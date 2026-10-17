@@ -110,6 +110,38 @@ describe("useWaapi", () => {
     expect(mock_waapi.animate).toHaveBeenCalledWith(el, { opacity: 1 })
   })
 
+  it("reverts the previous animation before recreating (regression: animations stacked)", async () => {
+    const el = document.createElement("div")
+    const options = ref({ opacity: [0, 1] })
+    withSetup(() => useWaapi(el, options))
+    await nextTick()
+    mock_animation.revert.mockClear()
+    options.value = { opacity: [1, 0] }
+    await nextTick()
+    expect(mock_animation.revert).toHaveBeenCalledOnce()
+    expect(mock_waapi.animate).toHaveBeenCalledTimes(2)
+  })
+
+  it("cancels the animation on unmount (regression: it kept running)", async () => {
+    const el = document.createElement("div")
+    const [, wrapper] = withSetup(() => useWaapi(el, { opacity: [0, 1] }))
+    await nextTick()
+    mock_animation.cancel.mockClear()
+    wrapper.unmount()
+    expect(mock_animation.cancel).toHaveBeenCalledOnce()
+  })
+
+  it("warns and leaves animation undefined when target is null", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const [result] = withSetup(() => useWaapi(null as any, { opacity: [0, 1] }))
+    await nextTick()
+    expect(warn).toHaveBeenCalledWith("Target element is null or undefined")
+    expect(mock_waapi.animate).not.toHaveBeenCalled()
+    expect(result.animation.value).toBeUndefined()
+    warn.mockRestore()
+  })
+
   it("delegates resume to the animation instance", async () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useWaapi(el))
