@@ -32,6 +32,10 @@ bun add @juleshry/vue-animejs
 You can avoid listing peer dependencies manually by adding `auto-install-peers=true` to your `.npmrc`.
 :::
 
+::: tip Nuxt
+Using Nuxt? See the [Nuxt guide](/guide/nuxt) to auto-import the composables and register the directives globally.
+:::
+
 ## Requirements
 
 | Dependency     | Version  |
