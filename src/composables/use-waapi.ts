@@ -1,6 +1,6 @@
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
 import {
   type WAAPIAnimationParams,
   type DOMTargetsParam,
@@ -9,7 +9,7 @@ import {
   type EasingFunction,
 } from "animejs"
 import { markRaw, type MaybeRef, type MaybeRefOrGetter, shallowReadonly, ShallowRef, shallowRef, unref } from "vue"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseWaapiReturn {
   /** The underlying Anime.js WAAPI animation instance. `undefined` until the target is available. */

@@ -1,7 +1,7 @@
 import { type AnimatableObject, type AnimatableParams, createAnimatable } from "animejs"
 import { type MaybeRefOrGetter } from "vue"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type MaybeRefOptions, resolveOptions } from "../utils/resolve-options.ts"
 
 /** The Anime.js `AnimatableObject` instance returned by `useRawAnimatable`. */
 export type UseRawAnimatableReturn = AnimatableObject

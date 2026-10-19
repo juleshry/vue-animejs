@@ -11,9 +11,9 @@ import {
   type Timer,
 } from "animejs"
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import { watchOptions } from "@src/utils/watch-options.ts"
-import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { watchOptions } from "../utils/watch-options.ts"
+import { type MaybeRefOptions, resolveOptions } from "../utils/resolve-options.ts"
 
 /**
  * What `add`, `set` and `remove` return: the live timeline, with its own `add` / `set` / `remove` swapped for the

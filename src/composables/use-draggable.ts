@@ -1,9 +1,9 @@
 import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 import { type Draggable, type DraggableParams, createDraggable, type EasingParam } from "animejs"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseDraggableReturn {
   /** The underlying Anime.js draggable instance. `undefined` until the target is available. */

@@ -1,8 +1,8 @@
 import { createTimer, type Timer, type TimerParams } from "animejs"
 import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
-import { watchOptions } from "@src/utils/watch-options.ts"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { watchOptions } from "../utils/watch-options.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseTimerReturn {
   /** The underlying Anime.js timer instance. `undefined` until mounted. */

@@ -1,9 +1,9 @@
 import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */

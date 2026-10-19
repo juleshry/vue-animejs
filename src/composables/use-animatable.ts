@@ -7,9 +7,9 @@ import {
 } from "animejs"
 import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 /** The keys of `T` that represent animatable properties, excluding Anime.js's reserved config keys (`ease`, `duration`, `unit`, `modifier`, `composition`). */
 export type AnimatablePropertyKeys<T extends AnimatableParams> = Exclude<keyof T, keyof AnimatablePropertyParamsOptions>

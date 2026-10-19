@@ -1,7 +1,7 @@
 import { animate, type AnimationParams, type JSAnimation } from "animejs"
 import { type MaybeRefOrGetter } from "vue"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { type MaybeRefOptions, resolveOptions } from "../utils/resolve-options.ts"
 
 /** The Anime.js `JSAnimation` instance returned by `useRawAnimate`. */
 export type UseRawAnimateReturn = JSAnimation

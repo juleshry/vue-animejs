@@ -1,6 +1,6 @@
 import { type ComponentPublicInstance, isRef, type MaybeRef, type MaybeRefOrGetter, type Ref, toValue } from "vue"
 import { type MaybeElementRef, unrefElement } from "@vueuse/core"
-import { isPlainObject } from "@src/utils/is-plain-object.ts"
+import { isPlainObject } from "./is-plain-object.ts"
 
 /**
  * An options object whose direct properties may each be a ref. A ref may also hold `null`, like an

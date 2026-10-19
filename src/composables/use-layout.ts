@@ -1,6 +1,6 @@
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
 import {
   type AutoLayout,
   type AutoLayoutParams,
@@ -10,7 +10,7 @@ import {
   type Timeline,
 } from "animejs"
 import { markRaw, type MaybeRef, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseLayoutReturn {
   /** The underlying Anime.js `AutoLayout` instance. `undefined` until the root element is available. */

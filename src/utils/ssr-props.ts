@@ -1,5 +1,5 @@
 import { normalizeStyle, type StyleValue } from "vue"
-import { kebabCase } from "@src/utils/kebab-case.ts"
+import { kebabCase } from "./kebab-case.ts"
 
 /** Lists (comma-separated, kebab-case) the style keys a directive injected on the server. */
 export const SSR_STYLE_ATTR = "data-anime-ssr"

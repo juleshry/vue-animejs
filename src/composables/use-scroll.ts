@@ -8,9 +8,9 @@ import {
   type Tickable,
   type WAAPIAnimation,
 } from "animejs"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets, resolveTarget } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseScrollReturn {
   /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */

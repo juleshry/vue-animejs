@@ -1,8 +1,8 @@
 import { tryOnUnmounted } from "@vueuse/core"
-import { watchOptions } from "@src/utils/watch-options.ts"
+import { watchOptions } from "../utils/watch-options.ts"
 import { createScope, type Scope, type ScopeMethod, type ScopeParams, type Tickable } from "animejs"
 import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseScopeReturn {
   /** The underlying Anime.js `Scope` instance. */

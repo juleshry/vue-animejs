@@ -1,6 +1,6 @@
 import { computed, type MaybeRefOrGetter, watch, type WatchHandle } from "vue"
 import { tryOnMounted } from "@vueuse/core"
-import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
+import { type MaybeRefOptions, resolveOptions } from "./resolve-options.ts"
 
 /**
  * Calls `build` with the options once the component has mounted, then again whenever they change:

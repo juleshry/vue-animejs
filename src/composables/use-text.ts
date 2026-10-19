@@ -1,7 +1,7 @@
 import { splitText, type TextSplitter, type TextSplitterParams } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
 import {
   computed,
   markRaw,
@@ -12,7 +12,7 @@ import {
   type MaybeRefOrGetter,
   type ShallowRef,
 } from "vue"
-import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */

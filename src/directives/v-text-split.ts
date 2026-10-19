@@ -7,9 +7,9 @@ import {
   type TextSplitterParams,
 } from "animejs"
 import type { Directive } from "vue"
-import { deferMount } from "@src/utils/deferred-mount.ts"
-import { isSameBinding } from "@src/utils/same-binding.ts"
-import { stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
+import { deferMount } from "../utils/deferred-mount.ts"
+import { isSameBinding } from "../utils/same-binding.ts"
+import { stripSSRProps, toSSRProps } from "../utils/ssr-props.ts"
 
 export interface VTextSplitValue extends TextSplitterParams {
   animation?: AnimationParams

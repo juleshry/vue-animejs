@@ -1,8 +1,8 @@
 import { computed, isRef, type MaybeRefOrGetter, watch, type WatchHandle } from "vue"
 import { tryOnMounted } from "@vueuse/core"
 import { type TargetsParam } from "animejs"
-import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
-import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
+import { type AnimationTargets, resolveTarget } from "./resolve-target.ts"
+import { type MaybeRefOptions, resolveOptions } from "./resolve-options.ts"
 
 /**
  * Calls `build` with the resolved target and options once the component has mounted, then again

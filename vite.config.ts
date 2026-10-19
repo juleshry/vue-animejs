@@ -26,6 +26,18 @@ export default defineConfig({
       "typescript/no-explicit-any": "error",
       "vite-plus/prefer-vite-plus-imports": "error",
     },
+    overrides: [
+      {
+        // vue-tsc copies specifiers into the emitted .d.ts as-is, and consumers can't resolve the alias
+        files: ["src/**"],
+        rules: {
+          "no-restricted-imports": [
+            "error",
+            { patterns: [{ regex: "^@(src/|lib$)", message: "Use a relative import inside src/." }] },
+          ],
+        },
+      },
+    ],
     options: {
       typeAware: true,
       typeCheck: true,

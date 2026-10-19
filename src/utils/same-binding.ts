@@ -1,4 +1,4 @@
-import { isPlainObject } from "@src/utils/is-plain-object.ts"
+import { isPlainObject } from "./is-plain-object.ts"
 
 /**
  * Whether two directive binding values describe the same animation, so `updated` can skip the
