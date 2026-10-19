@@ -1,4 +1,4 @@
-import { computed, type ComputedRef, markRaw, type MaybeRef, shallowRef } from "vue"
+import { computed, type ComputedRef, markRaw, type MaybeRefOrGetter, shallowRef } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 import {
   onScroll,
@@ -10,13 +10,18 @@ import {
 } from "animejs"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import { watchTarget } from "@src/utils/watch-target.ts"
+import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
 
 export interface UseScrollReturn {
   /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
   observer: ComputedRef<ScrollObserver | undefined>
-  /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option. */
+  /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option: `useTimeline({ autoplay })`. */
   autoplay: ComputedRef<ScrollObserver | false>
-  /** `{ autoplay }`, ready to pass straight as-is into `useTimeline`/`useTimer`/`useAnimate`'s options argument. */
+  /**
+   * `{ autoplay }`, ready to pass straight as-is into `useTimeline`/`useTimer`/`useAnimate`'s options argument.
+   *
+   * @deprecated Options accept refs as direct properties: pass `{ autoplay }` instead. Will be removed in the next major.
+   */
   autoplayComputed: ComputedRef<{ autoplay: ScrollObserver | false }>
   /** Re-reads the container and target bounds. */
   refresh: () => ScrollObserver | undefined
@@ -34,17 +39,17 @@ export interface UseScrollReturn {
  * Wraps Anime.js `onScroll()` into a Vue composable. Creates the ScrollObserver on mount, reactively re-creates it
  * when the container, target, or options change, and reverts it automatically on unmount.
  *
- * Call it before the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`): its mount hook
+ * Call it before the composable that consumes `autoplay` (e.g. `useTimeline`): its mount hook
  * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
- * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export function useScroll(
   container: AnimationTargets,
   target: AnimationTargets,
-  options: MaybeRef<Omit<ScrollObserverParams, "container" | "target">> = {}
+  options: MaybeRefOrGetter<MaybeRefOptions<Omit<ScrollObserverParams, "container" | "target">>> = {}
 ): UseScrollReturn {
   const instance = shallowRef<ScrollObserver>()
 

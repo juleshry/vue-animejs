@@ -154,4 +154,17 @@ describe("useText", () => {
       wrapper.unmount()
     }
   )
+
+  it("re-splits when a ref inside the params changes", async () => {
+    const el = document.createElement("div")
+    const words = ref(true)
+    withSetup(() => useText(el, { words, chars: true }))
+    await nextTick()
+    expect(mock_splitText).toHaveBeenCalledOnce()
+    expect(mock_splitText).toHaveBeenCalledWith(el, { words: true, chars: true })
+    words.value = false
+    await nextTick()
+    expect(mock_splitText).toHaveBeenCalledTimes(2)
+    expect(mock_splitText).toHaveBeenLastCalledWith(el, { words: false, chars: true })
+  })
 })

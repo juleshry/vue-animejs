@@ -187,4 +187,15 @@ describe("useTimer", () => {
     result.stretch(5000)
     expect(mock_timer.stretch).toHaveBeenCalledWith(5000)
   })
+
+  it("recreates the timer when a ref inside the options changes", async () => {
+    const duration = ref(1000)
+    withSetup(() => useTimer({ duration, loop: true }))
+    expect(mock_createTimer).toHaveBeenCalledOnce()
+    expect(mock_createTimer).toHaveBeenCalledWith({ duration: 1000, loop: true })
+    duration.value = 2000
+    await nextTick()
+    expect(mock_createTimer).toHaveBeenCalledTimes(2)
+    expect(mock_createTimer).toHaveBeenLastCalledWith({ duration: 2000, loop: true })
+  })
 })

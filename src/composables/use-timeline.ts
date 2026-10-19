@@ -1,12 +1,4 @@
-import {
-  markRaw,
-  type MaybeRef,
-  type MaybeRefOrGetter,
-  shallowReadonly,
-  type ShallowRef,
-  shallowRef,
-  toValue,
-} from "vue"
+import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import {
   type AnimationParams,
   type Callback,
@@ -21,6 +13,7 @@ import {
 import { tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
 import { watchOptions } from "@src/utils/watch-options.ts"
+import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
 
 /**
  * What `add`, `set` and `remove` return: the live timeline, with its own `add` / `set` / `remove` swapped for the
@@ -30,13 +23,13 @@ export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
   set: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition
   ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
@@ -49,13 +42,13 @@ export interface UseTimelineReturn {
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
   set: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition
   ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
@@ -102,9 +95,9 @@ export interface UseTimelineReturn {
  * `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order: made before mount, they apply once
  * the timeline exists, and when options change they're all replayed on the new timeline.
  *
- * @param options - Anime.js timeline parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js timeline parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
-export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimelineReturn {
+export function useTimeline(options: MaybeRefOrGetter<MaybeRefOptions<TimelineParams>> = {}): UseTimelineReturn {
   // Every call that builds the timeline's content, in order, so a re-created timeline gets it all back
   const queue: ((instance: Timeline) => Timeline)[] = []
 
@@ -129,14 +122,18 @@ export function useTimeline(options: MaybeRef<TimelineParams> = {}): UseTimeline
 
   function add(
     targets: AnimationTargets,
-    _params: MaybeRefOrGetter<AnimationParams>,
+    _params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) {
-    return toChain(enqueue(instance => instance.add(resolveTarget(targets), toValue(_params), position)))
+    return toChain(enqueue(instance => instance.add(resolveTarget(targets), resolveOptions(_params), position)))
   }
 
-  function set(targets: AnimationTargets, _params: MaybeRefOrGetter<AnimationParams>, position?: TimelinePosition) {
-    return toChain(enqueue(instance => instance.set(resolveTarget(targets), toValue(_params), position)))
+  function set(
+    targets: AnimationTargets,
+    _params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
+    position?: TimelinePosition
+  ) {
+    return toChain(enqueue(instance => instance.set(resolveTarget(targets), resolveOptions(_params), position)))
   }
 
   function remove(targets: AnimationTargets, propertyName?: string) {

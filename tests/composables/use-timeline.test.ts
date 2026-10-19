@@ -455,4 +455,36 @@ describe("useTimeline", () => {
       expect(mock_timeline.remove).toHaveBeenCalledWith(child_wrapper.element, undefined)
     })
   })
+
+  it("recreates the timeline when a ref inside the options changes", async () => {
+    const loop = ref(false)
+    withSetup(() => useTimeline({ loop, duration: 400 }))
+    expect(mock_createTimeline).toHaveBeenCalledOnce()
+    expect(mock_createTimeline).toHaveBeenCalledWith({ loop: false, duration: 400 })
+    loop.value = true
+    await nextTick()
+    expect(mock_createTimeline).toHaveBeenCalledTimes(2)
+    expect(mock_createTimeline).toHaveBeenLastCalledWith({ loop: true, duration: 400 })
+  })
+
+  it("unwraps refs inside add/set params when the timeline is (re)built, without watching them", async () => {
+    const el = document.createElement("div")
+    const distance = ref(100)
+    const loop = ref(false)
+    withSetup(() => {
+      const tl = useTimeline({ loop })
+      tl.add(el, { translateX: distance }).set(el, { opacity: distance })
+    })
+    expect(mock_timeline.add).toHaveBeenCalledWith(el, { translateX: 100 }, undefined)
+    expect(mock_timeline.set).toHaveBeenCalledWith(el, { opacity: 100 }, undefined)
+
+    distance.value = 200
+    await nextTick()
+    expect(mock_createTimeline).toHaveBeenCalledOnce()
+
+    loop.value = true
+    await nextTick()
+    expect(mock_timeline.add).toHaveBeenLastCalledWith(el, { translateX: 200 }, undefined)
+    expect(mock_timeline.set).toHaveBeenLastCalledWith(el, { opacity: 200 }, undefined)
+  })
 })

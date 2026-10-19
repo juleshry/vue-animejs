@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vite-plus/test"
-import { defineComponent, h, nextTick, ref, useTemplateRef } from "vue"
+import { defineComponent, h, nextTick, onMounted, reactive, ref, useTemplateRef } from "vue"
 import { mount } from "@vue/test-utils"
 import { watchTarget } from "@src/utils/watch-target.ts"
 import { mountWithTarget, type TargetForm, withSetup } from "../utils"
@@ -101,5 +101,85 @@ describe("watchTarget", () => {
     options.value = { opacity: 1 }
     await nextTick()
     expect(build).toHaveBeenCalledOnce()
+  })
+
+  it("rebuilds exactly once when a ref inside the options changes", async () => {
+    const build = vi.fn()
+    const el = document.createElement("div")
+    const distance = ref(0)
+    withSetup(() => watchTarget(el, { translateX: distance, duration: 800 }, build))
+    await nextTick()
+    expect(build).toHaveBeenCalledOnce()
+    expect(build).toHaveBeenLastCalledWith(el, { translateX: 0, duration: 800 })
+
+    distance.value = 250
+    await nextTick()
+    expect(build).toHaveBeenCalledTimes(2)
+    expect(build).toHaveBeenLastCalledWith(el, { translateX: 250, duration: 800 })
+  })
+
+  it.each(forms)("builds exactly once on mount with refs inside the options (%s)", async form => {
+    const build = vi.fn()
+    const distance = ref(0)
+    const wrapper = mountWithTarget(form, target => watchTarget(target, { translateX: distance }, build))
+    await nextTick()
+    expect(build).toHaveBeenCalledOnce()
+    wrapper.unmount()
+  })
+
+  it("rebuilds when the options object is mutated in place", async () => {
+    const build = vi.fn()
+    const options = ref<{ opacity: number; duration?: number }>({ opacity: 0 })
+    withSetup(() => watchTarget(document.createElement("div"), options, build))
+    options.value.duration = 400
+    await nextTick()
+    expect(build).toHaveBeenCalledTimes(2)
+    expect(build.mock.lastCall?.[1]).toEqual({ opacity: 0, duration: 400 })
+  })
+
+  it("rebuilds when a reactive() options object is mutated in place", async () => {
+    const build = vi.fn()
+    const options = reactive({ opacity: 0 })
+    withSetup(() => watchTarget(document.createElement("div"), options, build))
+    options.opacity = 1
+    await nextTick()
+    expect(build).toHaveBeenCalledTimes(2)
+    expect(build.mock.lastCall?.[1]).toEqual({ opacity: 1 })
+  })
+
+  it("accepts a getter for the whole options object", async () => {
+    const build = vi.fn()
+    const distance = ref(0)
+    withSetup(() => watchTarget(document.createElement("div"), () => ({ translateX: distance.value }), build))
+    distance.value = 250
+    await nextTick()
+    expect(build).toHaveBeenCalledTimes(2)
+    expect(build.mock.lastCall?.[1]).toEqual({ translateX: 250 })
+  })
+
+  it("picks up a change made before mount in the mount build, with no extra build", async () => {
+    const build = vi.fn()
+    const el = document.createElement("div")
+    const distance = ref(0)
+    mount(
+      defineComponent({
+        setup() {
+          watchTarget(el, { translateX: distance }, build)
+          distance.value = 250
+          onMounted(() => expect(build).toHaveBeenCalledWith(el, { translateX: 250 }))
+          return () => h("div")
+        },
+      })
+    )
+    await nextTick()
+    expect(build).toHaveBeenCalledOnce()
+    expect(build).toHaveBeenCalledWith(el, { translateX: 250 })
+  })
+
+  it("passes undefined options through unchanged", () => {
+    const build = vi.fn()
+    const el = document.createElement("div")
+    withSetup(() => watchTarget<undefined>(el, undefined, build))
+    expect(build).toHaveBeenCalledWith(el, undefined)
   })
 })

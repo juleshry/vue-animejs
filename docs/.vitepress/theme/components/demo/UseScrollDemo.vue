@@ -7,13 +7,13 @@
   const target = useTemplateRef<HTMLDivElement>("target")
   const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
 
-  const { autoplayComputed } = useScroll(container, target, {
+  const { autoplay } = useScroll(container, target, {
     enter: "bottom top",
     leave: "top bottom",
     sync: true,
   })
 
-  const { add } = useTimeline(autoplayComputed)
+  const { add } = useTimeline({ autoplay })
 
   add(box, { translateX: 200, duration: 1000 })
 </script>

@@ -40,7 +40,7 @@ const { play, pause, restart } = useWaapi(box, {
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the second argument.
+Put a `ref` straight into the options object. The whole options object can also be a `ref`, a `computed` or a getter, which is what you need for a derived value like the one below.
 
 ::: warning
 Changing options recreates the animation from scratch with the new parameters.
@@ -48,19 +48,17 @@ Changing options recreates the animation from scratch with the new parameters.
 
 ```vue
 <script setup lang="ts">
-import { useTemplateRef, ref, computed } from "vue"
+import { useTemplateRef, ref } from "vue"
 import { useWaapi } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 const distance = ref(100)
 
-const options = computed(() => ({
+useWaapi(box, () => ({
   translate: `${distance.value}px`,
   duration: 600,
   ease: "ease-out",
 }))
-
-useWaapi(box, options)
 
 function increase() {
   distance.value += 50
@@ -186,11 +184,11 @@ export interface UseWaapiReturn {
  * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
  * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
- * @param options - Anime.js WAAPI animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js WAAPI animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useWaapi(
   targets: AnimationTargets,
-  options?: MaybeRef<WAAPIAnimationParams>
+  options?: MaybeRefOrGetter<MaybeRefOptions<WAAPIAnimationParams>>
 ): UseWaapiReturn
 ```
 
@@ -200,7 +198,7 @@ export declare function useWaapi(
 
 - The animation is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animation as soon as it resolves.
-- If either `targets` or `options` changes, the current animation is **reverted** and a new one is created.
+- If either `targets` or `options` changes, the current animation is **reverted** and a new one is created. For `options`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - If `targets` resolves to nothing, a warning is logged and `animation` stays `undefined`.
 - On component **unmount**, the watcher is stopped and the animation is **cancelled** automatically.
 

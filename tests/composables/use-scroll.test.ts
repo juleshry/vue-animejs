@@ -208,4 +208,39 @@ describe("useScroll", () => {
     wrapper.unmount()
     expect(mock_observer.revert).toHaveBeenCalled()
   })
+
+  it("recreates the observer when a ref inside the options changes", async () => {
+    const container = document.createElement("div")
+    const target = document.createElement("div")
+    const sync = ref(false)
+    withSetup(() => useScroll(container, target, { sync }))
+    sync.value = true
+    await nextTick()
+    expect(mock_onScroll).toHaveBeenCalledTimes(2)
+    expect(mock_onScroll).toHaveBeenLastCalledWith({ sync: true, container, target })
+  })
+
+  it("builds a useTimeline given { autoplay } once, with the observer in place", async () => {
+    let creations = 0
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const container = useTemplateRef<HTMLElement>("container")
+          const target = useTemplateRef<HTMLElement>("target")
+          const { autoplay } = useScroll(container, target, { sync: true })
+          const { timeline } = useTimeline({ autoplay, loop: true })
+          watch(timeline, instance => {
+            if (instance) creations++
+          })
+          return () => h("div", { ref: "container" }, [h("div", { ref: "target" })])
+        },
+      })
+    )
+    await nextTick()
+    await nextTick()
+    expect(mock_createTimeline).toHaveBeenCalledOnce()
+    expect(mock_createTimeline).toHaveBeenCalledWith({ autoplay: mock_observer, loop: true })
+    expect(creations).toBe(1)
+    wrapper.unmount()
+  })
 })

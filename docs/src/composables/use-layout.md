@@ -74,7 +74,7 @@ function moveFirst() {
 
 ### Reactive params
 
-Pass a `ref` or `computed` as the second argument to change layout options reactively.
+Put a `ref` straight into the params object to change layout options reactively. The whole params object can also be a `ref`, a `computed` or a getter.
 
 ::: warning
 Changing `params` destroys and re-creates the `AutoLayout` instance.
@@ -82,14 +82,13 @@ Changing `params` destroys and re-creates the `AutoLayout` instance.
 
 ```vue
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from "vue"
+import { ref, useTemplateRef } from "vue"
 import { useLayout } from "@juleshry/vue-animejs"
 
 const container = useTemplateRef("container")
 const duration = ref(400)
 
-const params = computed(() => ({ ease: "outExpo", duration: duration.value }))
-const { record, animate } = useLayout(container, params)
+const { record, animate } = useLayout(container, { ease: "outExpo", duration })
 </script>
 ```
 
@@ -115,11 +114,11 @@ export interface UseLayoutReturn {
  * Wraps Anime.js `createLayout()` into a Vue composable. Reactively re-creates the layout observer when the root element or params change, and reverts it automatically on unmount.
  *
  * @param root - The container element whose children will be tracked. Accepts a template ref, a CSS selector, or a reactive ref to either.
- * @param params - Anime.js auto-layout parameters. Accepts a plain object or a reactive ref / computed.
+ * @param params - Anime.js auto-layout parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
 export declare function useLayout(
   root: MaybeRef<DOMTargetSelector> | MaybeComputedElementRef,
-  params?: MaybeRef<AutoLayoutParams>
+  params?: MaybeRefOrGetter<MaybeRefOptions<AutoLayoutParams>>
 ): UseLayoutReturn
 ```
 
@@ -129,7 +128,7 @@ export declare function useLayout(
 
 - The layout is created once the component has **mounted**, whatever form `root` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the layout as soon as it resolves.
-- If either `root` or `params` changes, the current layout is **reverted** and a new one is created.
+- If either `root` or `params` changes, the current layout is **reverted** and a new one is created. For `params`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the layout watcher is stopped and the layout is reverted automatically.
 
 ::: tip

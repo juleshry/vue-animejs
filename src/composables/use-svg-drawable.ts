@@ -27,7 +27,7 @@ export function useSvgDrawable(
   const drawable = shallowRef<DrawableSVGGeometry | undefined>()
 
   // `start` / `end` only set the initial draw: changing them later doesn't rebuild the drawable
-  const { stop } = watchTarget(target as AnimationTargets, undefined, el => {
+  const { stop } = watchTarget<undefined>(target as AnimationTargets, undefined, el => {
     drawable.value = undefined
     if (!el) {
       console.warn("[useSvgDrawable] Target element is null or undefined")

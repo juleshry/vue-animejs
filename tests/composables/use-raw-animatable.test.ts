@@ -72,4 +72,13 @@ describe("useRawAnimatable", () => {
 
     expect(mock_createAnimatable).toHaveBeenCalledWith(child_wrapper.element, { x: 100 })
   })
+
+  it("unwraps refs inside the options, and a getter for the whole object", () => {
+    const el = document.createElement("div")
+    const duration = ref(100)
+    useRawAnimatable(el, { x: 0, duration })
+    expect(mock_createAnimatable).toHaveBeenLastCalledWith(el, { x: 0, duration: 100 })
+    useRawAnimatable(el, () => ({ x: 0, duration: duration.value }))
+    expect(mock_createAnimatable).toHaveBeenLastCalledWith(el, { x: 0, duration: 100 })
+  })
 })

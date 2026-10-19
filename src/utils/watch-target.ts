@@ -1,7 +1,8 @@
-import { isRef, type MaybeRef, unref, watch, type WatchHandle } from "vue"
+import { computed, isRef, type MaybeRefOrGetter, watch, type WatchHandle } from "vue"
 import { tryOnMounted } from "@vueuse/core"
 import { type TargetsParam } from "animejs"
 import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.ts"
+import { type MaybeRefOptions, resolveOptions } from "@src/utils/resolve-options.ts"
 
 /**
  * Calls `build` with the resolved target and options once the component has mounted, then again
@@ -16,6 +17,9 @@ import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.
  * yet: `build` is skipped instead of being called with `undefined`, and the watcher builds once it
  * resolves.
  *
+ * The options are read through `resolveOptions`: a ref or getter for the whole object, refs as its
+ * direct properties, and in-place mutation of a reactive options object all trigger a rebuild.
+ *
  * @param target - The raw target, as passed to the composable.
  * @param options - The composable's options, as passed to the composable.
  * @param build - Creates the Anime.js instance. Never called twice in a row with the same target and options.
@@ -23,7 +27,7 @@ import { type AnimationTargets, resolveTarget } from "@src/utils/resolve-target.
  */
 export function watchTarget<O>(
   target: AnimationTargets,
-  options: MaybeRef<O>,
+  options: MaybeRefOrGetter<MaybeRefOptions<O>>,
   build: (el: TargetsParam, opt: O) => void
 ): WatchHandle {
   // Guards against tryOnMounted and the mount-time watch tick both building from the same inputs.
@@ -35,13 +39,17 @@ export function watchTarget<O>(
     build(el, opt)
   }
 
+  // resolveOptions returns a new object on every read: the computed caches it, so the mount-time build
+  // and the watcher's mount tick see the same object and buildOnce can dedupe them
+  const resolved_options = computed(() => resolveOptions(options))
+
   tryOnMounted(() => {
     const el = resolveTarget(target)
     if (el == null && isReactiveTarget(target)) return
-    buildOnce(el, unref(options))
+    buildOnce(el, resolved_options.value)
   })
 
-  return watch([() => resolveTarget(target), () => unref(options)], ([el, opt]) => buildOnce(el, opt), {
+  return watch([() => resolveTarget(target), resolved_options], ([el, opt]) => buildOnce(el, opt), {
     flush: "post",
   })
 }

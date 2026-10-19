@@ -2,7 +2,17 @@ import { splitText, type TextSplitter, type TextSplitterParams } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets } from "@src/utils/resolve-target.ts"
 import { watchTarget } from "@src/utils/watch-target.ts"
-import { computed, markRaw, shallowReadonly, shallowRef, type ComputedRef, type MaybeRef, type ShallowRef } from "vue"
+import {
+  computed,
+  markRaw,
+  shallowReadonly,
+  shallowRef,
+  type ComputedRef,
+  type MaybeRef,
+  type MaybeRefOrGetter,
+  type ShallowRef,
+} from "vue"
+import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
 
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
@@ -23,11 +33,11 @@ export interface UseTextReturn {
  * Wraps Anime.js `splitText()` into a Vue composable. Reactively re-splits the text when the target or params change, and reverts the DOM automatically on unmount.
  *
  * @param _target - The element(s) whose text content should be split. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param _params - Anime.js text-splitter parameters. Accepts a plain object or a reactive ref / computed.
+ * @param _params - Anime.js text-splitter parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
 export function useText(
   _target: MaybeRef<HTMLElement | NodeList | string | HTMLElement[]> | MaybeComputedElementRef,
-  _params?: MaybeRef<TextSplitterParams>
+  _params?: MaybeRefOrGetter<MaybeRefOptions<TextSplitterParams>>
 ): UseTextReturn {
   const splitter = shallowRef<TextSplitter | undefined>()
 
@@ -35,7 +45,7 @@ export function useText(
   const words = computed<HTMLElement[]>(() => splitter.value?.words ?? [])
   const chars = computed<HTMLElement[]>(() => splitter.value?.chars ?? [])
 
-  const { stop } = watchTarget(_target as AnimationTargets, _params, (el, params) => {
+  const { stop } = watchTarget<TextSplitterParams | undefined>(_target as AnimationTargets, _params, (el, params) => {
     revert()
     splitter.value = undefined
 

@@ -105,11 +105,11 @@ export type UseRawAnimateReturn = JSAnimation
  * unconditionally and immediately, with no client-only guard), never at `setup()` top level.
  *
  * @param target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useRawAnimate(
   target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
-  options?: MaybeRef<AnimationParams>
+  options?: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>
 ): JSAnimation
 ```
 

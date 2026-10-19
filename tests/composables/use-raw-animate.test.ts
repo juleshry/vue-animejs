@@ -72,4 +72,13 @@ describe("useRawAnimate", () => {
 
     expect(mock_animate).toHaveBeenCalledWith(child_wrapper.element, { opacity: [0, 1] })
   })
+
+  it("unwraps refs inside the options, and a getter for the whole object", () => {
+    const el = document.createElement("div")
+    const distance = ref(100)
+    useRawAnimate(el, { translateX: distance, duration: 300 })
+    expect(mock_animate).toHaveBeenLastCalledWith(el, { translateX: 100, duration: 300 })
+    useRawAnimate(el, () => ({ translateX: distance.value }))
+    expect(mock_animate).toHaveBeenLastCalledWith(el, { translateX: 100 })
+  })
 })

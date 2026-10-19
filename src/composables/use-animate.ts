@@ -1,8 +1,9 @@
-import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { type JSAnimation, animate, type TargetsParam, type AnimationParams } from "animejs"
 import { tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets } from "@src/utils/resolve-target.ts"
 import { watchTarget } from "@src/utils/watch-target.ts"
+import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
 
 export interface UseAnimateReturn {
   /** The underlying Anime.js animation instance. `undefined` until the target is available. */
@@ -39,9 +40,12 @@ export interface UseAnimateReturn {
  * Wraps Anime.js `animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
  *
  * @param _target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
- * @param _options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param _options - Anime.js animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
-export function useAnimate(_target: AnimationTargets, _options: MaybeRef<AnimationParams> = {}): UseAnimateReturn {
+export function useAnimate(
+  _target: AnimationTargets,
+  _options: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>> = {}
+): UseAnimateReturn {
   const animation = shallowRef<JSAnimation>()
 
   const { stop } = watchTarget(_target, _options, createAnimation)

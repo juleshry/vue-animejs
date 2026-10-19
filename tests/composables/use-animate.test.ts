@@ -250,4 +250,17 @@ describe("useAnimate", () => {
       wrapper.unmount()
     }
   )
+
+  it("recreates the animation when a ref inside the options changes", async () => {
+    const el = document.createElement("div")
+    const value = ref(1)
+    withSetup(() => useAnimate(el, { translateX: value, duration: 800 }))
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledOnce()
+    expect(mock_animate).toHaveBeenCalledWith(el, { translateX: 1, duration: 800 })
+    value.value = 2
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledTimes(2)
+    expect(mock_animate).toHaveBeenLastCalledWith(el, { translateX: 2, duration: 800 })
+  })
 })

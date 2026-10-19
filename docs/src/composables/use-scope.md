@@ -155,9 +155,9 @@ export interface UseScopeReturn {
  * Methods added before mount are queued and replayed once the component is mounted. When `params` change, every
  * method registered so far is replayed on the new scope.
  *
- * @param params - Anime.js scope parameters. Accepts a plain object or a reactive ref / computed.
+ * @param params - Anime.js scope parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
-export declare function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn
+export declare function useScope(params: MaybeRefOrGetter<MaybeRefOptions<ScopeParams>>): UseScopeReturn
 ```
 
 :::
@@ -165,7 +165,7 @@ export declare function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn
 ## Reactivity & Lifecycle
 
 - The scope is created once the component has **mounted** — `scope` is `undefined` until then.
-- If `params` is a `ref` or `computed` and its value changes (including a property mutated in place), the current scope is **reverted** and a new one is created with the updated parameters. Every method registered so far through `add()`, `registerMethod()` and `addOnce()` is replayed on the new scope, in registration order.
+- If `params` changes (a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place), the current scope is **reverted** and a new one is created with the updated parameters. Every method registered so far through `add()`, `registerMethod()` and `addOnce()` is replayed on the new scope, in registration order.
 - Calls to `add()`, `registerMethod()`, and `addOnce()` made before the component mounts are **queued** and executed in `onMounted` — so calling `add()` at the top level of `<script setup>` is safe and idiomatic.
 - When `mediaQueries` are provided, the scope automatically calls `refresh()` whenever a media query match changes.
 - On component **unmount**, `scope.revert()` is called automatically, removing all tracked animations from the DOM.

@@ -5,10 +5,11 @@ import {
   type AnimatablePropertyParamsOptions,
   createAnimatable,
 } from "animejs"
-import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { tryOnUnmounted } from "@vueuse/core"
 import { type AnimationTargets } from "@src/utils/resolve-target.ts"
 import { watchTarget } from "@src/utils/watch-target.ts"
+import { type MaybeRefOptions } from "@src/utils/resolve-options.ts"
 
 /** The keys of `T` that represent animatable properties, excluding Anime.js's reserved config keys (`ease`, `duration`, `unit`, `modifier`, `composition`). */
 export type AnimatablePropertyKeys<T extends AnimatableParams> = Exclude<keyof T, keyof AnimatablePropertyParamsOptions>
@@ -29,11 +30,11 @@ export interface UseAnimatableReturn<T extends AnimatableParams = AnimatablePara
  * Wraps Anime.js `createAnimatable()` into a Vue composable. Reactively re-creates the animatable when the target or options change, and reverts it automatically on unmount.
  *
  * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param options - Anime.js animatable parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js animatable parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export function useAnimatable<T extends AnimatableParams = AnimatableParams>(
   targets: AnimationTargets,
-  options: MaybeRef<T> = {} as T
+  options: MaybeRefOrGetter<MaybeRefOptions<T>> = {} as MaybeRefOptions<T>
 ): UseAnimatableReturn<T> {
   const animatable = shallowRef<TypedAnimatableObject<T>>()
 
