@@ -1,9 +1,9 @@
 import { animate, type AnimationParams, type JSAnimation } from "animejs"
 import type { Directive } from "vue"
-import { deferMount } from "@src/utils/deferred-mount.ts"
-import { isSameBinding } from "@src/utils/same-binding.ts"
-import { getInitialStyle } from "@src/utils/initial-style.ts"
-import { stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
+import { deferMount } from "../utils/deferred-mount.ts"
+import { isSameBinding } from "../utils/same-binding.ts"
+import { getInitialStyle } from "../utils/initial-style.ts"
+import { stripSSRProps, toSSRProps } from "../utils/ssr-props.ts"
 
 const instances = new WeakMap<HTMLElement, JSAnimation>()
 

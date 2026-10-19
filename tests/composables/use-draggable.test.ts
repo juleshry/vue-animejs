@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
-import { nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, onMounted, ref, useTemplateRef } from "vue"
+import { mount } from "@vue/test-utils"
 import { useDraggable } from "@lib"
 import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
 import { makeDraggableMock } from "../mocks"
@@ -151,4 +152,55 @@ describe("useDraggable", () => {
       wrapper.unmount()
     }
   )
+
+  it("recreates the draggable when a ref inside the options changes", async () => {
+    const el = document.createElement("div")
+    const value = ref(1)
+    withSetup(() => useDraggable(el, { releaseMass: value }))
+    await nextTick()
+    expect(mock_createDraggable).toHaveBeenCalledOnce()
+    expect(mock_createDraggable).toHaveBeenCalledWith(el, { releaseMass: 1 })
+    value.value = 2
+    await nextTick()
+    expect(mock_createDraggable).toHaveBeenCalledTimes(2)
+    expect(mock_createDraggable).toHaveBeenLastCalledWith(el, { releaseMass: 2 })
+  })
+
+  it("builds once, with the element, from a container template ref put straight into the options", async () => {
+    let container_el: HTMLElement | null = null
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const box = useTemplateRef<HTMLElement>("box")
+          const container = useTemplateRef<HTMLElement>("container")
+          useDraggable(box, { container, containerPadding: 10 })
+          onMounted(() => (container_el = container.value))
+          return () => h("div", { ref: "container" }, [h("div", { ref: "box" })])
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_createDraggable).toHaveBeenCalledOnce()
+    expect(mock_createDraggable.mock.calls[0][1]).toEqual({ container: container_el, containerPadding: 10 })
+    expect(container_el).toBeInstanceOf(HTMLDivElement)
+    wrapper.unmount()
+  })
+
+  it("resolves a component template ref in the options to the component's root element", async () => {
+    const Stage = defineComponent({ setup: () => () => h("section", { class: "stage" }) })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const box = useTemplateRef<HTMLElement>("box")
+          const container = useTemplateRef<InstanceType<typeof Stage>>("container")
+          useDraggable(box, { container })
+          return () => h("div", [h(Stage, { ref: "container" }), h("div", { ref: "box" })])
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_createDraggable).toHaveBeenCalledOnce()
+    expect(mock_createDraggable.mock.calls[0][1]?.container).toBe(wrapper.find(".stage").element)
+    wrapper.unmount()
+  })
 })

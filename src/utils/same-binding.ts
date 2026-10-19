@@ -1,3 +1,5 @@
+import { isPlainObject } from "./is-plain-object.ts"
+
 /**
  * Whether two directive binding values describe the same animation, so `updated` can skip the
  * rebuild. An inline binding (`v-animate="{ translateX: 250 }"`) is a new object on every render
@@ -26,10 +28,4 @@ export function isSameBinding(a: unknown, b: unknown): boolean {
   }
 
   return false
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (value === null || typeof value !== "object") return false
-  const proto: unknown = Object.getPrototypeOf(value)
-  return proto === Object.prototype || proto === null
 }

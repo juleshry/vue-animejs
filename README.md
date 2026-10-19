@@ -15,7 +15,7 @@
 
 ## 🚀 Overview
 
-**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target or option and the animation updates automatically. Lifecycle cleanup is handled for you.
+**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target, as the options, or straight inside the options object (`{ translateX: distance }`), and the animation updates automatically. Lifecycle cleanup is handled for you.
 
 **SSR-safe:** every composable and directive works with server-side rendering (Nuxt, `@vue/server-renderer`) with no `<ClientOnly>` wrapper. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. Directives go further and render their initial state on the server (`v-animate`, `v-waapi`, `v-svg-drawable`, and `v-text-split` with `ssrHidden`), so elements don't flash their final state before hydration.
 
@@ -120,7 +120,6 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Allow reactive refs inside option objects
 - [ ] Add components
 
 ## 📄 License

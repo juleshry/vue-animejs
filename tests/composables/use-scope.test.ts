@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
-import { defineComponent, h, nextTick, ref } from "vue"
+import { defineComponent, h, nextTick, ref, useTemplateRef } from "vue"
 import { mount } from "@vue/test-utils"
 import { useScope } from "@lib"
 import { expectInstanceStaysRaw, withSetup } from "../utils"
@@ -190,5 +190,33 @@ describe("useScope", () => {
     const factory = vi.fn()
     result.keepTime(factory)
     expect(mock_scope.keepTime).toHaveBeenCalledWith(factory)
+  })
+
+  it("recreates the scope when a ref inside the params changes", async () => {
+    const media_queries = ref({ small: "(max-width: 200px)" })
+    withSetup(() => useScope({ mediaQueries: media_queries }))
+    expect(mock_createScope).toHaveBeenCalledOnce()
+    expect(mock_createScope).toHaveBeenCalledWith({ mediaQueries: { small: "(max-width: 200px)" } })
+    media_queries.value = { small: "(max-width: 400px)" }
+    await nextTick()
+    expect(mock_createScope).toHaveBeenCalledTimes(2)
+    expect(mock_createScope).toHaveBeenLastCalledWith({ mediaQueries: { small: "(max-width: 400px)" } })
+  })
+
+  it("builds once with root from a component template ref, resolved to the component's root element", async () => {
+    const Panel = defineComponent({ setup: () => () => h("section", { class: "panel" }) })
+    const wrapper = mount(
+      defineComponent({
+        setup() {
+          const root = useTemplateRef<InstanceType<typeof Panel>>("root")
+          useScope({ root })
+          return () => h(Panel, { ref: "root" })
+        },
+      })
+    )
+    await nextTick()
+    expect(mock_createScope).toHaveBeenCalledOnce()
+    expect(mock_createScope.mock.calls[0][0]?.root).toBe(wrapper.find(".panel").element)
+    wrapper.unmount()
   })
 })

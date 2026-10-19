@@ -88,21 +88,18 @@ set(box, { opacity: 0 })
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the argument to control timeline-level parameters reactively. When options change the timeline is recreated and all previously recorded `add`/`set`/`remove`/`call`/`label`/`sync` calls are replayed automatically.
+Put a `ref` straight into the options object to control timeline-level parameters reactively. The whole options object can also be a `ref`, a `computed` or a getter. When options change the timeline is recreated and all previously recorded `add`/`set`/`remove`/`call`/`label`/`sync` calls are replayed automatically.
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue"
-import { useTemplateRef } from "vue"
+import { ref, useTemplateRef } from "vue"
 import { useTimeline } from "@juleshry/vue-animejs"
 
 const box1 = useTemplateRef<HTMLDivElement>("box1")
 const box2 = useTemplateRef<HTMLDivElement>("box2")
 const loop = ref<boolean>(false)
 
-const options = computed(() => ({ autoplay: false, loop: loop.value }))
-
-const { add, play, restart } = useTimeline(options)
+const { add, play, restart } = useTimeline({ autoplay: false, loop })
 
 add(box1, { translateX: 200, duration: 600, ease: "outExpo" })
   .add(box2, { translateX: 200, duration: 600, ease: "outExpo" }, "-=300")
@@ -132,13 +129,13 @@ export type TimelineChain = Timeline & {
   /** Adds an animation to the timeline and returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it, then returns a chainable object. */
   set: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition
   ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline and returns a chainable object. */
@@ -151,13 +148,13 @@ export interface UseTimelineReturn {
   /** Adds an animation to the timeline. Accepts a template ref or any valid Anime.js target. Returns a chainable object. */
   add: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition | StaggerFunction<number | string>
   ) => TimelineChain
   /** Sets a property to a value at a point in the timeline without animating it. Returns a chainable object. */
   set: (
     targets: AnimationTargets,
-    params: MaybeRefOrGetter<AnimationParams>,
+    params: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>,
     position?: TimelinePosition
   ) => TimelineChain
   /** Removes an animation target (or a specific property) from the timeline. Returns a chainable object. */
@@ -204,9 +201,9 @@ export interface UseTimelineReturn {
  * `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order: made before mount, they apply once
  * the timeline exists, and when options change they're all replayed on the new timeline.
  *
- * @param options - Anime.js timeline parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js timeline parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
-export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTimelineReturn
+export declare function useTimeline(options?: MaybeRefOrGetter<MaybeRefOptions<TimelineParams>>): UseTimelineReturn
 ```
 
 :::
@@ -215,7 +212,8 @@ export declare function useTimeline(options?: MaybeRef<TimelineParams>): UseTime
 
 - The timeline is created **on mount**, not at `setup()` time — `timeline` is `undefined` until then (this keeps `useTimeline` safe to call during SSR, where `onMounted` never runs). Control methods other than `add`/`set`/`call`/`remove` are no-ops and return `undefined` while `timeline` is unset.
 - `add`, `set`, `remove`, `call`, `label` and `sync` calls are recorded in order. Made **before mount**, they're applied once the component mounts — safe to call at the top level of `<script setup>`.
-- If `options` changes after mount, including a deep change to the options object, the current timeline is **reverted** and recreated. Every recorded call is replayed on the new timeline in the original order, so a target you `remove`d stays removed and labels still resolve.
+- If `options` changes after mount (a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place), the current timeline is **reverted** and recreated. Every recorded call is replayed on the new timeline in the original order, so a target you `remove`d stays removed and labels still resolve.
+- The `params` of `add` and `set` accept the same shapes as `options`, but they're read when the timeline is (re)built, not watched: changing a ref inside them takes effect the next time `options` changes.
 - On component **unmount**, the watcher and timeline are cleaned up automatically.
 
 ::: tip

@@ -1,8 +1,8 @@
 import { svg, type DrawableSVGGeometry, type DOMTargetSelector } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
 import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref } from "vue"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
 
 export interface UseSvgDrawableReturn {
   /**
@@ -27,7 +27,7 @@ export function useSvgDrawable(
   const drawable = shallowRef<DrawableSVGGeometry | undefined>()
 
   // `start` / `end` only set the initial draw: changing them later doesn't rebuild the drawable
-  const { stop } = watchTarget(target as AnimationTargets, undefined, el => {
+  const { stop } = watchTarget<undefined>(target as AnimationTargets, undefined, el => {
     drawable.value = undefined
     if (!el) {
       console.warn("[useSvgDrawable] Target element is null or undefined")

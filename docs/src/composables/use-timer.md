@@ -36,7 +36,7 @@ const { play, pause, restart } = useTimer({
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the argument.
+Put a `ref` straight into the options object. The whole options object can also be a `ref`, a `computed` or a getter.
 
 ::: warning
 Changing options cancels the current timer and recreates it with the new parameters.
@@ -44,21 +44,19 @@ Changing options cancels the current timer and recreates it with the new paramet
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue"
+import { ref } from "vue"
 import { useTimer } from "@juleshry/vue-animejs"
 
 const duration = ref(2000)
 const count = ref(0)
 
-const options = computed(() => ({
-  duration: duration.value,
+const { play } = useTimer({
+  duration,
   loop: true,
   onComplete: () => {
     count.value++
   },
-}))
-
-const { play } = useTimer(options)
+})
 </script>
 
 <template>
@@ -111,9 +109,9 @@ export interface UseTimerReturn {
 /**
  * Wraps Anime.js `createTimer()` into a Vue composable. Reactively re-creates the timer when options change, and cancels it automatically on unmount.
  *
- * @param options - Anime.js timer parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js timer parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
-export declare function useTimer(options?: MaybeRef<TimerParams>): UseTimerReturn
+export declare function useTimer(options?: MaybeRefOrGetter<MaybeRefOptions<TimerParams>>): UseTimerReturn
 ```
 
 :::
@@ -121,7 +119,7 @@ export declare function useTimer(options?: MaybeRef<TimerParams>): UseTimerRetur
 ## Reactivity Behavior
 
 - The timer is created **on mount**, not at `setup()` time — `timer` is `undefined` until then (this keeps `useTimer` safe to call during SSR, where `onMounted` never runs). Control methods are no-ops and return `undefined` while `timer` is unset.
-- If `options` changes, including a deep change to the options object (`options.value.duration = 1000`), the current timer is **cancelled** and a new one is created with the new parameters.
+- If `options` changes, the current timer is **cancelled** and a new one is created with the new parameters. That means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place (`options.value.duration = 1000`).
 - On component **unmount**, the watcher and timer are cleaned up automatically.
 
 ::: tip

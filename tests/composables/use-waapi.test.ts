@@ -248,4 +248,17 @@ describe("useWaapi", () => {
       wrapper.unmount()
     }
   )
+
+  it("recreates the animation when a ref inside the options changes", async () => {
+    const el = document.createElement("div")
+    const value = ref(1)
+    withSetup(() => useWaapi(el, { duration: value }))
+    await nextTick()
+    expect(mock_waapi.animate).toHaveBeenCalledOnce()
+    expect(mock_waapi.animate).toHaveBeenCalledWith(el, { duration: 1 })
+    value.value = 2
+    await nextTick()
+    expect(mock_waapi.animate).toHaveBeenCalledTimes(2)
+    expect(mock_waapi.animate).toHaveBeenLastCalledWith(el, { duration: 2 })
+  })
 })

@@ -17,6 +17,7 @@ export { useSvgDrawable, type UseSvgDrawableReturn } from "./composables/use-svg
 export { useText, type UseTextReturn } from "./composables/use-text.ts"
 export { useWaapi, type UseWaapiReturn } from "./composables/use-waapi.ts"
 export { useScope, type UseScopeReturn } from "./composables/use-scope.ts"
+export { type MaybeRefOptions } from "./utils/resolve-options.ts"
 export { vAnimate } from "./directives/v-animate.ts"
 export { vDraggable } from "./directives/v-draggable.ts"
 export { vSvgDrawable } from "./directives/v-svg-drawable.ts"

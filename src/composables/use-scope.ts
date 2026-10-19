@@ -1,7 +1,8 @@
 import { tryOnUnmounted } from "@vueuse/core"
-import { watchOptions } from "@src/utils/watch-options.ts"
+import { watchOptions } from "../utils/watch-options.ts"
 import { createScope, type Scope, type ScopeMethod, type ScopeParams, type Tickable } from "animejs"
-import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseScopeReturn {
   /** The underlying Anime.js `Scope` instance. */
@@ -26,9 +27,9 @@ export interface UseScopeReturn {
  * Methods added before mount are queued and replayed once the component is mounted. When `params` change, every
  * method registered so far is replayed on the new scope.
  *
- * @param params - Anime.js scope parameters. Accepts a plain object or a reactive ref / computed.
+ * @param params - Anime.js scope parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
-export function useScope(params: MaybeRef<ScopeParams>): UseScopeReturn {
+export function useScope(params: MaybeRefOrGetter<MaybeRefOptions<ScopeParams>>): UseScopeReturn {
   const scope = shallowRef<Scope | undefined>(undefined)
 
   // Every registration, in order, so a scope re-created from new params gets them all back

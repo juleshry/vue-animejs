@@ -1,6 +1,6 @@
 import type { AnimationParams } from "animejs"
-import { getInitialStyle } from "@src/utils/initial-style.ts"
-import type { SSRInitialState } from "@src/utils/ssr-props.ts"
+import { getInitialStyle } from "./initial-style.ts"
+import type { SSRInitialState } from "./ssr-props.ts"
 
 /**
  * Computes the attributes and style an SVG geometry element has once `svg.createDrawable()` and

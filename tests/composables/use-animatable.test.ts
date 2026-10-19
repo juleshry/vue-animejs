@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
+import { describe, it, expect, expectTypeOf, vi, beforeEach } from "vite-plus/test"
 import { nextTick, ref } from "vue"
 import { useAnimatable } from "@lib"
 import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
@@ -97,4 +97,29 @@ describe("useAnimatable", () => {
       wrapper.unmount()
     }
   )
+
+  it("recreates the animatable when a ref inside the options changes", async () => {
+    const el = document.createElement("div")
+    const value = ref(1)
+    withSetup(() => useAnimatable(el, { x: 500, duration: value }))
+    await nextTick()
+    expect(mock_createAnimatable).toHaveBeenCalledOnce()
+    expect(mock_createAnimatable).toHaveBeenCalledWith(el, { x: 500, duration: 1 })
+    value.value = 2
+    await nextTick()
+    expect(mock_createAnimatable).toHaveBeenCalledTimes(2)
+    expect(mock_createAnimatable).toHaveBeenLastCalledWith(el, { x: 500, duration: 2 })
+  })
+
+  it("infers the property setters from options holding refs, or from a getter", () => {
+    const el = document.createElement("div")
+    const [with_refs] = withSetup(() => useAnimatable(el, { x: 500, y: ref(300), duration: ref(400) }))
+    expectTypeOf(with_refs.animatable.value!).toHaveProperty("x")
+    expectTypeOf(with_refs.animatable.value!).toHaveProperty("y")
+    expectTypeOf(with_refs.animatable.value!).not.toHaveProperty("z")
+
+    const [from_getter] = withSetup(() => useAnimatable(el, () => ({ rotate: 90 })))
+    expectTypeOf(from_getter.animatable.value!).toHaveProperty("rotate")
+    expectTypeOf(from_getter.animatable.value!).not.toHaveProperty("x")
+  })
 })

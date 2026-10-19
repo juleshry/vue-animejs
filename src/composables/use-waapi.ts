@@ -1,6 +1,6 @@
 import { tryOnUnmounted } from "@vueuse/core"
-import { type AnimationTargets } from "@src/utils/resolve-target.ts"
-import { watchTarget } from "@src/utils/watch-target.ts"
+import { type AnimationTargets } from "../utils/resolve-target.ts"
+import { watchTarget } from "../utils/watch-target.ts"
 import {
   type WAAPIAnimationParams,
   type DOMTargetsParam,
@@ -8,7 +8,8 @@ import {
   type WAAPIAnimation,
   type EasingFunction,
 } from "animejs"
-import { markRaw, type MaybeRef, shallowReadonly, ShallowRef, shallowRef, unref } from "vue"
+import { markRaw, type MaybeRef, type MaybeRefOrGetter, shallowReadonly, ShallowRef, shallowRef, unref } from "vue"
+import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseWaapiReturn {
   /** The underlying Anime.js WAAPI animation instance. `undefined` until the target is available. */
@@ -43,9 +44,12 @@ export interface UseWaapiReturn {
  * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
  * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
- * @param options - Anime.js WAAPI animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js WAAPI animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
-export function useWaapi(targets: AnimationTargets, options: MaybeRef<WAAPIAnimationParams> = {}): UseWaapiReturn {
+export function useWaapi(
+  targets: AnimationTargets,
+  options: MaybeRefOrGetter<MaybeRefOptions<WAAPIAnimationParams>> = {}
+): UseWaapiReturn {
   const animation = shallowRef<WAAPIAnimation | undefined>()
 
   const { stop } = watchTarget(targets, options, (el, opt) => {

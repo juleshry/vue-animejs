@@ -123,4 +123,17 @@ describe("useLayout", () => {
       wrapper.unmount()
     }
   )
+
+  it("recreates the layout when a ref inside the options changes", async () => {
+    const el = document.createElement("div")
+    const value = ref(1)
+    withSetup(() => useLayout(el, { duration: value }))
+    await nextTick()
+    expect(mock_createLayout).toHaveBeenCalledOnce()
+    expect(mock_createLayout).toHaveBeenCalledWith(el, { duration: 1 })
+    value.value = 2
+    await nextTick()
+    expect(mock_createLayout).toHaveBeenCalledTimes(2)
+    expect(mock_createLayout).toHaveBeenLastCalledWith(el, { duration: 2 })
+  })
 })

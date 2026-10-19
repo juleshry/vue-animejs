@@ -10,7 +10,7 @@ Wraps Anime.js [`onScroll()`](https://animejs.com/documentation/events/onscroll)
 
 ### Scroll-linked animation
 
-Pass `autoplayComputed` straight into `useTimeline` (or `useAnimate`/`useTimer`) to drive an animation's progress directly from scroll position, instead of playing it once.
+Pass `autoplay` as the `autoplay` option of `useTimeline` (or `useAnimate`/`useTimer`) to drive an animation's progress directly from scroll position, instead of playing it once.
 
 ```vue
 <script setup lang="ts">
@@ -21,13 +21,13 @@ const container = useTemplateRef<HTMLDivElement>("container")
 const target = useTemplateRef<HTMLDivElement>("target")
 const box = useTemplateRef<HTMLDivElement>("box")
 
-const { autoplayComputed } = useScroll(container, target, {
+const { autoplay } = useScroll(container, target, {
   enter: "bottom top",
   leave: "top bottom",
   sync: true,
 })
 
-const { add } = useTimeline(autoplayComputed)
+const { add } = useTimeline({ autoplay })
 
 add(box, { translateX: 200, backgroundColor: "#9593ff", duration: 1000 })
 </script>
@@ -46,11 +46,11 @@ Pass `sync: true` (or leave it unset for the default eased sync) so the timeline
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the third argument to change `enter`/`leave`/`sync` reactively. The underlying `ScrollObserver` is reverted and recreated whenever it changes, alongside the container/target.
+Put a `ref` straight into the options object to change `enter`/`leave`/`sync` reactively. The whole options object can also be a `ref`, a `computed` or a getter. The underlying `ScrollObserver` is reverted and recreated whenever the options change, alongside the container/target.
 
 ```vue
 <script setup lang="ts">
-import { ref, computed, useTemplateRef } from "vue"
+import { ref, useTemplateRef } from "vue"
 import { useScroll, useTimeline } from "@juleshry/vue-animejs"
 
 const container = useTemplateRef<HTMLDivElement>("container")
@@ -58,11 +58,9 @@ const target = useTemplateRef<HTMLDivElement>("target")
 const box = useTemplateRef<HTMLDivElement>("box")
 const sync = ref(true)
 
-const options = computed(() => ({ enter: "bottom top", leave: "top bottom", sync: sync.value }))
+const { autoplay } = useScroll(container, target, { enter: "bottom top", leave: "top bottom", sync })
 
-const { autoplayComputed } = useScroll(container, target, options)
-
-const { add } = useTimeline(autoplayComputed)
+const { add } = useTimeline({ autoplay })
 
 add(box, { translateX: 200, duration: 1000 })
 </script>
@@ -78,11 +76,11 @@ add(box, { translateX: 200, duration: 1000 })
 
 ### With `useAnimate`
 
-Read `autoplay` and set it on a bigger reactive options object alongside whatever else you're animating, the same way you'd merge any other piece of reactive state.
+`autoplay` is a `computed`, so it goes straight into the options object alongside whatever else you're animating.
 
 ```vue
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue"
+import { useTemplateRef } from "vue"
 import { useAnimate, useScroll } from "@juleshry/vue-animejs"
 
 const container = useTemplateRef<HTMLDivElement>("container")
@@ -95,14 +93,12 @@ const { autoplay } = useScroll(container, target, {
   sync: true,
 })
 
-const options = computed(() => ({
+useAnimate(box, {
   translateX: 200,
   backgroundColor: "#9593ff",
   duration: 1000,
-  autoplay: autoplay.value,
-}))
-
-useAnimate(box, options)
+  autoplay,
+})
 </script>
 
 <template>
@@ -115,7 +111,7 @@ useAnimate(box, options)
 
 ### With `useRawAnimate`
 
-`useRawAnimate` creates its animation immediately and unconditionally from inside your own `onMounted` — it isn't reactive, so read `.value` off `useScroll`'s `autoplay` at that point instead of passing `autoplayComputed`. `useScroll` itself still goes at the normal top level; only the `useRawAnimate` call needs to move into `onMounted`.
+`useRawAnimate` creates its animation immediately and unconditionally from inside your own `onMounted` — it isn't reactive, so `autoplay` is read once, at that point. Since `useScroll` registered its mount hook first, the observer already exists by then. `useScroll` itself still goes at the normal top level; only the `useRawAnimate` call needs to move into `onMounted`.
 
 ```vue
 <script setup lang="ts">
@@ -137,7 +133,7 @@ onMounted(() => {
     translateX: 200,
     backgroundColor: "#9593ff",
     duration: 1000,
-    autoplay: autoplay.value,
+    autoplay,
   })
 })
 </script>
@@ -160,9 +156,13 @@ For all available options, see the [Anime.js onScroll documentation](https://ani
 export interface UseScrollReturn {
   /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
   observer: ComputedRef<ScrollObserver | undefined>
-  /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option. */
+  /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option: `useTimeline({ autoplay })`. */
   autoplay: ComputedRef<ScrollObserver | false>
-  /** `{ autoplay }`, ready to pass straight as-is into `useTimeline`/`useTimer`/`useAnimate`'s options argument. */
+  /**
+   * `{ autoplay }`, ready to pass straight as-is into `useTimeline`/`useTimer`/`useAnimate`'s options argument.
+   *
+   * @deprecated Options accept refs as direct properties: pass `{ autoplay }` instead. Will be removed in the next major.
+   */
   autoplayComputed: ComputedRef<{ autoplay: ScrollObserver | false }>
   /** Re-reads the container and target bounds. */
   refresh: () => ScrollObserver | undefined
@@ -179,17 +179,17 @@ export interface UseScrollReturn {
  * Wraps Anime.js `onScroll()` into a Vue composable. Creates the ScrollObserver on mount, reactively re-creates it
  * when the container, target, or options change, and reverts it automatically on unmount.
  *
- * Call it before the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`): its mount hook
+ * Call it before the composable that consumes `autoplay` (e.g. `useTimeline`): its mount hook
  * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
  * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
- * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useScroll(
   container: AnimationTargets,
   target: AnimationTargets,
-  options?: MaybeRef<Omit<ScrollObserverParams, "container" | "target">>
+  options?: MaybeRefOrGetter<MaybeRefOptions<Omit<ScrollObserverParams, "container" | "target">>>
 ): UseScrollReturn
 ```
 
@@ -197,15 +197,15 @@ export declare function useScroll(
 
 ## Reactivity & Lifecycle Behavior
 
-- The observer is created once the component has **mounted**, like every other composable with a DOM target, so a selector can point into the component's own template and server-rendered HTML is never touched before hydration. Until then, `observer`/`autoplay`/`autoplayComputed` are `undefined` / `false` / `{ autoplay: false }`.
+- The observer is created once the component has **mounted**, like every other composable with a DOM target, so a selector can point into the component's own template and server-rendered HTML is never touched before hydration. Until then, `observer`/`autoplay` are `undefined` / `false`.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the observer as soon as both `container` and `target` resolve.
-- Call `useScroll` **before** the composable that consumes `autoplay` / `autoplayComputed` (e.g. `useTimeline`). Mount hooks run in registration order, so the observer exists by the time the consumer builds, and it's built once, with the observer already in place.
+- Call `useScroll` **before** the composable that consumes `autoplay` (e.g. `useTimeline`). Mount hooks run in registration order, so the observer exists by the time the consumer builds, and it's built once, with the observer already in place.
 - If `container`, `target`, or `options` changes, the previous observer is **reverted** before the new one is created.
 - On component **unmount**, the watcher is stopped and the observer is reverted automatically.
 - Safe to call during SSR — the observer is never created server-side (`window`/`document` aren't touched).
 
-::: tip
-`autoplayComputed` exists so you don't have to write `computed(() => ({ autoplay: autoplay.value }))` yourself. If you need to combine it with other options, wrap it in your own `computed` instead: `computed(() => ({ ...autoplayComputed.value, loop: true }))`.
+::: warning
+`autoplayComputed` is deprecated: options accept refs as direct properties, so `useTimeline({ autoplay, loop: true })` replaces both `useTimeline(autoplayComputed)` and `computed(() => ({ ...autoplayComputed.value, loop: true }))`. It will be removed in the next major.
 :::
 
 ::: warning

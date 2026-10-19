@@ -36,7 +36,7 @@ const { play, pause, restart } = useAnimate(box, {
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the second argument.
+Put a `ref` straight into the options object: changing it recreates the animation with the new value. The whole options object can also be a `ref`, a `computed` or a getter.
 
 ::: warning
 Changing options recreates the animation from scratch with the new parameters.
@@ -44,19 +44,17 @@ Changing options recreates the animation from scratch with the new parameters.
 
 ```vue
 <script setup lang="ts">
-import { useTemplateRef, ref, computed } from "vue"
+import { useTemplateRef, ref } from "vue"
 import { useAnimate } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 const distance = ref(100)
 
-const options = computed(() => ({
-  translateX: distance.value,
+useAnimate(box, {
+  translateX: distance,
   duration: 600,
   ease: "outExpo",
-}))
-
-useAnimate(box, options)
+})
 
 function increase() {
   distance.value += 50
@@ -67,6 +65,15 @@ function increase() {
   <div ref="box" class="box" />
   <button @click="increase">Increase distance</button>
 </template>
+```
+
+Refs are only unwrapped one level deep. For a value nested in a tween object or a keyframe array, build the options in a getter (or a `computed`) instead:
+
+```ts
+useAnimate(box, () => ({
+  translateX: { to: distance.value, ease: "outExpo" },
+  duration: 600,
+}))
 ```
 
 ### CSS selector target
@@ -158,11 +165,11 @@ export interface UseAnimateReturn {
  * Wraps Anime.js `animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
  *
  * @param target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
- * @param options - Anime.js animation parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useAnimate(
   target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
-  options?: MaybeRef<AnimationParams>
+  options?: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>
 ): UseAnimateReturn
 ```
 
@@ -172,7 +179,7 @@ export declare function useAnimate(
 
 - The animation is created once the component has **mounted**, whatever form `target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animation as soon as it resolves.
-- If either `target` or `options` changes, the current animation is **cancelled** and a new one is created.
+- If `target` or `options` changes, the current animation is **cancelled** and a new one is created. For `options`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive options object mutated in place.
 - On component **unmount**, the watcher and animation are cleaned up automatically.
 
 ::: tip

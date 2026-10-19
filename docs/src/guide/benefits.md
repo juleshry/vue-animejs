@@ -60,7 +60,7 @@ Animations started in `onMounted` must be stopped in `onUnmounted`, otherwise th
 
 ## Reactive options
 
-Updating an animation when reactive state changes requires manually restarting the instance. With vue-animejs, any `Ref` or getter passed as an option is watched automatically.
+Updating an animation when reactive state changes requires manually restarting the instance. With vue-animejs, a `Ref` put straight into the options object is watched automatically, and so is a `ref`, `computed` or getter passed as the whole options object.
 
 ::: code-group
 

@@ -1,7 +1,7 @@
 import { createDraggable, type Draggable, type DraggableParams } from "animejs"
 import type { Directive } from "vue"
-import { deferMount } from "@src/utils/deferred-mount.ts"
-import { isSameBinding } from "@src/utils/same-binding.ts"
+import { deferMount } from "../utils/deferred-mount.ts"
+import { isSameBinding } from "../utils/same-binding.ts"
 
 const instances = new WeakMap<HTMLElement, Draggable>()
 

@@ -1,5 +1,5 @@
 import type { AnimationParams, WAAPIAnimationParams } from "animejs"
-import { kebabCase } from "@src/utils/kebab-case.ts"
+import { kebabCase } from "./kebab-case.ts"
 
 /**
  * Computes the inline style an element should have before its animation starts, so the server can

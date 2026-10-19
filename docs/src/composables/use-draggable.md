@@ -34,23 +34,21 @@ const { reset, disable, enable } = useDraggable(box)
 Pass a container element via the `container` option to keep the element within bounds. Use `containerPadding` to add inner spacing.
 
 ::: warning
-`container` must be resolved inside a `computed` — a template ref's `.value` is `null` at setup time, so passing it directly in a plain object will result in an unconstrained draggable.
+Pass the template ref itself, not its `.value`: `.value` is still `null` at setup time, so `container: container.value` gives an unconstrained draggable. While the ref is empty, the option counts as unset. A ref to a component works too: its root element is used.
 :::
 
 ```vue
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue"
+import { useTemplateRef } from "vue"
 import { useDraggable } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 const container = useTemplateRef("container")
 
-const options = computed(() => ({
-  container: container.value,
+useDraggable(box, {
+  container,
   containerPadding: 10,
-}))
-
-useDraggable(box, options)
+})
 </script>
 
 <template>
@@ -83,7 +81,7 @@ useDraggable(box, {
 
 ### Reactive options
 
-Pass a `ref` or `computed` as the second argument to change draggable behaviour at runtime.
+Put a `ref` straight into the options object to change draggable behaviour at runtime. The whole options object can also be a `ref`, a `computed` or a getter, which is what you need when a value is derived, like here, or nested (`x: { snap }`).
 
 ::: warning
 Changing options reverts the current draggable instance and creates a new one from scratch.
@@ -91,18 +89,16 @@ Changing options reverts the current draggable instance and creates a new one fr
 
 ```vue
 <script setup lang="ts">
-import { useTemplateRef, ref, computed } from "vue"
+import { useTemplateRef, ref } from "vue"
 import { useDraggable } from "@juleshry/vue-animejs"
 
 const box = useTemplateRef("box")
 const locked = ref(false)
 
-const options = computed(() => ({
+useDraggable(box, () => ({
   x: !locked.value,
   y: !locked.value,
 }))
-
-useDraggable(box, options)
 </script>
 
 <template>
@@ -147,11 +143,11 @@ export interface UseDraggableReturn {
  * Wraps Anime.js `createDraggable()` into a Vue composable. Reactively re-creates the draggable when the target or options change, and reverts it automatically on unmount.
  *
  * @param targets - The element(s) to make draggable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param options - Anime.js draggable parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js draggable parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useDraggable(
   targets: MaybeRef<TargetsParam>,
-  options?: MaybeRef<DraggableParams>
+  options?: MaybeRefOrGetter<MaybeRefOptions<DraggableParams>>
 ): UseDraggableReturn
 ```
 
@@ -161,7 +157,7 @@ export declare function useDraggable(
 
 - The draggable is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the draggable as soon as it resolves.
-- If either `targets` or `options` changes, the current draggable is **reverted** and a new one is created.
+- If either `targets` or `options` changes, the current draggable is **reverted** and a new one is created. For `options`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the watcher and draggable instance are cleaned up automatically.
 
 ::: tip

@@ -51,13 +51,13 @@
   const scrollBoxEl = useTemplateRef("scrollBox")
   const creationCount = ref(0)
 
-  const { autoplayComputed: scrollOptions } = useScroll(scrollContainerEl, scrollTargetEl, {
+  const { autoplay: scrollAutoplay } = useScroll(scrollContainerEl, scrollTargetEl, {
     enter: "bottom top",
     leave: "top bottom",
     sync: true,
   })
 
-  const { timeline: scrollTimeline, add: addScroll } = useTimeline(scrollOptions)
+  const { timeline: scrollTimeline, add: addScroll } = useTimeline({ autoplay: scrollAutoplay })
 
   addScroll(scrollBoxEl, { translateX: 150, backgroundColor: "#9593ff", duration: 1000 })
 

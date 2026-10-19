@@ -65,7 +65,7 @@ const { play } = useAnimate(words, {
 
 ### Reactive params
 
-Pass a `ref` or `computed` as the second argument.
+Put a `ref` straight into the params object, e.g. `{ words: true, chars: splitChars }`. The whole params object can also be a `ref`, a `computed` or a getter, which is what you need when the keys themselves change, like here.
 
 ::: warning
 Changing `params` reverts the current split and re-runs `splitText()` with the new options. Any in-progress animation on the old spans will be lost.
@@ -73,14 +73,13 @@ Changing `params` reverts the current split and re-runs `splitText()` with the n
 
 ```vue
 <script setup lang="ts">
-import { ref, computed, useTemplateRef } from "vue"
+import { ref, useTemplateRef } from "vue"
 import { useText } from "@juleshry/vue-animejs"
 
 const text_el = useTemplateRef<HTMLParagraphElement>("textEl")
 const splitBy = ref<"chars" | "words">("chars")
 
-const params = computed(() => ({ [splitBy.value]: true }))
-const { chars, words } = useText(text_el, params)
+const { chars, words } = useText(text_el, () => ({ [splitBy.value]: true }))
 </script>
 
 <template>
@@ -119,11 +118,11 @@ export interface UseTextReturn {
  * Wraps Anime.js `splitText()` into a Vue composable. Reactively re-splits the text when the target or params change, and reverts the DOM automatically on unmount.
  *
  * @param _target - The element(s) whose text content should be split. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param _params - Anime.js text-splitter parameters. Accepts a plain object or a reactive ref / computed.
+ * @param _params - Anime.js text-splitter parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
 export declare function useText(
   _target: MaybeRef<HTMLElement | NodeList | string | HTMLElement[]> | MaybeComputedElementRef,
-  _params?: MaybeRef<TextSplitterParams>
+  _params?: MaybeRefOrGetter<MaybeRefOptions<TextSplitterParams>>
 ): UseTextReturn
 ```
 
@@ -133,7 +132,7 @@ export declare function useText(
 
 - The text is split once the component has **mounted**, whatever form `_target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered text is never split before hydration.
 - `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs.
-- If `_target` or `_params` changes, the DOM is reverted and `splitText()` is called again.
+- If `_target` or `_params` changes, the DOM is reverted and `splitText()` is called again. For `_params`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the watcher is stopped and the DOM is reverted automatically.
 
 ::: tip

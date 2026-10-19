@@ -1,9 +1,9 @@
 import { animate, svg, type AnimationParams, type DrawableSVGGeometry, type JSAnimation } from "animejs"
 import type { Directive } from "vue"
-import { deferMount } from "@src/utils/deferred-mount.ts"
-import { isSameBinding } from "@src/utils/same-binding.ts"
-import { getInitialDraw } from "@src/utils/initial-draw.ts"
-import { restoreUserProps, stripSSRProps, toSSRProps } from "@src/utils/ssr-props.ts"
+import { deferMount } from "../utils/deferred-mount.ts"
+import { isSameBinding } from "../utils/same-binding.ts"
+import { getInitialDraw } from "../utils/initial-draw.ts"
+import { restoreUserProps, stripSSRProps, toSSRProps } from "../utils/ssr-props.ts"
 
 interface Entry {
   drawable: DrawableSVGGeometry

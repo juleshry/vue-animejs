@@ -42,19 +42,34 @@ Avoid CSS selectors inside reusable components. If the component is rendered mor
 
 ## Reactive Options
 
-All composables accept a `Ref` or `computed` as their options argument. When the options change, the composable reacts automatically:
+Put a `ref` (or `computed`) straight into the options object of any composable, and it reacts when that ref changes:
 
 ```ts
-const options = computed(() => ({
-  translateX: distance.value,
-  duration: 600,
-}))
+const distance = ref(250)
 
-useAnimate(el, options)
+useAnimate(el, { translateX: distance, duration: 600 })
 ```
+
+The whole options object can also be a `ref`, a `computed` or a getter, and mutating a property of a reactive options object in place counts as a change too:
+
+```ts
+useAnimate(el, () => ({ translateX: distance.value * 2, duration: 600 }))
+```
+
+A ref inside the options may hold `null`, like a template ref before mount: the option then counts as unset, so `useDraggable(box, { container })` or `useScope({ root })` work with template refs as-is. Pass the template ref itself, not its `.value`. Where an option accepts an element, a ref to a component works too and resolves to the component's root element (`$el`), the same way targets do.
+
+The exported `MaybeRefOptions<T>` type describes such an options object, if you wrap a composable in your own.
+
+- **One level deep.** Only refs that are direct properties of the options object are unwrapped. A ref nested in a tween object (`translateX: { to: distance }`), a keyframe array or a draggable's `x: { snap }` is passed to Anime.js as-is: build those options in a getter or a `computed` instead.
+- **Getters inside options aren't unwrapped.** A function-valued option already means something to Anime.js: a [function-based value](https://animejs.com/documentation/animation/tween-value-types/function-based) (`translateX: (el, i) => i * 50`), a callback, an `ease` or a `modifier`. So `translateX: () => distance.value` is a function-based value, read once per target when the animation is created, not a reactive getter. Use `translateX: distance`, or a getter for the whole object.
+- **`useTimeline`'s `add` / `set` params** accept the same shapes, but they're read when the timeline is (re)built, not watched.
 
 ::: warning
 Changing reactive options recreates the underlying Anime.js instance from scratch. The animation restarts from the element's current position with the new parameters.
+:::
+
+::: tip
+A value that changes every frame, like the pointer position, doesn't belong in rebuilt options. Use [`useAnimatable`](/composables/use-animatable) and call its setters (`animatable.value.x(value)`) instead.
 :::
 
 ## Lifecycle & Cleanup
@@ -97,7 +112,7 @@ Directives don't run on the server at all, apart from rendering their [initial s
 :::
 
 ::: tip
-[`useScroll`](/composables/use-scroll) follows the same rule: its `ScrollObserver` is created on mount. Call it before the composable that consumes its `autoplay` / `autoplayComputed` (e.g. `useTimeline`), so the observer already exists when that one builds on mount.
+[`useScroll`](/composables/use-scroll) follows the same rule: its `ScrollObserver` is created on mount. Call it before the composable that consumes its `autoplay` (e.g. `useTimeline({ autoplay })`), so the observer already exists when that one builds on mount.
 :::
 
 ### Initial state on the server
@@ -203,7 +218,17 @@ The `animation` property (where exposed) is a `DeepReadonly<ShallowRef<...>>`. D
 The library is written in strict TypeScript and ships with full type declarations. All public API types are re-exported from the main entry point:
 
 ```ts
-import type { UseAnimateReturn } from "@juleshry/vue-animejs"
+import type { MaybeRefOptions, UseAnimateReturn } from "@juleshry/vue-animejs"
 ```
 
-Anime.js types (`AnimationParams`, `TargetSelector`, etc.) come from the `animejs` package itself and are passed through without wrapping.
+Anime.js types (`AnimationParams`, `TargetSelector`, etc.) come from the `animejs` package itself. Option parameters wrap them as `MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>`, so you can type your own wrappers the same way:
+
+```ts
+import { toValue, type MaybeRefOrGetter } from "vue"
+import type { AnimationParams } from "animejs"
+import { useAnimate, type MaybeRefOptions } from "@juleshry/vue-animejs"
+
+export function useSlideIn(el: HTMLElement, options: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>> = {}) {
+  return useAnimate(el, () => ({ translateX: [-100, 0], ...toValue(options) }))
+}
+```

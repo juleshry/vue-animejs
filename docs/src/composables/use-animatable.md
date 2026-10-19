@@ -106,11 +106,11 @@ export interface UseAnimatableReturn<T extends AnimatableParams = AnimatablePara
  * Wraps Anime.js `createAnimatable()` into a Vue composable. Reactively re-creates the animatable when the target or options change, and reverts it automatically on unmount.
  *
  * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
- * @param options - Anime.js animatable parameters. Accepts a plain object or a reactive ref / computed. Defaults to `{}`.
+ * @param options - Anime.js animatable parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useAnimatable<T extends AnimatableParams = AnimatableParams>(
   targets: MaybeRef<TargetsParam>,
-  options?: MaybeRef<T>
+  options?: MaybeRefOrGetter<MaybeRefOptions<T>>
 ): UseAnimatableReturn<T>
 ```
 
@@ -120,12 +120,16 @@ export declare function useAnimatable<T extends AnimatableParams = AnimatablePar
 
 - The animatable is created once the component has **mounted**, whatever form `targets` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered HTML is never touched before hydration.
 - A template ref that is still empty at mount (e.g. behind a `v-if`) creates the animatable as soon as it resolves.
-- If either `targets` or `options` changes, the current animatable is **reverted** and a new one is created.
+- If either `targets` or `options` changes, the current animatable is **reverted** and a new one is created. For `options`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the watcher and animatable are cleaned up automatically via `revert()`.
 - The properties available on `animatable.value` are inferred from the shape of `options` passed at the call site — calling a property that wasn't configured (or a reserved config key like `ease`) is a type error.
 
 ::: tip
 Call properties as functions on `animatable.value` (e.g. `animatable.value.x(100)`) to spring-animate to the new value. Calling without arguments reads the current value (e.g. `animatable.value.x()`). No play method needed — the animatable responds immediately.
+:::
+
+::: warning
+Don't drive a value that changes every frame (pointer position, scroll offset…) through a ref in `options`: every change rebuilds the animatable. Call its setter instead (`animatable.value.x(value)`), as in the example above.
 :::
 
 ::: warning
