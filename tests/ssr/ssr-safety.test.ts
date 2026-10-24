@@ -14,6 +14,7 @@ import {
   waapi,
 } from "animejs"
 import {
+  AnimeLayout,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -29,7 +30,8 @@ import {
   useTimer,
   useWaapi,
 } from "@lib"
-import { renderSSR } from "../utils"
+import { h } from "vue"
+import { renderSSR, renderSSRApp } from "../utils"
 
 vi.mock("animejs", () => ({
   animate: vi.fn(() => ({ cancel: vi.fn(), revert: vi.fn() })),
@@ -86,6 +88,11 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useLayout(".target"))
     expect(mock_createLayout).not.toHaveBeenCalled()
     expect(result.layout.value).toBeUndefined()
+  })
+
+  it("AnimeLayout does not create a layout during SSR", async () => {
+    await renderSSRApp(() => h(AnimeLayout, { options: { duration: 300 } }))
+    expect(mock_createLayout).not.toHaveBeenCalled()
   })
 
   it("useScroll does not attach scroll listeners for non-ref selector container/target", async () => {

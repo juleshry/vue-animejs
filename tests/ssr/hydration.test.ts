@@ -15,6 +15,8 @@ import {
 } from "vue"
 import { renderToString } from "@vue/server-renderer"
 import {
+  AnimeLayout,
+  type AnimeLayoutExposed,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -302,5 +304,20 @@ describe("composables with a DOM target hydrate without touching the server HTML
     const { container, warn } = await hydrate(() => h(Comp))
     expect(hydrationWarnings(warn)).toEqual([])
     expect(container.querySelectorAll("#t [data-word]").length).toBe(2)
+  })
+})
+
+describe("AnimeLayout hydration", () => {
+  it("hydrates without a mismatch warning and creates the layout on its root", async () => {
+    const layout = ref<AnimeLayoutExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeLayout, { ref: layout, as: "ul", style: { color: "red" } }, () => [h("li", "a"), h("li", "b")])
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("UL")
+    expect(el.style.color).toBe("red")
+    expect(layout.value?.layout).toBeDefined()
   })
 })

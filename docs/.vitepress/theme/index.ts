@@ -23,6 +23,7 @@ import VDraggableDemo from "./components/demo/VDraggableDemo.vue"
 import VWaapiDemo from "./components/demo/VWaapiDemo.vue"
 import VSvgDrawableDemo from "./components/demo/VSvgDrawableDemo.vue"
 import VTextSplitDemo from "./components/demo/VTextSplitDemo.vue"
+import AnimeLayoutDemo from "./components/demo/AnimeLayoutDemo.vue"
 import "./style.css"
 
 const DEMO_ROUTES = ["/demos/use-scope"]
@@ -58,5 +59,6 @@ export default {
     app.component("VWaapiDemo", VWaapiDemo)
     app.component("VSvgDrawableDemo", VSvgDrawableDemo)
     app.component("VTextSplitDemo", VTextSplitDemo)
+    app.component("AnimeLayoutDemo", AnimeLayoutDemo)
   },
 } satisfies Theme

@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { RouterLink } from "vue-router"
-  import { composable_routes, directive_routes } from "../router"
+  import { component_routes, composable_routes, directive_routes } from "../router"
 </script>
 
 <template>
@@ -17,6 +17,13 @@
     <div class="section">
       <RouterLink to="/directives" class="section-header">Directives</RouterLink>
       <RouterLink v-for="route in directive_routes" :key="route.path" :to="route.path" class="sub-link">
+        {{ route.meta.label }}
+      </RouterLink>
+    </div>
+
+    <div class="section">
+      <RouterLink to="/components" class="section-header">Components</RouterLink>
+      <RouterLink v-for="route in component_routes" :key="route.path" :to="route.path" class="sub-link">
         {{ route.meta.label }}
       </RouterLink>
     </div>

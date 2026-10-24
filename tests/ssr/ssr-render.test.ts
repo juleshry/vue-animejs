@@ -3,6 +3,7 @@ import { describe, it, expect } from "vite-plus/test"
 import { type Component, defineComponent, h, onMounted, useTemplateRef, withDirectives } from "vue"
 import * as lib from "@lib"
 import {
+  AnimeLayout,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -112,6 +113,29 @@ const cases: Case[] = [
   { export: "useDraggable", name: "selector", component: withoutTarget(() => useDraggable("#target")), html: box },
   { export: "useLayout", name: "template ref", component: withTarget(t => useLayout(t)), html: box },
   { export: "useLayout", name: "selector", component: withoutTarget(() => useLayout("#target")), html: box },
+  {
+    export: "AnimeLayout",
+    name: "component",
+    component: () => h(AnimeLayout, { as: "ul", options: { duration: 300 } }, () => h("li", "item")),
+    html: "<ul><li>item</li></ul>",
+  },
+  {
+    export: "AnimeLayout",
+    name: "component as root",
+    component: () =>
+      h(
+        AnimeLayout,
+        {
+          as: defineComponent(
+            (_, { slots }) =>
+              () =>
+                h("ul", slots.default?.())
+          ),
+        },
+        () => h("li", "item")
+      ),
+    html: "<ul><li>item</li></ul>",
+  },
   { export: "useScope", name: "no target", component: withoutTarget(() => useScope({})), html: box },
   { export: "useScroll", name: "template ref", component: withTarget(t => useScroll(t, t)), html: box },
   { export: "useScroll", name: "selector", component: withoutTarget(() => useScroll("#target", "#target")), html: box },
@@ -181,9 +205,9 @@ describe("SSR render (real animejs)", () => {
     await expect(renderSSRApp(component)).resolves.toBe(html)
   })
 
-  it("covers every public composable and directive", () => {
+  it("covers every public composable, directive and component", () => {
     const covered = new Set(cases.map(c => c.export))
-    const missing = Object.keys(lib).filter(key => /^(use|v)[A-Z]/.test(key) && !covered.has(key))
+    const missing = Object.keys(lib).filter(key => /^(use|v|Anime)[A-Z]/.test(key) && !covered.has(key))
     expect(missing).toEqual([])
   })
 })

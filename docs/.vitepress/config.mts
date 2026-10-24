@@ -141,6 +141,10 @@ export default defineConfig({
           { text: "vTextSplit", link: "/directives/v-text-split" },
         ],
       },
+      {
+        text: "Components",
+        items: [{ text: "AnimeLayout", link: "/components/anime-layout" }],
+      },
     ],
   },
 })
