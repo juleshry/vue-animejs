@@ -19,6 +19,8 @@ import VSvgDrawableSection from "./pages/directives/VSvgDrawableSection.vue"
 import VWaapiSection from "./pages/directives/VWaapiSection.vue"
 import VTextSplitSection from "./pages/directives/VTextSplitSection.vue"
 import AnimeLayoutSection from "./pages/components/AnimeLayoutSection.vue"
+import AnimeScopeSection from "./pages/components/AnimeScopeSection.vue"
+import AnimeScopeResponsiveFrame from "./pages/components/AnimeScopeResponsiveFrame.vue"
 
 export const composable_routes = [
   {
@@ -122,6 +124,11 @@ export const component_routes = [
     component: AnimeLayoutSection,
     meta: { label: "AnimeLayout", description: "Container that animates its children's layout changes" },
   },
+  {
+    path: "/components/anime-scope",
+    component: AnimeScopeSection,
+    meta: { label: "AnimeScope", description: "Scope rooted on its element: selectors and defaults stay inside" },
+  },
 ]
 
 export const routes = [
@@ -131,6 +138,8 @@ export const routes = [
   ...directive_routes,
   { path: "/components", component: RouteIndex, props: { title: "Components", routes: component_routes } },
   ...component_routes,
+  // Pages embedded in an iframe by a section, rendered without the nav bar
+  { path: "/frames/anime-scope", component: AnimeScopeResponsiveFrame, meta: { bare: true } },
   { path: "/", redirect: "/composables" },
 ]
 

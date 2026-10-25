@@ -4,6 +4,7 @@ import { type Component, defineComponent, h, onMounted, useTemplateRef, withDire
 import * as lib from "@lib"
 import {
   AnimeLayout,
+  AnimeScope,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -137,6 +138,12 @@ const cases: Case[] = [
     html: "<ul><li>item</li></ul>",
   },
   { export: "useScope", name: "no target", component: withoutTarget(() => useScope({})), html: box },
+  {
+    export: "AnimeScope",
+    name: "component",
+    component: () => h(AnimeScope, { as: "section", options: { defaults: { duration: 300 } } }, () => h("p", "item")),
+    html: "<section><p>item</p></section>",
+  },
   { export: "useScroll", name: "template ref", component: withTarget(t => useScroll(t, t)), html: box },
   { export: "useScroll", name: "selector", component: withoutTarget(() => useScroll("#target", "#target")), html: box },
   { export: "useSvg", name: "no target", component: withoutTarget(() => useSvg()), html: box },

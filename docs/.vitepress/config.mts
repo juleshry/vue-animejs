@@ -143,7 +143,10 @@ export default defineConfig({
       },
       {
         text: "Components",
-        items: [{ text: "AnimeLayout", link: "/components/anime-layout" }],
+        items: [
+          { text: "AnimeLayout", link: "/components/anime-layout" },
+          { text: "AnimeScope", link: "/components/anime-scope" },
+        ],
       },
     ],
   },

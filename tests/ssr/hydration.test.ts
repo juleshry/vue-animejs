@@ -17,6 +17,8 @@ import { renderToString } from "@vue/server-renderer"
 import {
   AnimeLayout,
   type AnimeLayoutExposed,
+  AnimeScope,
+  type AnimeScopeExposed,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -319,5 +321,20 @@ describe("AnimeLayout hydration", () => {
     expect(el.tagName).toBe("UL")
     expect(el.style.color).toBe("red")
     expect(layout.value?.layout).toBeDefined()
+  })
+})
+
+describe("AnimeScope hydration", () => {
+  it("hydrates without a mismatch warning and creates the scope on its root", async () => {
+    const scope = ref<AnimeScopeExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeScope, { ref: scope, as: "section", style: { color: "red" } }, () => h("p", "item"))
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("SECTION")
+    expect(el.style.color).toBe("red")
+    expect(scope.value?.scope?.root).toBe(el)
   })
 })

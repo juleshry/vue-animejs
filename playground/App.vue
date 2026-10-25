@@ -1,10 +1,13 @@
 <script setup lang="ts">
-  import { RouterView } from "vue-router"
+  import { RouterView, useRoute } from "vue-router"
   import NavBar from "./components/NavBar.vue"
+
+  const route = useRoute()
 </script>
 
 <template>
-  <div class="layout">
+  <RouterView v-if="route.meta.bare" />
+  <div v-else class="layout">
     <NavBar />
     <main>
       <RouterView />

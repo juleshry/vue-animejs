@@ -15,6 +15,7 @@ import {
 } from "animejs"
 import {
   AnimeLayout,
+  AnimeScope,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -129,6 +130,11 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useTimeline({ autoplay: true }))
     expect(mock_createTimeline).not.toHaveBeenCalled()
     expect(result.timeline.value).toBeUndefined()
+  })
+
+  it("AnimeScope does not create a scope during SSR", async () => {
+    await renderSSRApp(() => h(AnimeScope, { options: { mediaQueries: { narrow: "(max-width: 600px)" } } }))
+    expect(mock_createScope).not.toHaveBeenCalled()
   })
 
   it("useScope does not create a scope during SSR", async () => {

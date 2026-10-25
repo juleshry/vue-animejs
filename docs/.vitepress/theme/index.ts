@@ -24,17 +24,19 @@ import VWaapiDemo from "./components/demo/VWaapiDemo.vue"
 import VSvgDrawableDemo from "./components/demo/VSvgDrawableDemo.vue"
 import VTextSplitDemo from "./components/demo/VTextSplitDemo.vue"
 import AnimeLayoutDemo from "./components/demo/AnimeLayoutDemo.vue"
+import AnimeScopeDemo from "./components/demo/anime-scope/AnimeScopeDemo.vue"
+import AnimeScopeDemoInner from "./components/demo/anime-scope/AnimeScopeDemoInner.vue"
+import { demoParent } from "./demo-parents"
 import "./style.css"
-
-const DEMO_ROUTES = ["/demos/use-scope"]
 
 export default {
   extends: DefaultTheme,
   Layout,
   enhanceApp({ app, router }) {
     router.onBeforePageLoad = to => {
-      if (typeof window !== "undefined" && DEMO_ROUTES.some(r => to.endsWith(r)) && window.self === window.top) {
-        window.location.replace("/composables/use-scope")
+      const parent = demoParent(to)
+      if (typeof window !== "undefined" && parent && window.self === window.top) {
+        window.location.replace(parent)
         return false
       }
     }
@@ -60,5 +62,7 @@ export default {
     app.component("VSvgDrawableDemo", VSvgDrawableDemo)
     app.component("VTextSplitDemo", VTextSplitDemo)
     app.component("AnimeLayoutDemo", AnimeLayoutDemo)
+    app.component("AnimeScopeDemo", AnimeScopeDemo)
+    app.component("AnimeScopeDemoInner", AnimeScopeDemoInner)
   },
 } satisfies Theme
