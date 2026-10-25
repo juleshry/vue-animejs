@@ -2,7 +2,7 @@
   <img src="./docs/src/public/icon-animated.svg" alt="vue-animejs" width="120" />
 
   <h1 align="center">vue-animejs</h1>
-  <p align="center">SSR-safe Vue 3 composables and directives for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>
+  <p align="center">SSR-safe Vue 3 composables, directives and components for <a href="https://animejs.com/">Anime.js</a> v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.</p>
   <p align="center">
     <a href="https://www.npmjs.com/package/@juleshry/vue-animejs"><img src="https://img.shields.io/npm/v/%40juleshry%2Fvue-animejs?label=npm&color=a1b858" alt="npm version" /></a>
     <a href="https://www.npmjs.com/package/@juleshry/vue-animejs"><img src="https://img.shields.io/npm/dm/%40juleshry%2Fvue-animejs?color=50a36f" alt="npm downloads" /></a>
@@ -15,9 +15,9 @@
 
 ## 🚀 Overview
 
-**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables. It integrates with Vue's reactivity system — pass a `ref` as a target, as the options, or straight inside the options object (`{ translateX: distance }`), and the animation updates automatically. Lifecycle cleanup is handled for you.
+**vue-animejs** wraps Anime.js v4 as idiomatic Vue 3 composables, directives and components. It integrates with Vue's reactivity system — pass a `ref` as a target, as the options, or straight inside the options object (`{ translateX: distance }`), and the animation updates automatically. Lifecycle cleanup is handled for you.
 
-**SSR-safe:** every composable and directive works with server-side rendering (Nuxt, `@vue/server-renderer`) with no `<ClientOnly>` wrapper. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. Directives go further and render their initial state on the server (`v-animate`, `v-waapi`, `v-svg-drawable`, and `v-text-split` with `ssrHidden`), so elements don't flash their final state before hydration.
+**SSR-safe:** every composable, directive and component works with server-side rendering (Nuxt, `@vue/server-renderer`) with no `<ClientOnly>` wrapper. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. Directives go further and render their initial state on the server (`v-animate`, `v-waapi`, `v-svg-drawable`, and `v-text-split` with `ssrHidden`), so elements don't flash their final state before hydration.
 
 **Before** — raw Anime.js in a Vue component:
 
@@ -71,7 +71,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 - Anime.js 4+
 - @vueuse/core 14+
 
-## 🦄 Composables & Directives
+## 🦄 Composables, Directives & Components
 
 | Composable       | Description                                       |
 |------------------|---------------------------------------------------|
@@ -99,6 +99,12 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `v-waapi`        | Animate via WAAPI declaratively |
 | `v-text-split`   | Split text into animatable lines, words, and chars declaratively |
 
+**Components** — wrap a composable that needs an element of its own:
+
+| Component     | Description                                              |
+|---------------|----------------------------------------------------------|
+| `AnimeLayout` | Container that animates its children's layout changes (reorder, add, remove) |
+
 ## 🚀 Usage
 
 For full API docs and live demos, see **[the doc here](https://vue-animejs.juleshry.dev)**.
@@ -120,7 +126,8 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [ ] Add components
+- [x] Add components (`AnimeLayout`)
+- [ ] More components: `AnimeScope`, `AnimeTransition`, `AnimeTransitionGroup`, `AnimeText`, `AnimeScroll`, `AnimeTimeline`
 
 ## 📄 License
 

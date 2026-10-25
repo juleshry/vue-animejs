@@ -3,8 +3,9 @@
 ## General
 
 - All composables are prefixed with `use` and accept both plain values and Vue `Ref`s as arguments
-- Composables integrate with Vue's component lifecycle — animations are cleaned up automatically on unmount
-- The library is tree-shakeable: only the composables you import are included in your bundle
+- Directives are prefixed with `v-` and components with `Anime` (e.g. `v-animate`, `AnimeLayout`)
+- Everything integrates with Vue's component lifecycle — animations are cleaned up automatically on unmount
+- The library is tree-shakeable: only the composables, directives and components you import are included in your bundle
 
 ## Targets
 
@@ -85,7 +86,7 @@ This applies to all composables.
 
 ## SSR
 
-Every composable and directive is SSR-safe: you can use them during server-side rendering (Nuxt, `@vue/server-renderer`, `vite-ssr`) without `<ClientOnly>`. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. During SSR, a composable's returned instance ref (`animation`, `timer`, `timeline`, etc.) stays `undefined` and control methods (`play`, `pause`, …) are no-ops:
+Every composable, directive and component is SSR-safe: you can use them during server-side rendering (Nuxt, `@vue/server-renderer`, `vite-ssr`) without `<ClientOnly>`. Nothing touches `window` or `document` on the server, and Anime.js instances are only created in the browser. During SSR, a composable's returned instance ref (`animation`, `timer`, `timeline`, etc.) stays `undefined` and control methods (`play`, `pause`, …) are no-ops:
 
 ```ts
 // Safe to call at the top level of setup(), even on the server
@@ -202,6 +203,47 @@ Changing the binding value recreates the underlying Anime.js instance from scrat
 :::
 
 Reach for a directive when the animation has no imperative control needs (no `play` / `pause` / `restart` from script) and the options can be expressed inline. Reach for the composable instead when you need to control playback, read animation state, or share the instance across multiple elements.
+
+## Components
+
+Components wrap a composable that needs an element of its own, like the container whose children [`useLayout`](/composables/use-layout) tracks. The component renders that element for you, so there's no template ref to wire up:
+
+```vue
+<script setup lang="ts">
+import { nextTick, ref, useTemplateRef } from "vue"
+import { AnimeLayout } from "@juleshry/vue-animejs"
+
+const grid = useTemplateRef("grid")
+const items = ref([1, 2, 3, 4])
+
+async function shuffle() {
+  grid.value?.record()
+  items.value = [...items.value].sort(() => Math.random() - 0.5)
+  await nextTick()
+  grid.value?.animate()
+}
+</script>
+
+<template>
+  <AnimeLayout ref="grid" as="ul" :options="{ duration: 600 }">
+    <li v-for="item in items" :key="item">{{ item }}</li>
+  </AnimeLayout>
+  <button @click="shuffle">Shuffle</button>
+</template>
+```
+
+- The `as` prop picks the root: a tag name (default `div`) or one of your own components. A component must render a single root element with the default slot directly inside it
+- `options` takes the same shapes as the composable's options. An inline object that re-renders with the same values doesn't recreate anything; changing a value does, like a composable's reactive options
+- The composable's controls are exposed on the component: reach them through a template ref, as above. The default slot gets no props, since everything inside it is animated: keep buttons and other triggers outside
+- The instance is created once the component has mounted and reverted on unmount, exactly like the composable it wraps
+
+### Composable, directive or component?
+
+| | Use it when |
+|---|---|
+| **Composable** | You need playback control or the animation state from script, or one instance shared across elements |
+| **Directive** | The animation lives on one element and can be written inline, with no control from script |
+| **Component** | The animation needs an element of its own (a container whose children are animated) and you'd rather not wire up a template ref |
 
 ## Returned Values
 
