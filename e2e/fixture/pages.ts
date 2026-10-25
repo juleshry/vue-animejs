@@ -1,4 +1,5 @@
 import type { Component } from "vue"
+import AnimeTransition from "./pages/AnimeTransition.vue"
 import ControlNoCreated from "./pages/ControlNoCreated.vue"
 import ControlNoSSR from "./pages/ControlNoSSR.vue"
 import VAnimate from "./pages/VAnimate.vue"
@@ -14,6 +15,7 @@ export const pages: Record<string, Component> = {
   "v-waapi": VWaapi,
   "v-svg-drawable": VSvgDrawable,
   "v-text-split": VTextSplit,
+  "anime-transition": AnimeTransition,
   "control-no-ssr": ControlNoSSR,
   "control-no-created": ControlNoCreated,
 }

@@ -105,6 +105,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 |---------------|----------------------------------------------------------|
 | `AnimeLayout` | Container that animates its children's layout changes (reorder, add, remove) |
 | `AnimeScope`  | Anime.js scope rooted on its element: selectors, defaults and media queries stay inside |
+| `AnimeTransition` | Vue `<Transition>` with Anime.js enter / leave animations, `appear` included under SSR |
 
 ## 🚀 Usage
 
@@ -127,8 +128,8 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 
 ## 🗺️ TODO
 
-- [x] Add components (`AnimeLayout`, `AnimeScope`)
-- [ ] More components: `AnimeTransition`, `AnimeTransitionGroup`, `AnimeText`, `AnimeScroll`, `AnimeTimeline`
+- [x] Add components (`AnimeLayout`, `AnimeScope`, `AnimeTransition`)
+- [ ] More components: `AnimeTransitionGroup`, `AnimeText`, `AnimeScroll`, `AnimeTimeline`
 
 ## 📄 License
 

@@ -42,7 +42,7 @@ function computed(page: Page, property: string, selector = TARGET): Promise<stri
 test.describe("server paint (JavaScript disabled)", () => {
   test.use({ javaScriptEnabled: false })
 
-  for (const name of ["v-animate", "v-waapi"]) {
+  for (const name of ["v-animate", "v-waapi", "anime-transition"]) {
     test(`${name} renders the animation's from state`, async ({ page }) => {
       await page.goto(`/${name}`)
       await expect.poll(() => computed(page, "opacity")).toBe("0")
@@ -103,6 +103,40 @@ for (const name of ["v-animate", "v-waapi"]) {
     })
   })
 }
+
+// Vue's <Transition> never runs appear hooks on hydrated elements: AnimeTransition starts the enter itself
+test.describe("anime-transition with appear", () => {
+  test("hydrates without warnings and never flashes the final state", async ({ page }) => {
+    const log = await open(page, "anime-transition")
+    await expect.poll(() => computed(page, "opacity")).toBe("1")
+    const frames = await getFrames(page)
+
+    expect(log.hydrationWarnings).toEqual([])
+    expect(log.errors).toEqual([])
+    expect(
+      frames.some(frame => !frame.hydrated),
+      "a frame painted before hydration"
+    ).toBe(true)
+    for (const frame of frames.filter(frame => !frame.hydrated)) {
+      expect(frame).toMatchObject({ opacity: 0, translateY: 20 })
+    }
+    expect(isNonDecreasing(frames.map(frame => frame.opacity))).toBe(true)
+    expect(isNonDecreasing(frames.map(frame => -frame.translateY))).toBe(true)
+    await expect(page.locator(TARGET)).not.toHaveAttribute("data-anime-ssr")
+    expect(await computed(page, "color")).toBe("rgb(255, 0, 0)")
+  })
+
+  test("leaves and enters again after hydration", async ({ page }) => {
+    await open(page, "anime-transition")
+    await expect.poll(() => computed(page, "opacity")).toBe("1")
+
+    await page.locator("[data-test=toggle]").click()
+    await expect(page.locator(TARGET)).toHaveCount(0)
+    await page.locator("[data-test=toggle]").click()
+    await expect(page.locator(TARGET)).toHaveCount(1)
+    await expect.poll(() => computed(page, "opacity")).toBe("1")
+  })
+})
 
 test.describe("v-animate with a conflicting :style", () => {
   test("hydrates without warnings and restores the user's value after a binding change", async ({ page }) => {

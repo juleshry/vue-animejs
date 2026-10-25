@@ -5,6 +5,7 @@ import * as lib from "@lib"
 import {
   AnimeLayout,
   AnimeScope,
+  AnimeTransition,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -136,6 +137,25 @@ const cases: Case[] = [
         () => h("li", "item")
       ),
     html: "<ul><li>item</li></ul>",
+  },
+  {
+    export: "AnimeTransition",
+    name: "without appear",
+    component: () => h(AnimeTransition, { enter: { opacity: [0, 1] } }, () => h("p", "hi")),
+    html: "<p>hi</p>",
+  },
+  {
+    export: "AnimeTransition",
+    name: "appear renders enter's starting values",
+    component: () =>
+      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], translateY: [20, 0] } }, () => h("p", "hi")),
+    html: '<p style="opacity:0;transform:translateY(20px);" data-anime-ssr="opacity,transform">hi</p>',
+  },
+  {
+    export: "AnimeTransition",
+    name: "appear with nothing rendered",
+    component: () => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => null),
+    html: "<!---->",
   },
   { export: "useScope", name: "no target", component: withoutTarget(() => useScope({})), html: box },
   {

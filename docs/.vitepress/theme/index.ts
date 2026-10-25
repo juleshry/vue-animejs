@@ -26,6 +26,7 @@ import VTextSplitDemo from "./components/demo/VTextSplitDemo.vue"
 import AnimeLayoutDemo from "./components/demo/AnimeLayoutDemo.vue"
 import AnimeScopeDemo from "./components/demo/anime-scope/AnimeScopeDemo.vue"
 import AnimeScopeDemoInner from "./components/demo/anime-scope/AnimeScopeDemoInner.vue"
+import AnimeTransitionDemo from "./components/demo/AnimeTransitionDemo.vue"
 import { demoParent } from "./demo-parents"
 import "./style.css"
 
@@ -64,5 +65,6 @@ export default {
     app.component("AnimeLayoutDemo", AnimeLayoutDemo)
     app.component("AnimeScopeDemo", AnimeScopeDemo)
     app.component("AnimeScopeDemoInner", AnimeScopeDemoInner)
+    app.component("AnimeTransitionDemo", AnimeTransitionDemo)
   },
 } satisfies Theme

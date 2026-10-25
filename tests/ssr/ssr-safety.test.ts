@@ -16,6 +16,7 @@ import {
 import {
   AnimeLayout,
   AnimeScope,
+  AnimeTransition,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -135,6 +136,11 @@ describe("SSR safety", () => {
   it("AnimeScope does not create a scope during SSR", async () => {
     await renderSSRApp(() => h(AnimeScope, { options: { mediaQueries: { narrow: "(max-width: 600px)" } } }))
     expect(mock_createScope).not.toHaveBeenCalled()
+  })
+
+  it("AnimeTransition does not animate during SSR, even with appear", async () => {
+    await renderSSRApp(() => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => h("p")))
+    expect(mock_animate).not.toHaveBeenCalled()
   })
 
   it("useScope does not create a scope during SSR", async () => {

@@ -21,6 +21,7 @@ import VTextSplitSection from "./pages/directives/VTextSplitSection.vue"
 import AnimeLayoutSection from "./pages/components/AnimeLayoutSection.vue"
 import AnimeScopeSection from "./pages/components/AnimeScopeSection.vue"
 import AnimeScopeResponsiveFrame from "./pages/components/AnimeScopeResponsiveFrame.vue"
+import AnimeTransitionSection from "./pages/components/AnimeTransitionSection.vue"
 
 export const composable_routes = [
   {
@@ -128,6 +129,11 @@ export const component_routes = [
     path: "/components/anime-scope",
     component: AnimeScopeSection,
     meta: { label: "AnimeScope", description: "Scope rooted on its element: selectors and defaults stay inside" },
+  },
+  {
+    path: "/components/anime-transition",
+    component: AnimeTransitionSection,
+    meta: { label: "AnimeTransition", description: "Enter and leave transitions played by Anime.js" },
   },
 ]
 

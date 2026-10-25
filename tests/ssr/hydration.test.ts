@@ -19,6 +19,7 @@ import {
   type AnimeLayoutExposed,
   AnimeScope,
   type AnimeScopeExposed,
+  AnimeTransition,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -336,5 +337,57 @@ describe("AnimeScope hydration", () => {
     expect(el.tagName).toBe("SECTION")
     expect(el.style.color).toBe("red")
     expect(scope.value?.scope?.root).toBe(el)
+  })
+})
+
+describe("AnimeTransition appear hydration", () => {
+  const enter = { opacity: [0, 1], translateY: [20, 0], duration: 1000 }
+
+  it("hydrates without a mismatch warning and starts from the server's starting state", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter }, () => h("p", { style: { color: "red" } }, "hi"))
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+    expect(el.style.color).toBe("red")
+    // Anime.js has taken over from the server style: same starting values, now its own
+    expect(el.style.opacity).toBe("0")
+    expect(el.style.transform).toBe("translateY(20px)")
+  })
+
+  it("restores the user's own value for a key the server overrode", async () => {
+    const { el } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter: { translateY: [20, 0], duration: 1000 } }, () =>
+        h("p", { style: { opacity: 0.5 } }, "hi")
+      )
+    )
+    expect(el.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+    expect(el.style.opacity).toBe("0.5")
+  })
+
+  it("plays the enter animation through after hydration", async () => {
+    const { el } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], duration: 50 } }, () => h("p", "hi"))
+    )
+    await new Promise(resolve => setTimeout(resolve, 200))
+    expect(el.style.opacity).toBe("1")
+  })
+
+  // Regression guard for @nuxt/hints-style checks: nothing is written before the surrounding onMounted hooks ran
+  it("leaves the server HTML untouched until every onMounted of the flush has run", async () => {
+    const seen: string[] = []
+    const Outer = defineComponent({
+      setup() {
+        const instance = getCurrentInstance()!
+        onMounted(() => seen.push((instance.vnode.el as Element).outerHTML))
+        return () => h(AnimeTransition, { appear: true, enter }, () => h("p", "hi"))
+      },
+    })
+    const server_html = await renderToString(createSSRApp({ render: () => h(Outer) }))
+    const { container } = await hydrate(() => h(Outer))
+    expect(seen).toEqual([server_html])
+    expect(container.querySelector("p")!.hasAttribute(SSR_STYLE_ATTR)).toBe(false) // the handoff did run, afterwards
   })
 })
