@@ -17,6 +17,7 @@ import {
   AnimeLayout,
   AnimeScope,
   AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -140,6 +141,13 @@ describe("SSR safety", () => {
 
   it("AnimeTransition does not animate during SSR, even with appear", async () => {
     await renderSSRApp(() => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => h("p")))
+    expect(mock_animate).not.toHaveBeenCalled()
+  })
+
+  it("AnimeTransitionGroup does not animate during SSR, even with appear", async () => {
+    await renderSSRApp(() =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, enter: { opacity: [0, 1] } }, () => [h("li", { key: "a" })])
+    )
     expect(mock_animate).not.toHaveBeenCalled()
   })
 

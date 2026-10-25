@@ -1,19 +1,7 @@
-import { type AnimationParams, type JSAnimation } from "animejs"
-import {
-  type BaseTransitionProps,
-  Comment,
-  defineComponent,
-  h,
-  isVNode,
-  onUnmounted,
-  type SlotsType,
-  Text,
-  Transition,
-  type VNode,
-  withDirectives,
-} from "vue"
-import { useRawAnimate } from "../composables/use-raw-animate.ts"
+import { type AnimationParams } from "animejs"
+import { type BaseTransitionProps, defineComponent, h, type SlotsType, Transition, type VNode } from "vue"
 import { type AppearState, vAppearState } from "../utils/appear-state.ts"
+import { useTransitionAnimations, withChildDirectives } from "../utils/transition-animations.ts"
 
 export interface AnimeTransitionProps {
   /** Anime.js animation parameters for the entering element, e.g. `{ opacity: [0, 1], translateY: [20, 0] }`. Without it, the element enters instantly. */
@@ -34,27 +22,7 @@ export interface AnimeTransitionProps {
  */
 export const AnimeTransition = defineComponent(
   (props: AnimeTransitionProps, { slots }) => {
-    const running = new Map<Element, JSAnimation>()
-
-    function play(el: Element, params: AnimationParams | undefined, done?: () => void) {
-      cancel(el)
-      if (!params) return done?.()
-
-      const animation = useRawAnimate(el, {
-        ...params,
-        onComplete: self => {
-          running.delete(el)
-          params.onComplete?.(self)
-          done?.()
-        },
-      })
-      running.set(el, animation)
-    }
-
-    function cancel(el: Element) {
-      running.get(el)?.cancel()
-      running.delete(el)
-    }
+    const { play, cancel } = useTransitionAnimations()
 
     // A hydrated element's appear: Vue's <Transition> doesn't run one, so there's no `done` to call
     const appear_state: AppearState = {
@@ -63,10 +31,6 @@ export const AnimeTransition = defineComponent(
       },
       start: el => play(el, props.enter),
     }
-
-    onUnmounted(() => {
-      for (const el of [...running.keys()]) cancel(el)
-    })
 
     return () => {
       const children = slots.default?.()
@@ -82,7 +46,7 @@ export const AnimeTransition = defineComponent(
           onEnterCancelled: cancel,
           onLeaveCancelled: cancel,
         },
-        () => (props.appear ? children?.map(child => withAppearState(child, appear_state)) : children)
+        () => withChildDirectives(children, props.appear ? [[vAppearState, appear_state]] : [])
       )
     }
   },
@@ -92,9 +56,3 @@ export const AnimeTransition = defineComponent(
     slots: Object as SlotsType<{ default?: () => VNode[] }>,
   }
 )
-
-// Comments (a `v-if` that is false) and text nodes can't carry a directive
-function withAppearState(child: VNode, state: AppearState): VNode {
-  if (!isVNode(child) || child.type === Comment || child.type === Text) return child
-  return withDirectives(child, [[vAppearState, state]])
-}

@@ -42,7 +42,7 @@ function computed(page: Page, property: string, selector = TARGET): Promise<stri
 test.describe("server paint (JavaScript disabled)", () => {
   test.use({ javaScriptEnabled: false })
 
-  for (const name of ["v-animate", "v-waapi", "anime-transition"]) {
+  for (const name of ["v-animate", "v-waapi", "anime-transition", "anime-transition-group"]) {
     test(`${name} renders the animation's from state`, async ({ page }) => {
       await page.goto(`/${name}`)
       await expect.poll(() => computed(page, "opacity")).toBe("0")
@@ -135,6 +135,105 @@ test.describe("anime-transition with appear", () => {
     await page.locator("[data-test=toggle]").click()
     await expect(page.locator(TARGET)).toHaveCount(1)
     await expect.poll(() => computed(page, "opacity")).toBe("1")
+  })
+})
+
+test.describe("anime-transition-group with appear", () => {
+  test("hydrates without warnings and never flashes the final state", async ({ page }) => {
+    const log = await open(page, "anime-transition-group")
+    await expect.poll(() => computed(page, "opacity")).toBe("1")
+    const frames = await getFrames(page)
+
+    expect(log.hydrationWarnings).toEqual([])
+    expect(log.errors).toEqual([])
+    expect(
+      frames.some(frame => !frame.hydrated),
+      "a frame painted before hydration"
+    ).toBe(true)
+    for (const frame of frames.filter(frame => !frame.hydrated)) {
+      expect(frame).toMatchObject({ opacity: 0, translateY: 20 })
+    }
+    expect(isNonDecreasing(frames.map(frame => frame.opacity))).toBe(true)
+    await expect(page.locator("li[data-anime-ssr]")).toHaveCount(0)
+  })
+
+  test("staggers the children and animates a child added after hydration", async ({ page }) => {
+    await open(page, "anime-transition-group")
+    // While the first child is still entering, the last one (200ms later) is behind it
+    await expect.poll(() => computed(page, "opacity")).not.toBe("0")
+    const first = Number(await computed(page, "opacity"))
+    const last = Number(await computed(page, "opacity", "[data-test=item-c]"))
+    expect(last).toBeLessThan(first)
+
+    await expect.poll(() => computed(page, "opacity", "[data-test=item-c]")).toBe("1")
+    await page.locator("[data-test=add]").click()
+    await expect(page.locator("[data-test=item-d]")).toHaveCount(1)
+    await expect.poll(() => computed(page, "opacity", "[data-test=item-d]")).toBe("1")
+  })
+})
+
+test.describe("anime-transition-group moves", () => {
+  // Regression: removing a middle child made the ones after it wait for its leave, then jump to their new place
+  test("slides the children after a removed one up instead of jumping", async ({ page }) => {
+    await open(page, "anime-transition-group")
+    await expect.poll(() => computed(page, "opacity", "[data-test=item-c]")).toBe("1")
+
+    const tops = await page.evaluate(async () => {
+      const c = document.querySelector("[data-test=item-c]")!
+      const samples = [c.getBoundingClientRect().top]
+      ;(document.querySelector("[data-test=remove-b]") as HTMLElement).click()
+      const end = performance.now() + 900
+      while (performance.now() < end) {
+        await new Promise(requestAnimationFrame)
+        samples.push(c.getBoundingClientRect().top)
+      }
+      return samples
+    })
+
+    const start = tops[0]
+    const finish = tops[tops.length - 1]
+    const distance = start - finish
+    expect(distance).toBeGreaterThan(10)
+    // It moves up the whole way, never back down, and no single frame covers most of the distance
+    expect(isNonDecreasing(tops.map(top => -top))).toBe(true)
+    const steps = tops.slice(1).map((top, i) => tops[i] - top)
+    expect(Math.max(...steps)).toBeLessThan(distance * 0.5)
+    expect(tops.filter(top => top !== start && top !== finish).length).toBeGreaterThan(3)
+  })
+})
+
+test.describe("anime-transition-group removing several children", () => {
+  // Regression: each leaving child was frozen after the previous one had left the layout, so it landed in that one's
+  // place and everything after it jumped
+  test("keeps each leaving child where it was and slides the rest up", async ({ page }) => {
+    await open(page, "anime-transition-group")
+    await expect.poll(() => computed(page, "opacity", "[data-test=item-c]")).toBe("1")
+
+    const result = await page.evaluate(async () => {
+      const top = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().top
+      const b = document.querySelector("[data-test=item-b]")!
+      const c = document.querySelector("[data-test=item-c]")!
+      const b_before = top("[data-test=item-b]")
+      const c_tops = [c.getBoundingClientRect().top]
+      ;(document.querySelector("[data-test=remove-a-b]") as HTMLElement).click()
+      // Vue patches the DOM asynchronously: by the next frame, both children have started leaving
+      await new Promise(requestAnimationFrame)
+      const b_after = b.getBoundingClientRect().top
+      const end = performance.now() + 900
+      while (performance.now() < end) {
+        await new Promise(requestAnimationFrame)
+        c_tops.push(c.getBoundingClientRect().top)
+      }
+      return { b_before, b_after, c_tops }
+    })
+
+    expect(result.b_after).toBeCloseTo(result.b_before, 0)
+    const tops = result.c_tops
+    const distance = tops[0] - tops[tops.length - 1]
+    expect(distance).toBeGreaterThan(20)
+    expect(isNonDecreasing(tops.map(top => -top))).toBe(true)
+    const steps = tops.slice(1).map((top, i) => tops[i] - top)
+    expect(Math.max(...steps)).toBeLessThan(distance * 0.5)
   })
 })
 

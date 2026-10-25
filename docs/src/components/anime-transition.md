@@ -119,7 +119,7 @@ export declare const AnimeTransition: DefineSetupFnComponent<
 - On **unmount**, a running animation is cancelled.
 
 ::: tip
-To animate elements moving to a new position (a reordered list), use [`AnimeLayout`](/components/anime-layout).
+For a list of elements entering and leaving, use [`AnimeTransitionGroup`](/components/anime-transition-group). To animate elements moving to a new position (a reordered list), use [`AnimeLayout`](/components/anime-layout).
 :::
 
 ## Source

@@ -20,6 +20,7 @@ import {
   AnimeScope,
   type AnimeScopeExposed,
   AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -389,5 +390,35 @@ describe("AnimeTransition appear hydration", () => {
     const { container } = await hydrate(() => h(Outer))
     expect(seen).toEqual([server_html])
     expect(container.querySelector("p")!.hasAttribute(SSR_STYLE_ATTR)).toBe(false) // the handoff did run, afterwards
+  })
+})
+
+describe("AnimeTransitionGroup appear hydration", () => {
+  const render = () =>
+    h(AnimeTransitionGroup, { tag: "ul", appear: true, stagger: 100, enter: { opacity: [0, 1], duration: 50 } }, () =>
+      ["a", "b", "c"].map(item => h("li", { key: item, style: { color: "red" } }, item))
+    )
+
+  it("hydrates without a mismatch warning and hands every child over to Anime.js", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(render)
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    for (const li of el.querySelectorAll("li")) {
+      expect(li.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+      expect(li.style.color).toBe("red")
+      expect(li.style.opacity).toBe("0")
+    }
+  })
+
+  it("plays every child's enter through, staggered", async () => {
+    const { el } = await hydrate(render)
+    const items = [...el.querySelectorAll("li")]
+    await new Promise(resolve => setTimeout(resolve, 120))
+    // a (no delay) has finished, c (200ms delay) hasn't started
+    expect(items[0].style.opacity).toBe("1")
+    expect(items[2].style.opacity).toBe("0")
+    await new Promise(resolve => setTimeout(resolve, 300))
+    expect(items.map(li => li.style.opacity)).toEqual(["1", "1", "1"])
   })
 })

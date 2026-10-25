@@ -1,11 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect } from "vite-plus/test"
-import { type Component, defineComponent, h, onMounted, useTemplateRef, withDirectives } from "vue"
+import { type Component, defineComponent, Fragment, h, onMounted, useTemplateRef, withDirectives } from "vue"
 import * as lib from "@lib"
 import {
   AnimeLayout,
   AnimeScope,
   AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -156,6 +157,38 @@ const cases: Case[] = [
     name: "appear with nothing rendered",
     component: () => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => null),
     html: "<!---->",
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "without appear",
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", enter: { opacity: [0, 1] } }, () =>
+        ["a", "b"].map(item => h("li", { key: item }, item))
+      ),
+    html: "<ul><li>a</li><li>b</li></ul>",
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "appear renders enter's starting values on every child",
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, stagger: 50, enter: { opacity: [0, 1] } }, () =>
+        ["a", "b"].map(item => h("li", { key: item }, item))
+      ),
+    html: '<ul><li style="opacity:0;" data-anime-ssr="opacity">a</li><li style="opacity:0;" data-anime-ssr="opacity">b</li></ul>',
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "appear through a v-for fragment",
+    // A compiled `v-for` hands the slot one Fragment vnode: its children must still get the starting values
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, enter: { opacity: [0, 1] } }, () => [
+        h(
+          Fragment,
+          null,
+          ["a", "b"].map(item => h("li", { key: item }, item))
+        ),
+      ]),
+    html: '<ul><li style="opacity:0;" data-anime-ssr="opacity">a</li><li style="opacity:0;" data-anime-ssr="opacity">b</li></ul>',
   },
   { export: "useScope", name: "no target", component: withoutTarget(() => useScope({})), html: box },
   {
