@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vite-plus/test"
-import { defineComponent, h, nextTick, ref, type Ref } from "vue"
+import { defineComponent, Fragment, h, nextTick, ref, type Ref, vShow, withDirectives } from "vue"
 import { mount } from "@vue/test-utils"
 import { AnimeTransitionGroup, type AnimeTransitionGroupProps } from "@lib"
 import { animate, type AnimationParams, type FunctionValue } from "animejs"
@@ -146,7 +146,51 @@ describe("AnimeTransitionGroup", () => {
     for (const animation of running) expect(animation.cancel).toHaveBeenCalled()
   })
 
+  // Regression: Fragments were flattened without their key, so `<template v-for :key>` children lost theirs
+  it("keys the children of a keyed fragment from it, as <TransitionGroup> does", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const items = ref(["a", "b", "c"])
+    mount(
+      defineComponent(
+        () => () =>
+          // What `<template v-for="item in items" :key="item"><li>…</li></template>` compiles to
+          h(AnimeTransitionGroup, { tag: "ul", leave }, () => [
+            h(
+              Fragment,
+              null,
+              items.value.map(item => h(Fragment, { key: item }, [h("li", { "data-item": item }, item)]))
+            ),
+          ])
+      ),
+      { global: { stubs: { "transition-group": false } }, attachTo: document.body }
+    )
+    items.value = ["a", "c"]
+    await nextTick()
+    expect(calls()).toEqual([{ item: "b", delay: undefined }])
+    expect(warn.mock.calls.flat().join(" ")).not.toMatch(/keyed/)
+    warn.mockRestore()
+  })
+
+  // Regression: withDirectives added to the `dirs` of the slot's own vnode, which a cached (static, v-once) child
+  // hands back on every render
+  it("leaves the slot's vnodes untouched", async () => {
+    const cached = h("li", { key: "static" }, "static")
+    const count = ref(0)
+    mount(
+      defineComponent(() => () => h(AnimeTransitionGroup, { tag: "ul", "data-count": count.value }, () => [cached])),
+      { global: { stubs: { "transition-group": false } }, attachTo: document.body }
+    )
+    count.value++
+    await nextTick()
+    count.value++
+    await nextTick()
+    expect(cached.dirs).toBeFalsy()
+  })
+
   describe("moves", () => {
+    // How far a positioned ancestor that isn't the offsetParent (e.g. a transformed one) puts frozen children off
+    let containing_block_offset = 0
+
     // happy-dom has no layout: put each child at x = 100 * its index among the children still in the layout (or where
     // it was frozen), for both getBoundingClientRect and offsetLeft
     function layoutLeft(el: HTMLElement): number {
@@ -158,8 +202,9 @@ describe("AnimeTransitionGroup", () => {
     }
 
     beforeEach(() => {
+      containing_block_offset = 0
       vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-        const left = layoutLeft(this)
+        const left = layoutLeft(this) + (this.style.position === "absolute" ? containing_block_offset : 0)
         return { left, top: 0, right: left + 80, bottom: 80, width: 80, height: 80, x: left, y: 0 } as DOMRect
       })
       vi.spyOn(HTMLElement.prototype, "offsetLeft", "get").mockImplementation(function (this: HTMLElement) {
@@ -171,14 +216,39 @@ describe("AnimeTransitionGroup", () => {
       vi.restoreAllMocks()
     })
 
-    /** The `animate()` calls that move an element, by item: `[translateX, translateY, duration]`. */
+    const item = (name: string) => document.querySelector<HTMLElement>(`[data-item=${name}]`)!
+
+    interface MoveCall {
+      offset: { x: number; y: number }
+      params: AnimationParams
+      animation: { cancel: ReturnType<typeof vi.fn> }
+      el: HTMLElement
+    }
+
+    /** The `animate()` calls that move an element (they animate an offset object, not the element), in order. */
+    function moveCalls(): MoveCall[] {
+      return mock_animate.mock.calls.flatMap(([target, params], i) => {
+        if (target instanceof Element) return []
+        const offset = target as { x: number; y: number }
+        const p = params as AnimationParams
+        // Find the element it writes to: run its update with a marker offset
+        const { x, y } = offset
+        offset.x = 9000 + i
+        p.onUpdate?.(mock_animate.mock.results[i].value)
+        const el = [...document.querySelectorAll<HTMLElement>("li")].find(li =>
+          li.style.translate.startsWith(`${9000 + i}px`)
+        )!
+        offset.x = x
+        offset.y = y
+        p.onUpdate?.(mock_animate.mock.results[i].value)
+        return [{ offset, params: p, animation: mock_animate.mock.results[i].value, el }]
+      })
+    }
+
+    /** The moves started so far, by item: `[x, y, duration]` they animate from (to 0). */
     function moves(): Record<string, unknown[]> {
       const out: Record<string, unknown[]> = {}
-      for (const [el, params] of mock_animate.mock.calls) {
-        const p = params as AnimationParams
-        if (p.translateX === undefined) continue
-        out[(el as HTMLElement).dataset.item!] = [p.translateX, p.translateY, p.duration]
-      }
+      for (const { offset, params, el } of moveCalls()) out[el.dataset.item!] = [offset.x, offset.y, params.duration]
       return out
     }
 
@@ -187,7 +257,7 @@ describe("AnimeTransitionGroup", () => {
       mountList({ leave }, items)
       items.value = ["a", "c"]
       await nextTick()
-      const b = document.querySelector<HTMLElement>("[data-item=b]")!
+      const b = item("b")
       expect(b.style.position).toBe("absolute")
       expect(b.style.margin).toBe("0px")
       for (const key of ["left", "top", "width", "height"] as const) expect(b.style[key]).toMatch(/px$/)
@@ -200,9 +270,20 @@ describe("AnimeTransitionGroup", () => {
       mountList({ leave }, items)
       items.value = ["a", "d"]
       await nextTick()
-      const left = (item: string) => document.querySelector<HTMLElement>(`[data-item=${item}]`)!.style.left
-      expect([left("b"), left("c")]).toEqual(["100px", "200px"])
-      expect(moves()).toEqual({ d: [[200, 0], [0, 0], 400] })
+      expect([item("b").style.left, item("c").style.left]).toEqual(["100px", "200px"])
+      expect(moves()).toEqual({ d: [200, 0, 400] })
+    })
+
+    // Regression: the offsets are relative to the offsetParent, which isn't the containing block under a transformed
+    // ancestor, so the leaving child jumped by the difference
+    it("corrects the frozen position when the containing block isn't the offsetParent", async () => {
+      containing_block_offset = 30
+      const items = ref(["a", "b", "c"])
+      mountList({ leave }, items)
+      items.value = ["a", "c"]
+      await nextTick()
+      expect(item("b").style.left).toBe("70px")
+      expect(item("b").getBoundingClientRect().left).toBe(100)
     })
 
     it("moves the children after a removed one from their old place instead of jumping", async () => {
@@ -211,7 +292,7 @@ describe("AnimeTransitionGroup", () => {
       items.value = ["a", "c", "d"]
       await nextTick()
       // c and d slid one slot left (100px): each starts 100px right of its new place and ends there
-      expect(moves()).toEqual({ c: [[100, 0], [0, 0], 400], d: [[100, 0], [0, 0], 400] })
+      expect(moves()).toEqual({ c: [100, 0, 400], d: [100, 0, 400] })
     })
 
     it("moves the children after an added one too", async () => {
@@ -219,7 +300,7 @@ describe("AnimeTransitionGroup", () => {
       mountList({ enter }, items)
       items.value = ["a", "b", "c"]
       await nextTick()
-      expect(moves()).toEqual({ c: [[-100, 0], [0, 0], 400] })
+      expect(moves()).toEqual({ c: [-100, 0, 400] })
     })
 
     it("uses `move` for the timing", async () => {
@@ -227,10 +308,7 @@ describe("AnimeTransitionGroup", () => {
       mountList({ leave, move: { duration: 150, ease: "linear" } }, items)
       items.value = ["a", "c"]
       await nextTick()
-      expect(mock_animate).toHaveBeenLastCalledWith(
-        document.querySelector("[data-item=c]"),
-        expect.objectContaining({ duration: 150, ease: "linear", translateX: [100, 0] })
-      )
+      expect(moveCalls()[0].params).toMatchObject({ duration: 150, ease: "linear", x: 0, y: 0 })
     })
 
     it("lets children jump with `move: false`, and leaves the leaving child in the layout", async () => {
@@ -239,20 +317,80 @@ describe("AnimeTransitionGroup", () => {
       items.value = ["a", "c"]
       await nextTick()
       expect(moves()).toEqual({})
-      expect(document.querySelector<HTMLElement>("[data-item=b]")!.style.position).toBe("")
+      expect(item("b").style.position).toBe("")
     })
 
-    it("reverts a move still running before starting the next one", async () => {
+    // Regression: moves animated translateX / translateY, replacing the translate of an enter still running
+    it("moves through the CSS `translate`, leaving `transform` to the enter and leave animations", async () => {
+      const items = ref(["a", "b", "c"])
+      mountList({ leave }, items)
+      items.value = ["a", "c"]
+      await nextTick()
+      const [move] = moveCalls()
+      expect(move.el).toBe(item("c"))
+      expect(item("c").style.translate).toBe("100px 0px")
+      expect(mock_animate.mock.calls.some(([, params]) => "translateX" in (params as AnimationParams))).toBe(false)
+      // Done: the element's own translate is back
+      move.params.onComplete?.(move.animation as never)
+      expect(item("c").style.translate).toBe("")
+    })
+
+    // Regression: a running move was reverted first, so a child still sliding jumped to its layout place
+    it("starts the next move from where the running one has got to", async () => {
       const items = ref(["a", "b", "c", "d"])
       mountList({ leave }, items)
       items.value = ["a", "c", "d"]
       await nextTick()
-      const first_moves = mock_animate.mock.results
-        .filter((_, i) => (mock_animate.mock.calls[i][1] as AnimationParams).translateX !== undefined)
-        .map(result => result.value as { revert: ReturnType<typeof vi.fn> })
+      const first = moveCalls().find(move => move.el === item("c"))!
+      first.offset.x = 40 // 60% of the way
+      items.value = ["c", "d"]
+      await nextTick()
+      expect(first.animation.cancel).toHaveBeenCalled()
+      const next = moveCalls().filter(move => move.el === item("c"))
+      expect(next[next.length - 1].offset).toEqual({ x: 140, y: 0 })
+    })
+
+    // Regression: running moves were reverted on every update, so a leaving child still sliding jumped
+    it("keeps the move of a child that starts leaving mid-way", async () => {
+      const items = ref(["a", "b", "c", "d"])
+      mountList({ leave }, items)
+      items.value = ["a", "c", "d"]
+      await nextTick()
+      const first = moveCalls().find(move => move.el === item("c"))!
       items.value = ["a", "d"]
       await nextTick()
-      for (const animation of first_moves) expect(animation.revert).toHaveBeenCalledOnce()
+      expect(first.animation.cancel).not.toHaveBeenCalled()
+      expect(item("c").style.position).toBe("absolute")
+    })
+
+    // Regression: the frozen style was only removed when a leave was cancelled, never once it was done, so a v-show
+    // child came back still absolutely positioned
+    it("puts a v-show child back into the layout once it has left", async () => {
+      const visible = ref<Record<string, boolean>>({ a: true, b: true, c: true })
+      mount(
+        defineComponent(
+          () => () =>
+            h(AnimeTransitionGroup, { tag: "ul", leave }, () =>
+              ["a", "b", "c"].map(name =>
+                withDirectives(h("li", { key: name, "data-item": name }, name), [[vShow, visible.value[name]]])
+              )
+            )
+        ),
+        { global: { stubs: { "transition-group": false } }, attachTo: document.body }
+      )
+      visible.value = { ...visible.value, b: false }
+      await nextTick()
+      expect(item("b").style.position).toBe("absolute")
+      complete(mock_animate.mock.calls.findIndex(([el]) => el === item("b")))
+      expect(item("b").style.position).toBe("")
+      expect(item("b").style.display).toBe("none")
+
+      // Shown again, it is tracked like the others
+      visible.value = { ...visible.value, b: true }
+      await nextTick()
+      visible.value = { ...visible.value, a: false }
+      await nextTick()
+      expect(Object.keys(moves())).toContain("b")
     })
   })
 })

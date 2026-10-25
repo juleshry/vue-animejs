@@ -63,7 +63,12 @@ export const AnimeTransitionGroup = defineComponent(
           onEnter: enter,
           onLeave: (el: Element, done: () => void) => {
             moves.leave(el)
-            play(el, props.leave, done, leaveOrder() * (props.stagger ?? 0))
+            // Back into the layout once it has left: a `v-show` child stays in the document, to be shown again
+            const left = () => {
+              moves.restore(el)
+              done()
+            }
+            play(el, props.leave, left, leaveOrder() * (props.stagger ?? 0))
           },
           onEnterCancelled: cancel,
           onLeaveCancelled: (el: Element) => {

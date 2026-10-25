@@ -3,7 +3,6 @@ import { type ScopeParams } from "animejs"
 import {
   type Component,
   type ComponentPublicInstance,
-  computed,
   defineComponent,
   h,
   type ShallowUnwrapRef,
@@ -12,7 +11,7 @@ import {
   type VNode,
 } from "vue"
 import { useScope, type UseScopeReturn } from "../composables/use-scope.ts"
-import { isSameBinding } from "../utils/same-binding.ts"
+import { useStableOptions } from "../utils/stable-options.ts"
 
 export interface AnimeScopeProps {
   /**
@@ -32,12 +31,7 @@ const component = defineComponent(
     // An element, or the component instance when `as` is a component
     const root = useTemplateRef<HTMLElement | ComponentPublicInstance>("root")
 
-    // An inline `:options="{ ... }"` is a new object on every parent render: keep the previous one while
-    // the content is the same, so the scope isn't re-created on unrelated re-renders
-    const options = computed<Omit<ScopeParams, "root">>(previous => {
-      const next = props.options ?? {}
-      return previous && isSameBinding(next, previous) ? previous : next
-    })
+    const options = useStableOptions(() => props.options)
 
     // The getter re-runs when the root changes (e.g. `as` swapped), so the scope is rebuilt on the new element
     const scope = useScope(() => ({ ...options.value, root: unrefElement(root) ?? undefined }))

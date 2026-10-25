@@ -54,7 +54,7 @@ Use `stagger`, not Anime.js's `stagger()` in `delay`: Vue calls the enter hook o
 
 ### Moves
 
-When a child enters or leaves, the others slide to their new place instead of jumping. A leaving child is taken out of the layout as soon as its leave starts (frozen with `position: absolute` where it is), so the ones after it move right away rather than once it's gone. `move` sets the timing of that slide; `:move="false"` turns it off.
+When a child enters or leaves, the others slide to their new place instead of jumping. A leaving child is taken out of the layout as soon as its leave starts (frozen with `position: absolute` where it is), so the ones after it move right away rather than once it's gone; a `v-show` child is put back into the layout once it's hidden. `move` sets the timing of that slide; `:move="false"` turns it off.
 
 ```vue
 <template>
@@ -81,7 +81,7 @@ Give the element around the children `position: relative` (the `tag` element abo
 :::
 
 ::: warning
-A leaving child gets inline `position`, `left`, `top`, `width`, `height`, `margin` and `box-sizing` for the duration of its leave. A `leave` that animates `width` or `height` therefore starts from the frozen size.
+A leaving child gets inline `position`, `left`, `top`, `width`, `height`, `margin` and `box-sizing` for the duration of its leave. A `leave` that animates `width` or `height` therefore starts from the frozen size. Moves write an inline `translate` (the CSS property, separate from `transform`) while they run, and put the element's own value back when they end.
 :::
 
 ### Animating on page load
@@ -141,7 +141,7 @@ export declare const AnimeTransitionGroup: DefineSetupFnComponent<
 - Each child that enters or leaves gets its own Anime.js animation; its transition finishes when that animation completes. CSS transitions are turned off (`css: false`).
 - Children that enter in the same update form one batch for `stagger`, and so do children that leave; enters and leaves are counted separately.
 - A child that starts leaving while it's still entering (or the reverse) is cancelled where it is, and the new animation starts from there.
-- Before each update, every child's position is recorded; after it, each child that changed position animates from where it was to its new place with `move` (a translate, so the layout itself isn't touched). A move still running when the next one starts is dropped, and the new one starts from where the child is on screen.
+- Before each update, every child's position is recorded; after it, each child that changed position animates from where it was to its new place with `move`, through the CSS `translate` property: the layout itself isn't touched, and an `enter` or `leave` that animates `translateX` / `translateY` keeps running alongside. A move still running when the next one starts is replaced by one that starts from where the child is on screen; a child that starts leaving mid-move finishes it.
 - On **unmount**, running animations are cancelled.
 
 ::: tip

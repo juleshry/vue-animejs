@@ -1,14 +1,24 @@
 import { type AnimationParams, type FunctionValue, type JSAnimation, type TweenParamValue } from "animejs"
-import { Comment, type DirectiveArguments, Fragment, isVNode, onUnmounted, Text, type VNode, withDirectives } from "vue"
+import {
+  cloneVNode,
+  Comment,
+  type DirectiveArguments,
+  Fragment,
+  isVNode,
+  onUnmounted,
+  Text,
+  type VNode,
+  withDirectives,
+} from "vue"
 import { useRawAnimate } from "../composables/use-raw-animate.ts"
 
 /** The Anime.js animations a transition component plays on its children. */
 export interface TransitionAnimations {
   /**
    * Plays `params` on `el`, cancelling whatever was running there, then calls `done`. Without `params`, calls `done`
-   * right away. `delay_offset` (ms) is added to `params.delay`, for staggering.
+   * right away. `delayOffset` (ms) is added to `params.delay`, for staggering.
    */
-  play: (el: Element, params: AnimationParams | undefined, done?: () => void, delay_offset?: number) => void
+  play: (el: Element, params: AnimationParams | undefined, done?: () => void, delayOffset?: number) => void
   /** Stops the animation running on `el`, where it is. */
   cancel: (el: Element) => void
 }
@@ -20,7 +30,7 @@ export interface TransitionAnimations {
 export function useTransitionAnimations(): TransitionAnimations {
   const running = new Map<Element, JSAnimation>()
 
-  function play(el: Element, params: AnimationParams | undefined, done?: () => void, delay_offset = 0) {
+  function play(el: Element, params: AnimationParams | undefined, done?: () => void, delayOffset = 0) {
     cancel(el)
     if (!params) return done?.()
 
@@ -32,7 +42,7 @@ export function useTransitionAnimations(): TransitionAnimations {
         done?.()
       },
     }
-    if (delay_offset) options.delay = offsetDelay(params.delay, delay_offset)
+    if (delayOffset) options.delay = offsetDelay(params.delay, delayOffset)
     running.set(el, useRawAnimate(el, options))
   }
 
@@ -50,21 +60,29 @@ export function useTransitionAnimations(): TransitionAnimations {
 
 /**
  * Applies `directives` to every element or component in `children`, e.g. `vAppearState` so an `appear` also plays
- * after hydration. Fragments (a `v-for`) are flattened, as `<TransitionGroup>` does anyway; comments and text are
- * left alone, since they can't carry a directive.
+ * after hydration. Fragments (a `v-for`) are flattened, and their children keyed from the fragment's key, as
+ * `<TransitionGroup>` does anyway; comments and text are left alone, since they can't carry a directive. Each child is
+ * copied first: the slot can hand back the same cached vnode on every render, and `withDirectives` adds to its `dirs`.
  *
  * @param children - The default slot's vnodes.
  * @param directives - The directives to apply, as `withDirectives` takes them.
+ * @param parentKey - The key of the fragment `children` come from, if any.
  */
 export function withChildDirectives(
   children: VNode[] | undefined,
-  directives: DirectiveArguments
+  directives: DirectiveArguments,
+  parentKey?: PropertyKey | null
 ): VNode[] | undefined {
   if (!directives.length) return children
-  return children?.flatMap(child => {
+  return children?.flatMap((child, i) => {
     if (!isVNode(child) || child.type === Comment || child.type === Text) return [child]
-    if (child.type === Fragment) return withChildDirectives(child.children as VNode[], directives) ?? []
-    return [withDirectives(child, directives)]
+    // `<template v-for :key>` puts the key on the fragment: compose it like getTransitionRawChildren does
+    const key = parentKey == null ? child.key : String(parentKey) + String(child.key ?? i)
+    if (child.type === Fragment) return withChildDirectives(child.children as VNode[], directives, key) ?? []
+    const copy = key === child.key ? cloneVNode(child) : cloneVNode(child, { key: key ?? undefined })
+    // cloneVNode shares the `dirs` array
+    copy.dirs = copy.dirs && [...copy.dirs]
+    return [withDirectives(copy, directives)]
   })
 }
 

@@ -2,7 +2,6 @@ import { type AutoLayoutParams } from "animejs"
 import {
   type Component,
   type ComponentPublicInstance,
-  computed,
   defineComponent,
   h,
   type ShallowUnwrapRef,
@@ -11,7 +10,7 @@ import {
   type VNode,
 } from "vue"
 import { useLayout, type UseLayoutReturn } from "../composables/use-layout.ts"
-import { isSameBinding } from "../utils/same-binding.ts"
+import { useStableOptions } from "../utils/stable-options.ts"
 
 export interface AnimeLayoutProps {
   /**
@@ -31,12 +30,7 @@ const component = defineComponent(
     // An element, or the component instance when `as` is a component (useLayout resolves it to its `$el`)
     const root = useTemplateRef<HTMLElement | ComponentPublicInstance>("root")
 
-    // An inline `:options="{ ... }"` is a new object on every parent render: keep the previous one while
-    // the content is the same, so the layout isn't re-created on unrelated re-renders
-    const options = computed<AutoLayoutParams>(previous => {
-      const next = props.options ?? {}
-      return previous && isSameBinding(next, previous) ? previous : next
-    })
+    const options = useStableOptions(() => props.options)
 
     const layout = useLayout(root, options)
     expose(layout)

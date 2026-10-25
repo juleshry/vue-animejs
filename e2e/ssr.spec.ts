@@ -237,6 +237,42 @@ test.describe("anime-transition-group removing several children", () => {
   })
 })
 
+test.describe("anime-transition-group moving an entering child", () => {
+  // Regression: moves animated translateY too, replacing the enter's: the child dropped its slide-in in one frame
+  test("keeps the enter's translate running while the child moves", async ({ page }) => {
+    await open(page, "anime-transition-group")
+
+    const result = await page.evaluate(async () => {
+      const c = document.querySelector("[data-test=item-c]") as HTMLElement
+      const translateY = () => new DOMMatrix(getComputedStyle(c).transform).m42
+      // Wait until c is part-way through its enter
+      while (Number(getComputedStyle(c).opacity) < 0.2) await new Promise(requestAnimationFrame)
+      const before = translateY()
+      ;(document.querySelector("[data-test=remove-a-b]") as HTMLElement).click()
+      const samples: number[] = []
+      const tops: number[] = []
+      const end = performance.now() + 900
+      while (performance.now() < end) {
+        await new Promise(requestAnimationFrame)
+        samples.push(translateY())
+        tops.push(c.getBoundingClientRect().top)
+      }
+      return { before, samples, tops }
+    })
+
+    expect(result.before).toBeGreaterThan(2)
+    // The enter's translate goes on from where it was, down to 0
+    expect(Math.abs(result.samples[0] - result.before)).toBeLessThan(5)
+    expect(isNonDecreasing(result.samples.map(value => -value))).toBe(true)
+    expect(result.samples[result.samples.length - 1]).toBe(0)
+    // And the child slides up into its new place on top of it
+    const tops = result.tops
+    expect(isNonDecreasing(tops.map(top => -top))).toBe(true)
+    const distance = tops[0] - tops[tops.length - 1]
+    expect(distance).toBeGreaterThan(20)
+  })
+})
+
 test.describe("v-animate with a conflicting :style", () => {
   test("hydrates without warnings and restores the user's value after a binding change", async ({ page }) => {
     const log = await open(page, "v-animate-user-style")

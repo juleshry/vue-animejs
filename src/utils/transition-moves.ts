@@ -10,13 +10,21 @@ interface LayoutBox {
   height: number
 }
 
+/** A move running on an element: the offset it animates down to 0, written to the element's `translate`. */
+interface Move {
+  offset: { x: number; y: number }
+  animation: JSAnimation
+  /** The element's inline `translate` before its first move, put back once the last one completes. */
+  original: string
+}
+
 /** The moves of a transition group's children, animated by Anime.js. */
 export interface TransitionMoves {
   /** Tracks a child's element, so its position can be compared across updates. Apply it to every child. */
   vTrack: ObjectDirective<Element>
   /** Takes a leaving element out of the layout where it is, so the others start moving right away. */
   leave: (el: Element) => void
-  /** Puts an element whose leave was cancelled back into the layout. */
+  /** Puts an element taken out of the layout back into it, once its leave is cancelled or done (`v-show`). */
   restore: (el: Element) => void
 }
 
@@ -24,6 +32,9 @@ export interface TransitionMoves {
  * Animates the children of a transition group from their old position to their new one whenever an update moves them
  * (FLIP): positions are recorded before the update and compared after it. Leaving children are taken out of the
  * layout first, so the ones after them move as soon as the leave starts instead of jumping once it ends.
+ *
+ * Moves animate the CSS `translate` property, not `transform`, so they add up with an enter or leave animation that
+ * translates the same element, and a new move starts from wherever the previous one had got to.
  *
  * Call it in the component's `setup()`.
  *
@@ -33,8 +44,9 @@ export function useTransitionMoves(params: () => AnimationParams | false): Trans
   const elements = new Set<Element>()
   // A leaving element's inline style before it was taken out of the layout (weak: Vue removes it once it has left)
   const leaving = new WeakMap<Element, string>()
-  const moving = new Map<Element, JSAnimation>()
-  // Where each child was on screen before the update, to animate it from there
+  const moving = new Map<Element, Move>()
+  // Where each child was on screen before the update, to animate it from there. Only set during an update: a leave
+  // outside of one (a `v-show` in a child component) measures the element where it is
   let before = new Map<Element, DOMRect>()
   // Its layout box before the update, to freeze it there if it leaves. Measured up front: the children leave one by
   // one, and once the first is out of the layout the next one has already moved into its place
@@ -53,47 +65,62 @@ export function useTransitionMoves(params: () => AnimationParams | false): Trans
 
   onUpdated(() => {
     const move = params()
+    const recorded = before
+    before = new Map()
+    boxes = new Map()
     if (move === false) return
-    // Drop the transforms of moves still running: the new one starts from where the element is now on screen,
-    // which the recorded position already includes
-    for (const animation of moving.values()) animation.revert()
-    moving.clear()
 
-    for (const [el, old] of before) {
+    for (const [el, old] of recorded) {
       // A child removed by this update is leaving: it keeps its frozen position
       if (!elements.has(el) || leaving.has(el)) continue
+      // Both rects include the same transform and translate (no frame has passed), so this is how far the layout moved
       const now = el.getBoundingClientRect()
       const dx = old.left - now.left
       const dy = old.top - now.top
       if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) continue
+      if (!(el instanceof HTMLElement || el instanceof SVGElement)) continue
 
-      const animation = useRawAnimate(el, {
+      const previous = moving.get(el)
+      previous?.animation.cancel()
+      const offset = { x: dx + (previous?.offset.x ?? 0), y: dy + (previous?.offset.y ?? 0) }
+      const original = previous ? previous.original : el.style.translate
+      const write = () => (el.style.translate = `${offset.x}px ${offset.y}px`)
+      // Now, not on the first tick: the layout has already moved, and this frame would show it jump
+      write()
+      const animation = useRawAnimate(offset, {
         ...move,
-        translateX: [dx, 0],
-        translateY: [dy, 0],
+        x: 0,
+        y: 0,
+        onUpdate: self => {
+          write()
+          move.onUpdate?.(self)
+        },
         onComplete: self => {
           moving.delete(el)
+          el.style.translate = original
           move.onComplete?.(self)
         },
       })
-      moving.set(el, animation)
+      moving.set(el, { offset, animation, original })
     }
   })
 
   onUnmounted(() => {
-    for (const animation of moving.values()) animation.cancel()
+    for (const { animation } of moving.values()) animation.cancel()
   })
 
   // Created per component instance, so it can keep that instance's elements
   const vTrack: ObjectDirective<Element> = {
     mounted: el => void elements.add(el),
+    // Called as soon as a child starts leaving, not once it's gone: a move still running there finishes on its own
     unmounted: el => void elements.delete(el),
   }
 
   function leave(el: Element) {
     if (params() === false || !(el instanceof HTMLElement)) return
-    leaving.set(el, el.style.cssText)
+    const rect = before.get(el) ?? el.getBoundingClientRect()
     const box = boxes.get(el) ?? layoutBox(el)
+    leaving.set(el, el.style.cssText)
     Object.assign(el.style, {
       position: "absolute",
       left: `${box.left}px`,
@@ -103,20 +130,29 @@ export function useTransitionMoves(params: () => AnimationParams | false): Trans
       margin: "0",
       boxSizing: "border-box",
     })
+    // The offsets are relative to the offsetParent, but a closer transformed (or filtered, contained, ...) ancestor
+    // can be the containing block instead: correct by however far the element landed from where it was
+    const now = el.getBoundingClientRect()
+    if (Math.abs(rect.left - now.left) >= 0.5) el.style.left = `${box.left + rect.left - now.left}px`
+    if (Math.abs(rect.top - now.top) >= 0.5) el.style.top = `${box.top + rect.top - now.top}px`
   }
 
   function restore(el: Element) {
     const style = leaving.get(el)
     if (style === undefined) return
     leaving.delete(el)
-    if (el instanceof HTMLElement) el.style.cssText = style
+    if (!(el instanceof HTMLElement)) return
+    // A move may still be running (or have ended) since: keep its translate
+    const translate = el.style.translate
+    el.style.cssText = style
+    el.style.translate = translate
   }
 
   return { vTrack, leave, restore }
 }
 
-// offsetLeft / offsetTop are relative to the containing block an absolutely positioned element would use, and ignore
-// transforms (an enter still running), as do offsetWidth / offsetHeight
+// offsetLeft / offsetTop are relative to the containing block an absolutely positioned element would usually use, and
+// ignore transforms (an enter still running), as do offsetWidth / offsetHeight
 function layoutBox(el: HTMLElement): LayoutBox {
   return { left: el.offsetLeft, top: el.offsetTop, width: el.offsetWidth, height: el.offsetHeight }
 }
