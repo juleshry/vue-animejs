@@ -368,12 +368,15 @@ describe("AnimeTransition appear hydration", () => {
     expect(el.style.opacity).toBe("0.5")
   })
 
-  it("plays the enter animation through after hydration", async () => {
+  it("plays the enter animation through after hydration, then hands the element back to its own styles", async () => {
     const { el } = await hydrate(() =>
-      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], duration: 50 } }, () => h("p", "hi"))
+      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], duration: 50 } }, () =>
+        h("p", { style: { color: "red" } }, "hi")
+      )
     )
     await new Promise(resolve => setTimeout(resolve, 200))
-    expect(el.style.opacity).toBe("1")
+    expect(el.style.opacity).toBe("")
+    expect(el.style.color).toBe("red")
   })
 
   // Regression guard for @nuxt/hints-style checks: nothing is written before the surrounding onMounted hooks ran
@@ -415,10 +418,11 @@ describe("AnimeTransitionGroup appear hydration", () => {
     const { el } = await hydrate(render)
     const items = [...el.querySelectorAll("li")]
     await new Promise(resolve => setTimeout(resolve, 120))
-    // a (no delay) has finished, c (200ms delay) hasn't started
-    expect(items[0].style.opacity).toBe("1")
+    // a (no delay) has finished and lost its inline opacity, c (200ms delay) hasn't started
+    expect(items[0].style.opacity).toBe("")
     expect(items[2].style.opacity).toBe("0")
     await new Promise(resolve => setTimeout(resolve, 300))
-    expect(items.map(li => li.style.opacity)).toEqual(["1", "1", "1"])
+    expect(items.map(li => li.style.opacity)).toEqual(["", "", ""])
+    expect(items.map(li => li.style.color)).toEqual(["red", "red", "red"])
   })
 })

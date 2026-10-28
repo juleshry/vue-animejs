@@ -1,4 +1,10 @@
-import { type AnimationParams, type FunctionValue, type JSAnimation, type TweenParamValue } from "animejs"
+import {
+  type AnimationParams,
+  cleanInlineStyles,
+  type FunctionValue,
+  type JSAnimation,
+  type TweenParamValue,
+} from "animejs"
 import {
   cloneVNode,
   Comment,
@@ -15,11 +21,12 @@ import { useRawAnimate } from "../composables/use-raw-animate.ts"
 /** The Anime.js animations a transition component plays on its children. */
 export interface TransitionAnimations {
   /**
-   * Plays `params` on `el`, cancelling whatever was running there, then calls `done`. Without `params`, calls `done`
-   * right away. `delayOffset` (ms) is added to `params.delay`, for staggering.
+   * Plays `params` on `el`, cancelling whatever was running there, then calls `done` and puts back the inline styles
+   * `el` had before. Without `params`, calls `done` right away. `delayOffset` (ms) is added to `params.delay`, for
+   * staggering.
    */
   play: (el: Element, params: AnimationParams | undefined, done?: () => void, delayOffset?: number) => void
-  /** Stops the animation running on `el`, where it is. */
+  /** Stops the animation running on `el`, where it is, leaving its current values on `el` for the next one to start from. */
   cancel: (el: Element) => void
 }
 
@@ -40,6 +47,8 @@ export function useTransitionAnimations(): TransitionAnimations {
         running.delete(el)
         params.onComplete?.(self)
         done?.()
+        // Last, so a leaving element is already gone: left on the element, the end values would override its classes
+        cleanInlineStyles(self)
       },
     }
     if (delayOffset) options.delay = offsetDelay(params.delay, delayOffset)

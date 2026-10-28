@@ -2,12 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { defineComponent, h, nextTick, ref, type Ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { AnimeTransition, type AnimeTransitionProps } from "@lib"
-import { animate, type AnimationParams } from "animejs"
+import { animate, type AnimationParams, cleanInlineStyles } from "animejs"
 
 const mock_animate = vi.mocked(animate)
+const mock_cleanInlineStyles = vi.mocked(cleanInlineStyles)
 
 vi.mock("animejs", () => ({
   animate: vi.fn(() => ({ cancel: vi.fn() })),
+  cleanInlineStyles: vi.fn(),
 }))
 
 const enter: AnimationParams = { opacity: [0, 1], duration: 300 }
@@ -36,6 +38,7 @@ function lastAnimation(): { cancel: ReturnType<typeof vi.fn> } {
 describe("AnimeTransition", () => {
   beforeEach(() => {
     mock_animate.mockClear()
+    mock_cleanInlineStyles.mockClear()
     document.body.innerHTML = ""
   })
 
@@ -76,6 +79,28 @@ describe("AnimeTransition", () => {
     await nextTick()
     expect(wrapper.find("#t").exists()).toBe(false)
     expect(mock_animate).not.toHaveBeenCalled()
+  })
+
+  it("puts back the element's inline styles once an animation completes, after finishing the transition", async () => {
+    const show = ref(false)
+    const after_enter = vi.fn(() => expect(mock_cleanInlineStyles).not.toHaveBeenCalled())
+    mountToggle({ enter, onAfterEnter: after_enter }, show)
+    show.value = true
+    await nextTick()
+    expect(mock_cleanInlineStyles).not.toHaveBeenCalled()
+    complete(0)
+    expect(after_enter).toHaveBeenCalledOnce()
+    expect(mock_cleanInlineStyles).toHaveBeenCalledExactlyOnceWith(mock_animate.mock.results[0].value)
+  })
+
+  it("leaves the inline styles of a cancelled animation, for the next one to start from", async () => {
+    const show = ref(false)
+    mountToggle({ enter, leave }, show)
+    show.value = true
+    await nextTick()
+    show.value = false
+    await nextTick()
+    expect(mock_cleanInlineStyles).not.toHaveBeenCalled()
   })
 
   it("still calls the user's own onComplete", async () => {

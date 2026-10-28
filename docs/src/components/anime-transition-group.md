@@ -141,6 +141,7 @@ export declare const AnimeTransitionGroup: DefineSetupFnComponent<
 - Each child that enters or leaves gets its own Anime.js animation; its transition finishes when that animation completes. CSS transitions are turned off (`css: false`).
 - Children that enter in the same update form one batch for `stagger`, and so do children that leave; enters and leaves are counted separately.
 - A child that starts leaving while it's still entering (or the reverse) is cancelled where it is, and the new animation starts from there.
+- Once an enter or leave completes, the inline styles it wrote are removed and the child's own inline styles are put back, so its classes and `:style` apply again. Give `enter` only its starting values (`opacity: { from: 0 }`) when the child's CSS sets the end value, or it jumps to that value on the last frame.
 - Before each update, every child's position is recorded; after it, each child that changed position animates from where it was to its new place with `move`, through the CSS `translate` property: the layout itself isn't touched, and an `enter` or `leave` that animates `translateX` / `translateY` keeps running alongside. A move still running when the next one starts is replaced by one that starts from where the child is on screen; a child that starts leaving mid-move finishes it.
 - On **unmount**, running animations are cancelled.
 

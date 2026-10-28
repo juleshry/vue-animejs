@@ -12,6 +12,10 @@ Wraps Vue's `<Transition>` so the enter and leave animations are played by Anime
 
 `enter` animates the element in, `leave` animates it out before Vue removes it. Give `enter` its starting values (`opacity: [0, 1]`), and `leave` the values to end on.
 
+::: warning
+Once an animation completes, the element gets back the inline styles it had before, and its CSS applies again. If `enter` ends on a value the element's CSS doesn't give it, it jumps to the CSS value on the last frame: `opacity: [0, 1]` on an `opacity-50` element ends at 1, then drops to 0.5. Give only the starting value instead, `opacity: { from: 0 }`, and the element animates to its own style.
+:::
+
 ```vue
 <script setup lang="ts">
 import { ref } from "vue"
@@ -114,7 +118,7 @@ export declare const AnimeTransition: DefineSetupFnComponent<
 
 - Each enter or leave creates an Anime.js animation on the element; the transition finishes when it completes. CSS transitions are turned off (`css: false`), so only Anime.js animates.
 - An enter interrupted by a leave (or the reverse) is cancelled where it is, and the new animation starts from there.
-- The animated values stay on the element once the animation ends, as with any Anime.js animation.
+- Once an enter or leave completes, the inline styles it wrote are removed and the element's own inline styles are put back, so its classes and `:style` apply again. A cancelled animation leaves its values in place, for the next one to start from.
 - `enter` and `leave` are read when the transition starts, so changing them affects the next enter or leave, not the running one.
 - On **unmount**, a running animation is cancelled.
 

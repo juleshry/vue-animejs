@@ -8,6 +8,7 @@ const mock_animate = vi.mocked(animate)
 
 vi.mock("animejs", () => ({
   animate: vi.fn(() => ({ cancel: vi.fn(), revert: vi.fn() })),
+  cleanInlineStyles: vi.fn(),
 }))
 
 const enter: AnimationParams = { opacity: [0, 1], duration: 300 }
