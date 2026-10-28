@@ -1,6 +1,6 @@
 {
   "name": "@juleshry/vue-animejs",
-  "version": "1.6.0-beta.0",
+  "version": "1.6.0-beta.1",
   "description": "SSR-safe Vue 3 composables, directives and components for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
   "keywords": [
     "animation",
