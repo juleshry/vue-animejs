@@ -183,7 +183,7 @@ export interface UseWaapiReturn {
 /**
  * Wraps Anime.js `waapi.animate()` into a Vue composable. Reactively re-creates the WAAPI animation when the target or options change, and stops it automatically on unmount.
  *
- * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
+ * @param targets - The DOM element(s) to animate via WAAPI. Accepts a template ref, a CSS selector, a DOM element, a ref or getter returning any of these, or an array of them.
  * @param options - Anime.js WAAPI animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useWaapi(

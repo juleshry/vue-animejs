@@ -182,7 +182,7 @@ export interface UseScrollReturn {
  * Call it before the composable that consumes `autoplay` (e.g. `useTimeline`): its mount hook
  * then runs first, so the consumer is built once, with the observer already in place.
  *
- * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a ref or getter returning any of these.
  * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
  * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */

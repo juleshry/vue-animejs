@@ -104,13 +104,13 @@ export type UseRawAnimateReturn = JSAnimation
  * SSR-safety is the caller's responsibility: invoke this from inside your own `onMounted` (it runs
  * unconditionally and immediately, with no client-only guard), never at `setup()` top level.
  *
- * @param target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param target - The element(s) to animate. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a ref or getter returning any of these (read once).
  * @param options - Anime.js animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useRawAnimate(
-  target: MaybeRef<TargetSelector> | MaybeComputedElementRef,
+  target: AnimationTargets,
   options?: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>
-): JSAnimation
+): UseRawAnimateReturn
 ```
 
 :::

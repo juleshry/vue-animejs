@@ -143,7 +143,7 @@ describe("useText", () => {
 
   // Regression: a non-ref target used to be resolved in setup(), before the component's own template
   // existed (and during hydration, before Vue had hydrated the server HTML).
-  it.each<TargetForm>(["selector", "template ref"])(
+  it.each<TargetForm>(["selector", "template ref", "getter"])(
     "builds exactly once on mount from the component's own template (%s)",
     async form => {
       const record = recordTargetFound(mock_splitText)

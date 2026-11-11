@@ -37,6 +37,15 @@ useAnimate(".box", { translateX: 200 })
 useAnimate(document.querySelector(".box"), { translateX: 200 })
 ```
 
+So is a getter, for a target derived from other state, like elements a child component exposes through its template ref. It is tracked like a `computed`: the animation is re-created when it returns other elements, and nothing is built while it returns `undefined` or `null`:
+
+```ts
+const list = useTemplateRef("list") // a child component that exposes `items: HTMLElement[]`
+useAnimate(() => list.value?.items, { opacity: [0, 1], delay: stagger(40) })
+```
+
+All of these forms, and arrays of them, make up the exported `AnimationTargets` type, which the composables take as their target.
+
 ::: warning
 Avoid CSS selectors inside reusable components. If the component is rendered more than once, the selector matches all instances and triggers the animation on every matching element simultaneously. Use `useTemplateRef` instead to scope the animation to the component's own element. Page-level components rendered only once are not affected.
 :::
@@ -260,17 +269,17 @@ The `animation` property (where exposed) is a `DeepReadonly<ShallowRef<...>>`. D
 The library is written in strict TypeScript and ships with full type declarations. All public API types are re-exported from the main entry point:
 
 ```ts
-import type { MaybeRefOptions, UseAnimateReturn } from "@juleshry/vue-animejs"
+import type { AnimationTargets, MaybeRefOptions, UseAnimateReturn } from "@juleshry/vue-animejs"
 ```
 
-Anime.js types (`AnimationParams`, `TargetSelector`, etc.) come from the `animejs` package itself. Option parameters wrap them as `MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>`, so you can type your own wrappers the same way:
+Anime.js types (`AnimationParams`, `TargetSelector`, etc.) come from the `animejs` package itself. Option parameters wrap them as `MaybeRefOrGetter<MaybeRefOptions<AnimationParams>>`, and targets are `AnimationTargets`, so you can type your own wrappers the same way:
 
 ```ts
 import { toValue, type MaybeRefOrGetter } from "vue"
 import type { AnimationParams } from "animejs"
-import { useAnimate, type MaybeRefOptions } from "@juleshry/vue-animejs"
+import { useAnimate, type AnimationTargets, type MaybeRefOptions } from "@juleshry/vue-animejs"
 
-export function useSlideIn(el: HTMLElement, options: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>> = {}) {
+export function useSlideIn(el: AnimationTargets, options: MaybeRefOrGetter<MaybeRefOptions<AnimationParams>> = {}) {
   return useAnimate(el, () => ({ translateX: [-100, 0], ...toValue(options) }))
 }
 ```

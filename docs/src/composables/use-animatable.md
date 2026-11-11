@@ -105,11 +105,11 @@ export interface UseAnimatableReturn<T extends AnimatableParams = AnimatablePara
 /**
  * Wraps Anime.js `createAnimatable()` into a Vue composable. Reactively re-creates the animatable when the target or options change, and reverts it automatically on unmount.
  *
- * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param targets - The element(s) to make animatable. Accepts a template ref, a CSS selector, a DOM element, or a ref or getter returning any of these.
  * @param options - Anime.js animatable parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useAnimatable<T extends AnimatableParams = AnimatableParams>(
-  targets: MaybeRef<TargetsParam>,
+  targets: AnimationTargets,
   options?: MaybeRefOrGetter<MaybeRefOptions<T>>
 ): UseAnimatableReturn<T>
 ```

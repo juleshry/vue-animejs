@@ -26,6 +26,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
@@ -35,5 +36,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: ${{ runner.os }}-bun-
       - run: bun install
-      - run: bunx playwright install --with-deps chromium
+      # No --with-deps: the runner image already has Chromium's libraries, and apt only added CJK/Thai fonts the
+      # fixtures don't use, while making the job depend on Ubuntu's mirrors (their DNS failing broke CI)
+      - run: bunx playwright install chromium
       - run: bun run test:e2e

@@ -9,7 +9,7 @@ import {
   type LayoutAnimationParams,
   type Timeline,
 } from "animejs"
-import { markRaw, type MaybeRef, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
+import { markRaw, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef } from "vue"
 import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseLayoutReturn {
@@ -28,11 +28,11 @@ export interface UseLayoutReturn {
 /**
  * Wraps Anime.js `createLayout()` into a Vue composable. Reactively re-creates the layout observer when the root element or params change, and reverts it automatically on unmount.
  *
- * @param root - The container element whose children will be tracked. Accepts a template ref, a CSS selector, or a reactive ref to either.
+ * @param root - The container element whose children will be tracked. Accepts a template ref, a CSS selector, or a ref or getter returning either.
  * @param params - Anime.js auto-layout parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
 export function useLayout(
-  root: MaybeRef<DOMTargetSelector> | MaybeComputedElementRef,
+  root: MaybeRefOrGetter<DOMTargetSelector | null | undefined> | MaybeComputedElementRef,
   params: MaybeRefOrGetter<MaybeRefOptions<AutoLayoutParams>> = {}
 ): UseLayoutReturn {
   const layout = shallowRef<AutoLayout | undefined>()

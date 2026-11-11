@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
-import { defineComponent, h, nextTick, ref, type ComponentPublicInstance } from "vue"
+import { defineComponent, h, nextTick, ref, shallowRef, type ComponentPublicInstance } from "vue"
 import { mount } from "@vue/test-utils"
 import { useAnimate } from "@lib"
 import { expectInstanceStaysRaw, withSetup, mountWithTarget, recordTargetFound, type TargetForm } from "../utils"
@@ -125,6 +125,24 @@ describe("useAnimate", () => {
     expect(mock_animate).toHaveBeenCalledWith(el2, {})
   })
 
+  it("animates the elements a getter derives, once they exist, and again when they change", async () => {
+    const a = document.createElement("span")
+    const b = document.createElement("span")
+    // Stands in for what a component exposes through a template ref, e.g. AnimeText's `chars`
+    const exposed = shallowRef<{ chars: HTMLElement[] }>()
+    withSetup(() => useAnimate(() => exposed.value?.chars, { opacity: [0, 1] }))
+    await nextTick()
+    expect(mock_animate).not.toHaveBeenCalled()
+
+    exposed.value = { chars: [a] }
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledExactlyOnceWith([a], { opacity: [0, 1] })
+
+    exposed.value = { chars: [a, b] }
+    await nextTick()
+    expect(mock_animate).toHaveBeenLastCalledWith([a, b], { opacity: [0, 1] })
+  })
+
   it("delegates reverse to the animation instance", async () => {
     const el = document.createElement("div")
     const [result] = withSetup(() => useAnimate(el))
@@ -239,7 +257,7 @@ describe("useAnimate", () => {
 
   // Regression: a non-ref target used to be resolved in setup(), before the component's own template
   // existed (and during hydration, before Vue had hydrated the server HTML).
-  it.each<TargetForm>(["selector", "template ref", "array of template refs"])(
+  it.each<TargetForm>(["selector", "template ref", "getter", "array of template refs"])(
     "builds exactly once on mount from the component's own template (%s)",
     async form => {
       const record = recordTargetFound(mock_animate)

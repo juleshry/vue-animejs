@@ -73,4 +73,32 @@ describe("resolveTarget", () => {
     const els_ref = ref([el1, el2])
     expect(resolveTarget(els_ref)).toEqual([el1, el2])
   })
+
+  it("calls a getter and returns its value", () => {
+    const el = document.createElement("div")
+    const els = [el, document.createElement("div")]
+    expect(resolveTarget(() => el)).toBe(el)
+    expect(resolveTarget(() => els)).toBe(els)
+    expect(resolveTarget(() => ".box")).toBe(".box")
+  })
+
+  it("resolves a getter returning a component instance to its $el", () => {
+    const ChildComp = defineComponent({ render: () => h("span") })
+    let resolved: unknown
+    mount(
+      defineComponent({
+        setup() {
+          const child_ref = ref<ComponentPublicInstance | null>(null)
+          resolved = () => resolveTarget(() => child_ref.value)
+          return () => h(ChildComp, { ref: child_ref })
+        },
+      })
+    )
+    expect((resolved as () => unknown)()).toBeInstanceOf(HTMLSpanElement)
+  })
+
+  it("resolves getters inside an array, dropping the empty ones", () => {
+    const el = document.createElement("div")
+    expect(resolveTarget([() => el, () => null])).toEqual([el])
+  })
 })

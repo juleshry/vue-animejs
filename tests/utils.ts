@@ -15,7 +15,7 @@ import { renderToString } from "@vue/server-renderer"
 import { type AnimationTargets } from "@src/utils/resolve-target.ts"
 
 /** The forms a composable target can take when it points into the component's own template. */
-export type TargetForm = "selector" | "template ref" | "array of template refs"
+export type TargetForm = "selector" | "template ref" | "getter" | "array of template refs"
 
 export interface TargetComponentOptions {
   /** The target element's tag. A `path` is wrapped in an `<svg>`, other tags get a text child. Defaults to `div`. */
@@ -39,7 +39,7 @@ export function withSetup<T>(setup: () => T): [T, VueWrapper] {
 
 /**
  * A component that calls `use` in its `setup()` with a target of the given `form`, pointing at
- * elements of its own template: `#t`, plus `#u` for the array form.
+ * elements of its own template: `#t`, plus `#u` for the array form. The getter form reads the template ref.
  */
 export function targetComponent(
   form: TargetForm,
@@ -50,7 +50,13 @@ export function targetComponent(
     setup() {
       const t = useTemplateRef<HTMLElement>("t")
       const u = useTemplateRef<HTMLElement>("u")
-      use(form === "selector" ? "#t" : form === "template ref" ? t : [t, u])
+      const targets: Record<TargetForm, AnimationTargets> = {
+        selector: "#t",
+        "template ref": t,
+        getter: () => t.value,
+        "array of template refs": [t, u],
+      }
+      use(targets[form])
 
       const path_props = tag === "path" ? { d: "M0 0L10 10" } : {}
       const text = tag === "path" ? undefined : "Hello world"
