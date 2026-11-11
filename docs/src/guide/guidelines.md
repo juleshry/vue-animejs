@@ -41,7 +41,7 @@ So is a getter, for a target derived from other state, like the elements a compo
 
 ```ts
 const text = useTemplateRef("text") // <AnimeText ref="text" :options="{ chars: true }">
-useAnimate(() => text.value?.chars, { opacity: [0, 1], delay: stagger(40) })
+useAnimate(() => text.value?.chars, { opacity: [0, 1], delay: (_?: Target, i = 0) => i * 40 })
 ```
 
 All of these forms, and arrays of them, make up the exported `AnimationTargets` type, which the composables take as their target.

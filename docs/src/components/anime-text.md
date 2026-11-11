@@ -12,9 +12,13 @@ Wraps [`useText`](/composables/use-text) into a component: renders a root elemen
 
 Put a template ref on `AnimeText`: it exposes the `useText` controls, with `lines`, `words` and `chars` unwrapped to plain arrays. Pass a getter reading them to [`useAnimate`](/composables/use-animate): every new split gives new arrays, so the animation is re-created on the new elements.
 
+::: warning
+Don't use `stagger()` for a delay when the text can change: Anime.js computes a stagger's values once, for the first animation it's used in, and the re-created animation reuses the same function. A longer text then gets a delay of `0` on the characters past the first count. Compute the delay from the index instead, as below.
+:::
+
 ```vue
 <script setup lang="ts">
-import { stagger } from "animejs"
+import { type Target } from "animejs"
 import { useTemplateRef } from "vue"
 import { AnimeText, useAnimate } from "@juleshry/vue-animejs"
 
@@ -23,7 +27,7 @@ const text = useTemplateRef("text")
 const { restart } = useAnimate(() => text.value?.chars, {
   translateY: [-24, 0],
   opacity: [0, 1],
-  delay: stagger(40),
+  delay: (_?: Target, i = 0) => i * 40,
   ease: "outExpo",
 })
 </script>

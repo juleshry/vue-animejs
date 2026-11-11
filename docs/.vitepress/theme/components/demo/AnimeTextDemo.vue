@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { stagger } from "animejs"
+  import { type Target } from "animejs"
   import { ref, useTemplateRef } from "vue"
   import { AnimeText, useAnimate } from "@juleshry/vue-animejs"
 
@@ -11,7 +11,7 @@
     translateY: [-24, 0],
     opacity: [0, 1],
     duration: 700,
-    delay: stagger(40),
+    delay: (_?: Target, i = 0) => i * 40,
     ease: "outExpo",
   })
 
