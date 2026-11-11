@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
-import { defineComponent, h, markRaw, nextTick, ref, useTemplateRef } from "vue"
+import { defineComponent, h, markRaw, nextTick, ref } from "vue"
 import { mount } from "@vue/test-utils"
 import { AnimeScroll, type AnimeScrollExposed } from "@lib"
 import { makeScrollObserverMock } from "../mocks"
@@ -35,12 +35,13 @@ describe("AnimeScroll", () => {
     expect(wrapper.element.tagName).toBe("SECTION")
   })
 
-  it("observes its root element in the document body by default, with its options", async () => {
+  it("uses its root element as the container, with its options and no target", async () => {
     const options = { sync: true }
     const wrapper = mount(AnimeScroll, { props: { options } })
     await nextTick()
-    expect(mock_onScroll).toHaveBeenCalledOnce()
-    expect(mock_onScroll).toHaveBeenCalledWith({ ...options, container: "body", target: wrapper.element })
+    expect(mock_onScroll).toHaveBeenCalledExactlyOnceWith({ ...options, container: wrapper.element })
+    // Left unset, so Anime.js observes the first target of the animation linked to it
+    expect(mock_onScroll.mock.calls[0][0]).not.toHaveProperty("target")
   })
 
   it("observes the element a component given in `as` renders", async () => {
@@ -55,29 +56,7 @@ describe("AnimeScroll", () => {
     await nextTick()
     expect(wrapper.html()).toBe('<section class="s">\n  <p></p>\n</section>')
     expect(warn).not.toHaveBeenCalled()
-    expect(mock_onScroll).toHaveBeenCalledWith({ container: "body", target: wrapper.find("section").element })
-  })
-
-  it("observes within the given container", async () => {
-    const wrapper = mount(AnimeScroll, { props: { container: "#scroller" } })
-    await nextTick()
-    expect(mock_onScroll).toHaveBeenCalledWith({ container: "#scroller", target: wrapper.element })
-  })
-
-  it("waits for a container template ref to resolve instead of falling back to the body", async () => {
-    const wrapper = mount(
-      defineComponent(() => {
-        const scroller = useTemplateRef<HTMLElement>("scroller")
-        return () => h("div", { ref: "scroller" }, [h(AnimeScroll, { container: scroller.value })])
-      })
-    )
-    await nextTick()
-    await nextTick()
-    expect(mock_onScroll).toHaveBeenCalledOnce()
-    expect(mock_onScroll).toHaveBeenCalledWith({
-      container: wrapper.element,
-      target: wrapper.element.firstElementChild,
-    })
+    expect(mock_onScroll).toHaveBeenCalledWith({ container: wrapper.find("section").element })
   })
 
   it("re-creates the observer when the options change", async () => {
@@ -85,7 +64,7 @@ describe("AnimeScroll", () => {
     await nextTick()
     await wrapper.setProps({ options: { sync: false } })
     expect(mock_onScroll).toHaveBeenCalledTimes(2)
-    expect(mock_onScroll).toHaveBeenLastCalledWith({ sync: false, container: "body", target: wrapper.element })
+    expect(mock_onScroll).toHaveBeenLastCalledWith({ sync: false, container: wrapper.element })
     expect(mock_observer.revert).toHaveBeenCalledOnce()
   })
 
@@ -100,7 +79,7 @@ describe("AnimeScroll", () => {
     // markRaw: setProps() makes its values reactive, which a component imported in a template never is
     await wrapper.setProps({ as: markRaw(Section) })
     expect(mock_onScroll).toHaveBeenCalledTimes(2)
-    expect(mock_onScroll).toHaveBeenLastCalledWith({ container: "body", target: wrapper.find("section").element })
+    expect(mock_onScroll).toHaveBeenLastCalledWith({ container: wrapper.find("section").element })
   })
 
   // Regression guard: `:options="{ ... }"` is a new object on every parent render

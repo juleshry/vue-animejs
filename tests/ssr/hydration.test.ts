@@ -377,7 +377,7 @@ describe("AnimeText hydration", () => {
 })
 
 describe("AnimeScroll hydration", () => {
-  it("hydrates without a mismatch warning and observes its root", async () => {
+  it("hydrates without a mismatch warning and observes its root as the container", async () => {
     const scroll = ref<AnimeScrollExposed>()
     const error = vi.spyOn(console, "error").mockImplementation(() => {})
     const { el, warn } = await hydrate(() =>

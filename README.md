@@ -108,7 +108,7 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `AnimeTransition` | Vue `<Transition>` with Anime.js enter / leave animations, `appear` included under SSR |
 | `AnimeTransitionGroup` | Vue `<TransitionGroup>` with Anime.js enter / leave animations, staggered |
 | `AnimeText` | Splits its text into lines, words and chars, and again when the content changes |
-| `AnimeScroll` | Scroll observer on its element, to drive animations from scroll |
+| `AnimeScroll` | Scroll container that drives the animations of the elements inside it |
 
 ## 🚀 Usage
 

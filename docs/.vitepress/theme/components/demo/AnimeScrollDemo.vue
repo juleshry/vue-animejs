@@ -3,25 +3,30 @@
   import { AnimeScroll, useAnimate } from "@juleshry/vue-animejs"
   import DemoSquare from "./shared/DemoSquare.vue"
 
-  const scroll = useTemplateRef("scroll")
+  const scroller = useTemplateRef("scroller")
   const box = useTemplateRef<InstanceType<typeof DemoSquare>>("box")
 
   useAnimate(box, {
     translateX: 200,
     rotate: 180,
     ease: "linear",
-    autoplay: computed(() => scroll.value?.autoplay ?? false),
+    autoplay: computed(() => scroller.value?.autoplay ?? false),
   })
 </script>
 
 <template>
-  <!-- No container: the page itself is scrolled -->
-  <AnimeScroll ref="scroll" class="demo" :options="{ enter: 'bottom top', leave: 'top bottom', sync: true }">
-    <p class="demo-hint">Scroll the page: the square follows this block across the viewport.</p>
-    <div class="demo-stage">
+  <div class="demo">
+    <p class="demo-hint">Scroll inside the box: the square moves as it travels through it.</p>
+    <AnimeScroll
+      ref="scroller"
+      class="demo-scroller"
+      :options="{ enter: 'bottom top', leave: 'top bottom', sync: true }"
+    >
+      <div class="demo-spacer" />
       <DemoSquare ref="box" />
-    </div>
-  </AnimeScroll>
+      <div class="demo-spacer" />
+    </AnimeScroll>
+  </div>
 </template>
 
 <style scoped>
@@ -38,9 +43,15 @@
     font-size: 14px;
   }
 
-  .demo-stage {
+  .demo-scroller {
+    height: 200px;
+    overflow-y: auto;
     border: 1px dashed var(--vp-c-divider);
     border-radius: 6px;
-    padding: 16px;
+    padding: 0 16px;
+  }
+
+  .demo-spacer {
+    height: 220px;
   }
 </style>

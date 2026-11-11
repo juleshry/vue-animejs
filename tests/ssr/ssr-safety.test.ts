@@ -107,7 +107,7 @@ describe("SSR safety", () => {
   })
 
   it("AnimeScroll does not create an observer during SSR", async () => {
-    await renderSSRApp(() => h(AnimeScroll, { container: ".container", options: { sync: true } }))
+    await renderSSRApp(() => h(AnimeScroll, { options: { sync: true } }))
     expect(mock_onScroll).not.toHaveBeenCalled()
   })
 
