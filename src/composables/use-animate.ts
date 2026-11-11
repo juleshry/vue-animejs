@@ -39,7 +39,7 @@ export interface UseAnimateReturn {
 /**
  * Wraps Anime.js `animate()` into a Vue composable. Reactively re-creates the animation when the target or options change, and cancels it automatically on unmount.
  *
- * @param _target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, a reactive ref to any of these, or an array of them.
+ * @param _target - The element(s) to animate. Accepts a template ref, a CSS selector, a DOM element, a ref or getter returning any of these, or an array of them.
  * @param _options - Anime.js animation parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export function useAnimate(

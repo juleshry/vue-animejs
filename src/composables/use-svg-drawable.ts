@@ -1,6 +1,6 @@
 import { svg, type DrawableSVGGeometry, type DOMTargetSelector } from "animejs"
 import { type MaybeComputedElementRef, tryOnUnmounted } from "@vueuse/core"
-import { markRaw, type MaybeRef, shallowReadonly, type ShallowRef, shallowRef, unref } from "vue"
+import { markRaw, type MaybeRef, type MaybeRefOrGetter, shallowReadonly, type ShallowRef, shallowRef, unref } from "vue"
 import { type AnimationTargets } from "../utils/resolve-target.ts"
 import { watchTarget } from "../utils/watch-target.ts"
 
@@ -15,12 +15,12 @@ export interface UseSvgDrawableReturn {
 /**
  * Wraps an SVG geometry element in Anime.js's drawable Proxy. The proxy intercepts `setAttribute('draw', …)` calls and translates normalised `draw` values (`0`–`1`) into the correct `stroke-dasharray` / `stroke-dashoffset` updates. Pass the returned `drawable` ref as the target to `useAnimate`.
  *
- * @param target - The SVG element to make drawable. Accepts a template ref, a CSS selector, or a reactive ref to either.
+ * @param target - The SVG element to make drawable. Accepts a template ref, a CSS selector, or a ref or getter returning either.
  * @param start - Initial draw start position (`0`–`1`). Defaults to `0`.
  * @param end - Initial draw end position (`0`–`1`). Defaults to `0` (fully hidden).
  */
 export function useSvgDrawable(
-  target: MaybeRef<DOMTargetSelector> | MaybeComputedElementRef,
+  target: MaybeRefOrGetter<DOMTargetSelector | null | undefined> | MaybeComputedElementRef,
   start: MaybeRef<number> = 0,
   end: MaybeRef<number> = 0
 ): UseSvgDrawableReturn {

@@ -75,6 +75,12 @@ describe("SSR safety", () => {
     expect(result.animation.value).toBeUndefined()
   })
 
+  it("useAnimate does not create an animation for a getter target", async () => {
+    const result = await renderSSR(() => useAnimate(() => ".target", { opacity: [0, 1] }))
+    expect(mock_animate).not.toHaveBeenCalled()
+    expect(result.animation.value).toBeUndefined()
+  })
+
   it("useAnimatable does not create an animatable for a non-ref selector target", async () => {
     const result = await renderSSR(() => useAnimatable(".target"))
     expect(mock_createAnimatable).not.toHaveBeenCalled()

@@ -267,8 +267,8 @@ describe("directives leave the DOM untouched until every onMounted has run", () 
 // Anime.js wrote to DOM Vue hadn't hydrated yet: style mismatches, or a throw for useDraggable,
 // useLayout and useText. The first build now waits for mount.
 describe("composables with a DOM target hydrate without touching the server HTML first", () => {
-  const all_forms: TargetForm[] = ["selector", "template ref", "array of template refs"]
-  const single_forms: TargetForm[] = ["selector", "template ref"]
+  const all_forms: TargetForm[] = ["selector", "template ref", "getter", "array of template refs"]
+  const single_forms: TargetForm[] = ["selector", "template ref", "getter"]
   const motion = { opacity: [0, 1], translateY: [20, 0], duration: 1000 }
 
   // Each case calls the composable and returns its instance ref

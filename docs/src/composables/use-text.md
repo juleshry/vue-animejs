@@ -117,11 +117,11 @@ export interface UseTextReturn {
 /**
  * Wraps Anime.js `splitText()` into a Vue composable. Reactively re-splits the text when the target or params change, and reverts the DOM automatically on unmount.
  *
- * @param _target - The element(s) whose text content should be split. Accepts a template ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param _target - The element(s) whose text content should be split. Accepts a template ref, a CSS selector, a DOM element, or a ref or getter returning any of these.
  * @param _params - Anime.js text-splitter parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties.
  */
 export declare function useText(
-  _target: MaybeRef<HTMLElement | NodeList | string | HTMLElement[]> | MaybeComputedElementRef,
+  _target: MaybeRefOrGetter<HTMLElement | NodeList | string | HTMLElement[] | null | undefined> | MaybeComputedElementRef,
   _params?: MaybeRefOrGetter<MaybeRefOptions<TextSplitterParams>>
 ): UseTextReturn
 ```

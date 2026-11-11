@@ -237,7 +237,7 @@ describe("useWaapi", () => {
 
   // Regression: a non-ref target used to be resolved in setup(), before the component's own template
   // existed (and during hydration, before Vue had hydrated the server HTML).
-  it.each<TargetForm>(["selector", "template ref", "array of template refs"])(
+  it.each<TargetForm>(["selector", "template ref", "getter", "array of template refs"])(
     "builds exactly once on mount from the component's own template (%s)",
     async form => {
       const record = recordTargetFound(mock_waapi.animate)

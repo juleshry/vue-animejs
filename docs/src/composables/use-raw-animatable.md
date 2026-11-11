@@ -99,13 +99,13 @@ export type UseRawAnimatableReturn = AnimatableObject
  * SSR-safety is the caller's responsibility: invoke this from inside your own `onMounted` (it runs
  * unconditionally and immediately, with no client-only guard), never at `setup()` top level.
  *
- * @param targets - The element(s) to make animatable. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a reactive ref to any of these.
+ * @param targets - The element(s) to make animatable. Accepts a template ref, a Vue component ref, a CSS selector, a DOM element, or a ref or getter returning any of these (read once).
  * @param options - Anime.js animatable parameters. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useRawAnimatable(
-  targets: MaybeRef<TargetsParam> | Ref<ComponentPublicInstance>,
+  targets: AnimationTargets,
   options?: MaybeRefOrGetter<MaybeRefOptions<AnimatableParams>>
-): AnimatableObject
+): UseRawAnimatableReturn
 ```
 
 :::

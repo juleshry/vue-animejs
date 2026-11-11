@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vite-plus/test"
-import { defineComponent, h, nextTick, onMounted, reactive, ref, useTemplateRef } from "vue"
+import { defineComponent, h, nextTick, onMounted, reactive, ref, shallowRef, useTemplateRef } from "vue"
 import { mount } from "@vue/test-utils"
 import { watchTarget } from "@src/utils/watch-target.ts"
 import { mountWithTarget, type TargetForm, withSetup } from "../utils"
 
-const forms: TargetForm[] = ["selector", "template ref", "array of template refs"]
+const forms: TargetForm[] = ["selector", "template ref", "getter", "array of template refs"]
 
 describe("watchTarget", () => {
   it.each(forms)("builds exactly once on mount from the component's own template (%s)", async form => {
@@ -65,6 +65,39 @@ describe("watchTarget", () => {
     a.value = el
     await nextTick()
     expect(build).toHaveBeenCalledWith([el], {})
+  })
+
+  it("waits for a getter that returns nothing at mount, then rebuilds when its dependencies change", async () => {
+    const build = vi.fn()
+    const a = document.createElement("div")
+    const b = document.createElement("div")
+    const els = shallowRef<HTMLElement[]>()
+    withSetup(() => watchTarget(() => els.value, {}, build))
+    await nextTick()
+    expect(build).not.toHaveBeenCalled()
+
+    els.value = [a]
+    await nextTick()
+    expect(build).toHaveBeenCalledExactlyOnceWith([a], {})
+
+    els.value = [a, b]
+    await nextTick()
+    expect(build).toHaveBeenLastCalledWith([a, b], {})
+    expect(build).toHaveBeenCalledTimes(2)
+  })
+
+  it("doesn't rebuild when a getter returns a new array with the same elements", async () => {
+    const build = vi.fn()
+    const el = document.createElement("div")
+    const count = ref(0)
+    // A new array on every read, and a dependency that changes without changing the elements
+    withSetup(() => watchTarget(() => (count.value, [el]), {}, build))
+    await nextTick()
+    expect(build).toHaveBeenCalledOnce()
+
+    count.value++
+    await nextTick()
+    expect(build).toHaveBeenCalledOnce()
   })
 
   it("builds with a static null target on mount, so the composable can warn about it", async () => {
