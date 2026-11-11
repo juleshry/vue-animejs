@@ -107,6 +107,8 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `AnimeScope`  | Anime.js scope rooted on its element: selectors, defaults and media queries stay inside |
 | `AnimeTransition` | Vue `<Transition>` with Anime.js enter / leave animations, `appear` included under SSR |
 | `AnimeTransitionGroup` | Vue `<TransitionGroup>` with Anime.js enter / leave animations, staggered |
+| `AnimeText` | Splits its text into lines, words and chars, and again when the content changes |
+| `AnimeScroll` | Scroll container that drives the animations of the elements inside it |
 
 ## 🚀 Usage
 
@@ -130,7 +132,8 @@ See the [Contributing Guide](./CONTRIBUTING.md).
 ## 🗺️ TODO
 
 - [x] Add components (`AnimeLayout`, `AnimeScope`, `AnimeTransition`, `AnimeTransitionGroup`)
-- [ ] More components: `AnimeText`, `AnimeScroll`, `AnimeTimeline`
+- [x] More components: `AnimeText`, `AnimeScroll`
+- [ ] `AnimeTimeline` / `AnimeTimelineItem`
 
 ## 📄 License
 

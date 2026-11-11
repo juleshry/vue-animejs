@@ -16,6 +16,8 @@ import {
 import {
   AnimeLayout,
   AnimeScope,
+  AnimeScroll,
+  AnimeText,
   AnimeTransition,
   AnimeTransitionGroup,
   useAnimatable,
@@ -104,6 +106,11 @@ describe("SSR safety", () => {
     expect(mock_createLayout).not.toHaveBeenCalled()
   })
 
+  it("AnimeScroll does not create an observer during SSR", async () => {
+    await renderSSRApp(() => h(AnimeScroll, { options: { sync: true } }))
+    expect(mock_onScroll).not.toHaveBeenCalled()
+  })
+
   it("useScroll does not attach scroll listeners for non-ref selector container/target", async () => {
     const result = await renderSSR(() => useScroll(".container", ".target"))
     expect(mock_onScroll).not.toHaveBeenCalled()
@@ -120,6 +127,11 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useText(".target"))
     expect(mock_splitText).not.toHaveBeenCalled()
     expect(result.splitter.value).toBeUndefined()
+  })
+
+  it("AnimeText does not split the text during SSR", async () => {
+    await renderSSRApp(() => h(AnimeText, { options: { chars: true } }, () => "Hello"))
+    expect(mock_splitText).not.toHaveBeenCalled()
   })
 
   it("useWaapi does not create a WAAPI animation for a non-ref selector target", async () => {

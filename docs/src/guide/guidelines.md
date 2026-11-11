@@ -37,11 +37,11 @@ useAnimate(".box", { translateX: 200 })
 useAnimate(document.querySelector(".box"), { translateX: 200 })
 ```
 
-So is a getter, for a target derived from other state, like elements a child component exposes through its template ref. It is tracked like a `computed`: the animation is re-created when it returns other elements, and nothing is built while it returns `undefined` or `null`:
+So is a getter, for a target derived from other state, like the elements a component exposes through its template ref. It is tracked like a `computed`: the animation is re-created when it returns other elements, and nothing is built while it returns `undefined` or `null`:
 
 ```ts
-const list = useTemplateRef("list") // a child component that exposes `items: HTMLElement[]`
-useAnimate(() => list.value?.items, { opacity: [0, 1], delay: stagger(40) })
+const text = useTemplateRef("text") // <AnimeText ref="text" :options="{ chars: true }">
+useAnimate(() => text.value?.chars, { opacity: [0, 1], delay: (_?: Target, i = 0) => i * 40 })
 ```
 
 All of these forms, and arrays of them, make up the exported `AnimationTargets` type, which the composables take as their target.

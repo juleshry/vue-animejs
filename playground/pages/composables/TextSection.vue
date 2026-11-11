@@ -12,7 +12,8 @@
   })
 
   useAnimate(words, {
-    y: [($el: Target) => (+$el.dataset.line % 2 ? "100%" : "-100%"), "0%"],
+    // Odd lines come from below, even lines from above
+    y: { from: ($el?: Target) => (Number(($el as HTMLElement).dataset.line) % 2 ? "100%" : "-100%"), to: "0%" },
     loop: true,
     duration: 500,
     alternate: true,

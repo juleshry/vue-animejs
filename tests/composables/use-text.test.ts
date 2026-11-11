@@ -57,21 +57,21 @@ describe("useText", () => {
     const el = document.createElement("p")
     const [result] = withSetup(() => useText(el))
     await nextTick()
-    expect(result.lines.value).toBe(mock_splitter.lines)
+    expect(result.lines.value).toEqual(mock_splitter.lines)
   })
 
   it("words computed ref reflects splitter.words", async () => {
     const el = document.createElement("p")
     const [result] = withSetup(() => useText(el))
     await nextTick()
-    expect(result.words.value).toBe(mock_splitter.words)
+    expect(result.words.value).toEqual(mock_splitter.words)
   })
 
   it("chars computed ref reflects splitter.chars", async () => {
     const el = document.createElement("p")
     const [result] = withSetup(() => useText(el))
     await nextTick()
-    expect(result.chars.value).toBe(mock_splitter.chars)
+    expect(result.chars.value).toEqual(mock_splitter.chars)
   })
 
   it("lines/words/chars are empty arrays before target resolves", () => {

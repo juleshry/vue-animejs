@@ -113,6 +113,11 @@ export function makeTextSplitterMock() {
     chars: [document.createElement("span"), document.createElement("span")] as HTMLElement[],
     revert: vi.fn(),
     refresh: vi.fn(),
+    // Like a splitter whose text is already split: the effect runs right away
+    addEffect: vi.fn(function (this: unknown, effect: (splitter: unknown) => unknown) {
+      effect(this)
+      return this
+    }),
   }
 }
 

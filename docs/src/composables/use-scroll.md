@@ -146,6 +146,34 @@ onMounted(() => {
 </template>
 ```
 
+### Observing the animated element
+
+Leave `target` out (pass `undefined` to give `options`), and the observer takes it from the animation it drives: Anime.js uses the first DOM target of the animation linked through `autoplay`, or the document body if there is none. The animated element is then the one whose position in the container drives the animation.
+
+```vue
+<script setup lang="ts">
+import { useTemplateRef } from "vue"
+import { useAnimate, useScroll } from "@juleshry/vue-animejs"
+
+const container = useTemplateRef<HTMLDivElement>("container")
+const box = useTemplateRef<HTMLDivElement>("box")
+
+const { autoplay } = useScroll(container, undefined, { enter: "bottom top", leave: "top bottom", sync: true })
+
+useAnimate(box, { translateX: 200, ease: "linear", autoplay })
+</script>
+
+<template>
+  <div ref="container" class="scroll-container">
+    <div class="spacer" />
+    <div ref="box" class="box" />
+    <div class="spacer" />
+  </div>
+</template>
+```
+
+[`AnimeScroll`](/components/anime-scroll) does this for you, with its own root as the container.
+
 ## Type Declarations
 
 For all available options, see the [Anime.js onScroll documentation](https://animejs.com/documentation/events/onscroll).
@@ -154,7 +182,7 @@ For all available options, see the [Anime.js onScroll documentation](https://ani
 
 ```ts
 export interface UseScrollReturn {
-  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
+  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with the container (and the target, when given) available. */
   observer: ComputedRef<ScrollObserver | undefined>
   /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option: `useTimeline({ autoplay })`. */
   autoplay: ComputedRef<ScrollObserver | false>
@@ -183,12 +211,12 @@ export interface UseScrollReturn {
  * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a ref or getter returning any of these.
- * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
+ * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`. Optional: when left out, the observer uses the first DOM target of the animation linked to it (e.g. through `autoplay`), or else the document body.
  * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export declare function useScroll(
   container: AnimationTargets,
-  target: AnimationTargets,
+  target?: AnimationTargets,
   options?: MaybeRefOrGetter<MaybeRefOptions<Omit<ScrollObserverParams, "container" | "target">>>
 ): UseScrollReturn
 ```
@@ -198,7 +226,7 @@ export declare function useScroll(
 ## Reactivity & Lifecycle Behavior
 
 - The observer is created once the component has **mounted**, like every other composable with a DOM target, so a selector can point into the component's own template and server-rendered HTML is never touched before hydration. Until then, `observer`/`autoplay` are `undefined` / `false`.
-- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the observer as soon as both `container` and `target` resolve.
+- A template ref that is still empty at mount (e.g. behind a `v-if`) creates the observer as soon as both `container` and `target` resolve. Without a `target`, only `container` is waited for, and the target comes from the linked animation.
 - Call `useScroll` **before** the composable that consumes `autoplay` (e.g. `useTimeline`). Mount hooks run in registration order, so the observer exists by the time the consumer builds, and it's built once, with the observer already in place.
 - If `container`, `target`, or `options` changes, the previous observer is **reverted** before the new one is created.
 - On component **unmount**, the watcher is stopped and the observer is reverted automatically.

@@ -16,7 +16,7 @@ import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
   splitter: Readonly<ShallowRef<TextSplitter | undefined>>
-  /** Reactive array of `<span>` elements representing each line after splitting. */
+  /** Reactive array of `<span>` elements representing each line after splitting. Empty until web fonts have loaded: Anime.js waits for them to split lines. */
   lines: ComputedRef<HTMLElement[]>
   /** Reactive array of `<span>` elements representing each word after splitting. */
   words: ComputedRef<HTMLElement[]>
@@ -41,10 +41,13 @@ export function useText(
   _params?: MaybeRefOrGetter<MaybeRefOptions<TextSplitterParams>>
 ): UseTextReturn {
   const splitter = shallowRef<TextSplitter | undefined>()
+  // Bumped after every split: splitText fills its arrays itself, later when lines wait for fonts, and Vue can't see it
+  const split_count = shallowRef(0)
 
-  const lines = computed<HTMLElement[]>(() => splitter.value?.lines ?? [])
-  const words = computed<HTMLElement[]>(() => splitter.value?.words ?? [])
-  const chars = computed<HTMLElement[]>(() => splitter.value?.chars ?? [])
+  // New arrays on every split, so the dependents are notified even when Anime.js refilled the same array in place
+  const lines = computed<HTMLElement[]>(() => (split_count.value, [...(splitter.value?.lines ?? [])]))
+  const words = computed<HTMLElement[]>(() => (split_count.value, [...(splitter.value?.words ?? [])]))
+  const chars = computed<HTMLElement[]>(() => (split_count.value, [...(splitter.value?.chars ?? [])]))
 
   const { stop } = watchTarget<TextSplitterParams | undefined>(_target as AnimationTargets, _params, (el, params) => {
     revert()
@@ -52,7 +55,13 @@ export function useText(
 
     if (!el) return
 
-    splitter.value = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
+    const instance = markRaw(splitText(el as HTMLElement | NodeList | string | HTMLElement[], params))
+    // Runs now if the text is already split, and again after each split Anime.js does later (fonts ready, resize)
+    instance.addEffect(() => {
+      split_count.value++
+      return () => {}
+    })
+    splitter.value = instance
   })
 
   tryOnUnmounted(() => {

@@ -108,6 +108,24 @@ describe("useScroll", () => {
     expect(result.autoplayComputed.value).toEqual({ autoplay: mock_observer })
   })
 
+  it("creates the observer without a `target` key when no target is given, so Anime.js takes the linked one", () => {
+    const container = document.createElement("div")
+    withSetup(() => useScroll(container, undefined, { sync: true }))
+    expect(mock_onScroll).toHaveBeenCalledExactlyOnceWith({ sync: true, container })
+    expect(mock_onScroll.mock.calls[0][0]).not.toHaveProperty("target")
+  })
+
+  it("without a target, waits for the container ref only", async () => {
+    const container_ref = ref<HTMLElement | null>(null)
+    withSetup(() => useScroll(container_ref))
+    expect(mock_onScroll).not.toHaveBeenCalled()
+
+    const container = document.createElement("div")
+    container_ref.value = container
+    await nextTick()
+    expect(mock_onScroll).toHaveBeenCalledExactlyOnceWith({ container })
+  })
+
   it("recreates the observer when a target ref changes to a new element", async () => {
     const container = document.createElement("div")
     const target_ref = ref(document.createElement("div"))

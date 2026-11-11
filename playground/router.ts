@@ -23,6 +23,8 @@ import AnimeScopeSection from "./pages/components/AnimeScopeSection.vue"
 import AnimeScopeResponsiveFrame from "./pages/components/AnimeScopeResponsiveFrame.vue"
 import AnimeTransitionSection from "./pages/components/AnimeTransitionSection.vue"
 import AnimeTransitionGroupSection from "./pages/components/AnimeTransitionGroupSection.vue"
+import AnimeTextSection from "./pages/components/AnimeTextSection.vue"
+import AnimeScrollSection from "./pages/components/AnimeScrollSection.vue"
 
 export const composable_routes = [
   {
@@ -140,6 +142,16 @@ export const component_routes = [
     path: "/components/anime-transition-group",
     component: AnimeTransitionGroupSection,
     meta: { label: "AnimeTransitionGroup", description: "List enter and leave transitions, staggered" },
+  },
+  {
+    path: "/components/anime-text",
+    component: AnimeTextSection,
+    meta: { label: "AnimeText", description: "Splits its text, and again when the content changes" },
+  },
+  {
+    path: "/components/anime-scroll",
+    component: AnimeScrollSection,
+    meta: { label: "AnimeScroll", description: "Scroll observer on its element, driving an animation" },
   },
 ]
 

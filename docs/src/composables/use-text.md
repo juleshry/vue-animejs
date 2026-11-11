@@ -12,7 +12,7 @@ Wraps Anime.js [`splitText()`](https://animejs.com/documentation/split-text) int
 
 ```vue
 <script setup lang="ts">
-import { type Target } from "animejs"
+import { stagger } from "animejs"
 import { useTemplateRef } from "vue"
 import { useAnimate, useText } from "@juleshry/vue-animejs"
 
@@ -23,7 +23,7 @@ const { play, restart } = useAnimate(chars, {
   translateY: [-24, 0],
   opacity: [0, 1],
   duration: 700,
-  delay: (_: Target, i: number) => i * 50,
+  delay: stagger(50),
   ease: "outExpo",
 })
 </script>
@@ -41,7 +41,7 @@ Use `words` instead of `chars` to animate word by word.
 
 ```vue
 <script setup lang="ts">
-import { type Target } from "animejs"
+import { stagger } from "animejs"
 import { useTemplateRef } from "vue"
 import { useAnimate, useText } from "@juleshry/vue-animejs"
 
@@ -52,7 +52,7 @@ const { play } = useAnimate(words, {
   opacity: [0, 1],
   translateX: [-16, 0],
   duration: 500,
-  delay: (_: Target, i: number) => i * 80,
+  delay: stagger(80),
   ease: "outCubic",
 })
 </script>
@@ -102,7 +102,7 @@ const { chars, words } = useText(text_el, () => ({ [splitBy.value]: true }))
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
   splitter: Readonly<ShallowRef<TextSplitter | undefined>>
-  /** Reactive array of `<span>` elements representing each line after splitting. */
+  /** Reactive array of `<span>` elements representing each line after splitting. Empty until web fonts have loaded: Anime.js waits for them to split lines. */
   lines: ComputedRef<HTMLElement[]>
   /** Reactive array of `<span>` elements representing each word after splitting. */
   words: ComputedRef<HTMLElement[]>
@@ -131,7 +131,7 @@ export declare function useText(
 ## Reactivity & Lifecycle
 
 - The text is split once the component has **mounted**, whatever form `_target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered text is never split before hydration.
-- `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs.
+- `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs, including the splits Anime.js does on its own: once web fonts have loaded when splitting by `lines`, and when a resize changes the line breaks. Each split gives new arrays, so an animation using them as targets is re-created.
 - If `_target` or `_params` changes, the DOM is reverted and `splitText()` is called again. For `_params`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the watcher is stopped and the DOM is reverted automatically.
 

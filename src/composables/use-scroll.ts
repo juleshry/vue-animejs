@@ -13,7 +13,7 @@ import { watchTarget } from "../utils/watch-target.ts"
 import { type MaybeRefOptions } from "../utils/resolve-options.ts"
 
 export interface UseScrollReturn {
-  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with both container and target available. */
+  /** The underlying Anime.js ScrollObserver. `undefined` until mounted with the container (and the target, when given) available. */
   observer: ComputedRef<ScrollObserver | undefined>
   /** The observer, or `false` while it doesn't exist yet — plug straight into an `autoplay` option: `useTimeline({ autoplay })`. */
   autoplay: ComputedRef<ScrollObserver | false>
@@ -43,19 +43,21 @@ export interface UseScrollReturn {
  * then runs first, so the consumer is built once, with the observer already in place.
  *
  * @param container - The scrollable container. Accepts a template ref, a CSS selector, a DOM element, or a ref or getter returning any of these.
- * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`.
+ * @param target - The element whose scroll position is observed within `container`. Same accepted shapes as `container`. Optional: when left out, the observer uses the first DOM target of the animation linked to it (e.g. through `autoplay`), or else the document body.
  * @param options - Anime.js `ScrollObserverParams`, minus `container`/`target`. Accepts a plain object, a ref / computed / getter, and refs as direct properties. Defaults to `{}`.
  */
 export function useScroll(
   container: AnimationTargets,
-  target: AnimationTargets,
+  target?: AnimationTargets,
   options: MaybeRefOrGetter<MaybeRefOptions<Omit<ScrollObserverParams, "container" | "target">>> = {}
 ): UseScrollReturn {
   const instance = shallowRef<ScrollObserver>()
 
-  // Both elements in one target, so watchTarget builds once they have both resolved, and rebuilds when either changes
+  // Both elements in one target, so watchTarget builds once they have both resolved, and rebuilds when either changes.
+  // Without a target, only the container is waited for, and Anime.js takes the target from the linked animation.
   const both = () => {
     const container_el = resolveTarget(container)
+    if (target === undefined) return container_el ? [container_el] : undefined
     const target_el = resolveTarget(target)
     return container_el && target_el ? [container_el, target_el] : undefined
   }
@@ -65,8 +67,13 @@ export function useScroll(
     instance.value = undefined
     if (!els) return
 
-    const [container_el, target_el] = els as [TargetsParam, TargetsParam]
-    instance.value = markRaw(onScroll({ ...opt, container: container_el, target: target_el }))
+    const [container_el, target_el] = els as [TargetsParam, TargetsParam?]
+    // No `target` key at all without a target: Anime.js only falls back to the linked animation's when it's unset
+    const params =
+      target_el === undefined
+        ? { ...opt, container: container_el }
+        : { ...opt, container: container_el, target: target_el }
+    instance.value = markRaw(onScroll(params))
   })
 
   tryOnUnmounted(() => {
