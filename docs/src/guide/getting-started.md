@@ -2,7 +2,7 @@
 
 ## Overview
 
-**vue-animejs** wraps [Anime.js v4](https://animejs.com/) into a set of Vue 3 composables. Every composable integrates with Vue's reactivity system and cleans up automatically when the component unmounts.
+**vue-animejs** wraps [Anime.js v4](https://animejs.com/) into Vue 3 composables, directives and components. Everything integrates with Vue's reactivity system and cleans up automatically when the component unmounts.
 
 ## Installation
 
@@ -88,4 +88,36 @@ import { vAnimate } from "@juleshry/vue-animejs"
 
 ::: tip
 See the [Directives](/directives/v-animate) section for the full list — `v-draggable`, `v-waapi`, `v-svg-drawable`, and `v-text-split` cover the same use cases as their composable counterparts.
+:::
+
+## Your first component
+
+Some animations need an element of their own, like a container whose children move to their new place when the list changes. A component renders that element for you:
+
+```vue
+<script setup lang="ts">
+import { nextTick, ref, useTemplateRef } from "vue"
+import { AnimeLayout } from "@juleshry/vue-animejs"
+
+const list = useTemplateRef("list")
+const items = ref(["a", "b", "c"])
+
+async function reverse() {
+  list.value?.record()
+  items.value = [...items.value].reverse()
+  await nextTick()
+  list.value?.animate()
+}
+</script>
+
+<template>
+  <AnimeLayout ref="list" as="ul" :options="{ duration: 500 }">
+    <li v-for="item in items" :key="item">{{ item }}</li>
+  </AnimeLayout>
+  <button @click="reverse">Reverse</button>
+</template>
+```
+
+::: tip
+See [AnimeLayout](/components/anime-layout) for the details, and [Components](/guide/guidelines#components) in the guidelines for when to pick a component over a composable or a directive.
 :::

@@ -1,8 +1,12 @@
 // @vitest-environment node
 import { describe, it, expect } from "vite-plus/test"
-import { type Component, defineComponent, h, onMounted, useTemplateRef, withDirectives } from "vue"
+import { type Component, defineComponent, Fragment, h, onMounted, useTemplateRef, withDirectives } from "vue"
 import * as lib from "@lib"
 import {
+  AnimeLayout,
+  AnimeScope,
+  AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -112,7 +116,87 @@ const cases: Case[] = [
   { export: "useDraggable", name: "selector", component: withoutTarget(() => useDraggable("#target")), html: box },
   { export: "useLayout", name: "template ref", component: withTarget(t => useLayout(t)), html: box },
   { export: "useLayout", name: "selector", component: withoutTarget(() => useLayout("#target")), html: box },
+  {
+    export: "AnimeLayout",
+    name: "component",
+    component: () => h(AnimeLayout, { as: "ul", options: { duration: 300 } }, () => h("li", "item")),
+    html: "<ul><li>item</li></ul>",
+  },
+  {
+    export: "AnimeLayout",
+    name: "component as root",
+    component: () =>
+      h(
+        AnimeLayout,
+        {
+          as: defineComponent(
+            (_, { slots }) =>
+              () =>
+                h("ul", slots.default?.())
+          ),
+        },
+        () => h("li", "item")
+      ),
+    html: "<ul><li>item</li></ul>",
+  },
+  {
+    export: "AnimeTransition",
+    name: "without appear",
+    component: () => h(AnimeTransition, { enter: { opacity: [0, 1] } }, () => h("p", "hi")),
+    html: "<p>hi</p>",
+  },
+  {
+    export: "AnimeTransition",
+    name: "appear renders enter's starting values",
+    component: () =>
+      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], translateY: [20, 0] } }, () => h("p", "hi")),
+    html: '<p style="opacity:0;transform:translateY(20px);" data-anime-ssr="opacity,transform">hi</p>',
+  },
+  {
+    export: "AnimeTransition",
+    name: "appear with nothing rendered",
+    component: () => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => null),
+    html: "<!---->",
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "without appear",
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", enter: { opacity: [0, 1] } }, () =>
+        ["a", "b"].map(item => h("li", { key: item }, item))
+      ),
+    html: "<ul><li>a</li><li>b</li></ul>",
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "appear renders enter's starting values on every child",
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, stagger: 50, enter: { opacity: [0, 1] } }, () =>
+        ["a", "b"].map(item => h("li", { key: item }, item))
+      ),
+    html: '<ul><li style="opacity:0;" data-anime-ssr="opacity">a</li><li style="opacity:0;" data-anime-ssr="opacity">b</li></ul>',
+  },
+  {
+    export: "AnimeTransitionGroup",
+    name: "appear through a v-for fragment",
+    // A compiled `v-for` hands the slot one Fragment vnode: its children must still get the starting values
+    component: () =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, enter: { opacity: [0, 1] } }, () => [
+        h(
+          Fragment,
+          null,
+          ["a", "b"].map(item => h("li", { key: item }, item))
+        ),
+      ]),
+    html: '<ul><li style="opacity:0;" data-anime-ssr="opacity">a</li><li style="opacity:0;" data-anime-ssr="opacity">b</li></ul>',
+  },
   { export: "useScope", name: "no target", component: withoutTarget(() => useScope({})), html: box },
+  {
+    export: "AnimeScope",
+    name: "component",
+    component: () => h(AnimeScope, { as: "section", options: { defaults: { duration: 300 } } }, () => h("p", "item")),
+    html: "<section><p>item</p></section>",
+  },
   { export: "useScroll", name: "template ref", component: withTarget(t => useScroll(t, t)), html: box },
   { export: "useScroll", name: "selector", component: withoutTarget(() => useScroll("#target", "#target")), html: box },
   { export: "useSvg", name: "no target", component: withoutTarget(() => useSvg()), html: box },
@@ -181,9 +265,9 @@ describe("SSR render (real animejs)", () => {
     await expect(renderSSRApp(component)).resolves.toBe(html)
   })
 
-  it("covers every public composable and directive", () => {
+  it("covers every public composable, directive and component", () => {
     const covered = new Set(cases.map(c => c.export))
-    const missing = Object.keys(lib).filter(key => /^(use|v)[A-Z]/.test(key) && !covered.has(key))
+    const missing = Object.keys(lib).filter(key => /^(use|v|Anime)[A-Z]/.test(key) && !covered.has(key))
     expect(missing).toEqual([])
   })
 })

@@ -1,10 +1,11 @@
 {
   "name": "@juleshry/vue-animejs",
-  "version": "1.5.0",
-  "description": "SSR-safe Vue 3 composables and directives for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
+  "version": "1.6.0-beta.1",
+  "description": "SSR-safe Vue 3 composables, directives and components for Anime.js v4 — reactive animations that integrate naturally with Vue's reactivity system and component lifecycle.",
   "keywords": [
     "animation",
     "animejs",
+    "components",
     "composable",
     "composables",
     "directives",
@@ -52,7 +53,7 @@
     "@types/node": "^26.6.0",
     "@types/semver": "^7.8.0",
     "@vitejs/plugin-vue": "^6.0.10",
-    "@vitest/coverage-v8": "5.0.4",
+    "@vitest/coverage-v8": "5.0.5",
     "@vue/server-renderer": "^3.5.42",
     "@vue/test-utils": "^2.5.0",
     "@vueuse/core": "^14.4.0",
@@ -61,9 +62,9 @@
     "happy-dom": "^20.14.5",
     "semver": "^7.8.5",
     "typescript": "^6.0.3",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0",
-    "vite-plus": "1.2.0",
-    "vitest": "5.0.4",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vite-plus": "1.4.0",
+    "vitest": "5.0.5",
     "vue": "^3.5.42",
     "vue-tsc": "^3.3.11"
   },
@@ -73,7 +74,7 @@
     "vue": ">=3.5"
   },
   "overrides": {
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.2.0",
-    "vitest": "5.0.4"
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vitest": "5.0.5"
   }
 }

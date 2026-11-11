@@ -53,7 +53,7 @@ export default defineConfig({
 
   title: "Vue x Animejs",
   description:
-    "Reactive, lifecycle-aware, SSR-safe animation composables and directives for Vue 3 — powered by Anime.js v4.",
+    "Reactive, lifecycle-aware, SSR-safe animation composables, directives and components for Vue 3 — powered by Anime.js v4.",
 
   srcDir: "src",
 
@@ -139,6 +139,15 @@ export default defineConfig({
           { text: "vWaapi", link: "/directives/v-waapi" },
           { text: "vSvgDrawable", link: "/directives/v-svg-drawable" },
           { text: "vTextSplit", link: "/directives/v-text-split" },
+        ],
+      },
+      {
+        text: "Components",
+        items: [
+          { text: "AnimeLayout", link: "/components/anime-layout" },
+          { text: "AnimeScope", link: "/components/anime-scope" },
+          { text: "AnimeTransition", link: "/components/anime-transition" },
+          { text: "AnimeTransitionGroup", link: "/components/anime-transition-group" },
         ],
       },
     ],

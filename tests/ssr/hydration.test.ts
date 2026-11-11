@@ -15,6 +15,12 @@ import {
 } from "vue"
 import { renderToString } from "@vue/server-renderer"
 import {
+  AnimeLayout,
+  type AnimeLayoutExposed,
+  AnimeScope,
+  type AnimeScopeExposed,
+  AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -302,5 +308,121 @@ describe("composables with a DOM target hydrate without touching the server HTML
     const { container, warn } = await hydrate(() => h(Comp))
     expect(hydrationWarnings(warn)).toEqual([])
     expect(container.querySelectorAll("#t [data-word]").length).toBe(2)
+  })
+})
+
+describe("AnimeLayout hydration", () => {
+  it("hydrates without a mismatch warning and creates the layout on its root", async () => {
+    const layout = ref<AnimeLayoutExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeLayout, { ref: layout, as: "ul", style: { color: "red" } }, () => [h("li", "a"), h("li", "b")])
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("UL")
+    expect(el.style.color).toBe("red")
+    expect(layout.value?.layout).toBeDefined()
+  })
+})
+
+describe("AnimeScope hydration", () => {
+  it("hydrates without a mismatch warning and creates the scope on its root", async () => {
+    const scope = ref<AnimeScopeExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeScope, { ref: scope, as: "section", style: { color: "red" } }, () => h("p", "item"))
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("SECTION")
+    expect(el.style.color).toBe("red")
+    expect(scope.value?.scope?.root).toBe(el)
+  })
+})
+
+describe("AnimeTransition appear hydration", () => {
+  const enter = { opacity: [0, 1], translateY: [20, 0], duration: 1000 }
+
+  it("hydrates without a mismatch warning and starts from the server's starting state", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter }, () => h("p", { style: { color: "red" } }, "hi"))
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+    expect(el.style.color).toBe("red")
+    // Anime.js has taken over from the server style: same starting values, now its own
+    expect(el.style.opacity).toBe("0")
+    expect(el.style.transform).toBe("translateY(20px)")
+  })
+
+  it("restores the user's own value for a key the server overrode", async () => {
+    const { el } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter: { translateY: [20, 0], duration: 1000 } }, () =>
+        h("p", { style: { opacity: 0.5 } }, "hi")
+      )
+    )
+    expect(el.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+    expect(el.style.opacity).toBe("0.5")
+  })
+
+  it("plays the enter animation through after hydration, then hands the element back to its own styles", async () => {
+    const { el } = await hydrate(() =>
+      h(AnimeTransition, { appear: true, enter: { opacity: [0, 1], duration: 50 } }, () =>
+        h("p", { style: { color: "red" } }, "hi")
+      )
+    )
+    await new Promise(resolve => setTimeout(resolve, 200))
+    expect(el.style.opacity).toBe("")
+    expect(el.style.color).toBe("red")
+  })
+
+  // Regression guard for @nuxt/hints-style checks: nothing is written before the surrounding onMounted hooks ran
+  it("leaves the server HTML untouched until every onMounted of the flush has run", async () => {
+    const seen: string[] = []
+    const Outer = defineComponent({
+      setup() {
+        const instance = getCurrentInstance()!
+        onMounted(() => seen.push((instance.vnode.el as Element).outerHTML))
+        return () => h(AnimeTransition, { appear: true, enter }, () => h("p", "hi"))
+      },
+    })
+    const server_html = await renderToString(createSSRApp({ render: () => h(Outer) }))
+    const { container } = await hydrate(() => h(Outer))
+    expect(seen).toEqual([server_html])
+    expect(container.querySelector("p")!.hasAttribute(SSR_STYLE_ATTR)).toBe(false) // the handoff did run, afterwards
+  })
+})
+
+describe("AnimeTransitionGroup appear hydration", () => {
+  const render = () =>
+    h(AnimeTransitionGroup, { tag: "ul", appear: true, stagger: 100, enter: { opacity: [0, 1], duration: 50 } }, () =>
+      ["a", "b", "c"].map(item => h("li", { key: item, style: { color: "red" } }, item))
+    )
+
+  it("hydrates without a mismatch warning and hands every child over to Anime.js", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(render)
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    for (const li of el.querySelectorAll("li")) {
+      expect(li.hasAttribute(SSR_STYLE_ATTR)).toBe(false)
+      expect(li.style.color).toBe("red")
+      expect(li.style.opacity).toBe("0")
+    }
+  })
+
+  it("plays every child's enter through, staggered", async () => {
+    const { el } = await hydrate(render)
+    const items = [...el.querySelectorAll("li")]
+    await new Promise(resolve => setTimeout(resolve, 120))
+    // a (no delay) has finished and lost its inline opacity, c (200ms delay) hasn't started
+    expect(items[0].style.opacity).toBe("")
+    expect(items[2].style.opacity).toBe("0")
+    await new Promise(resolve => setTimeout(resolve, 300))
+    expect(items.map(li => li.style.opacity)).toEqual(["", "", ""])
+    expect(items.map(li => li.style.color)).toEqual(["red", "red", "red"])
   })
 })

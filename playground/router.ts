@@ -1,6 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router"
-import ComposablesPage from "./pages/ComposablesPage.vue"
-import DirectivesPage from "./pages/DirectivesPage.vue"
+import RouteIndex from "./components/RouteIndex.vue"
 import AnimateSection from "./pages/composables/AnimateSection.vue"
 import RawAnimateSection from "./pages/composables/RawAnimateSection.vue"
 import TimerSection from "./pages/composables/TimerSection.vue"
@@ -19,6 +18,11 @@ import VDraggableSection from "./pages/directives/VDraggableSection.vue"
 import VSvgDrawableSection from "./pages/directives/VSvgDrawableSection.vue"
 import VWaapiSection from "./pages/directives/VWaapiSection.vue"
 import VTextSplitSection from "./pages/directives/VTextSplitSection.vue"
+import AnimeLayoutSection from "./pages/components/AnimeLayoutSection.vue"
+import AnimeScopeSection from "./pages/components/AnimeScopeSection.vue"
+import AnimeScopeResponsiveFrame from "./pages/components/AnimeScopeResponsiveFrame.vue"
+import AnimeTransitionSection from "./pages/components/AnimeTransitionSection.vue"
+import AnimeTransitionGroupSection from "./pages/components/AnimeTransitionGroupSection.vue"
 
 export const composable_routes = [
   {
@@ -116,11 +120,38 @@ export const directive_routes = [
   },
 ]
 
+export const component_routes = [
+  {
+    path: "/components/anime-layout",
+    component: AnimeLayoutSection,
+    meta: { label: "AnimeLayout", description: "Container that animates its children's layout changes" },
+  },
+  {
+    path: "/components/anime-scope",
+    component: AnimeScopeSection,
+    meta: { label: "AnimeScope", description: "Scope rooted on its element: selectors and defaults stay inside" },
+  },
+  {
+    path: "/components/anime-transition",
+    component: AnimeTransitionSection,
+    meta: { label: "AnimeTransition", description: "Enter and leave transitions played by Anime.js" },
+  },
+  {
+    path: "/components/anime-transition-group",
+    component: AnimeTransitionGroupSection,
+    meta: { label: "AnimeTransitionGroup", description: "List enter and leave transitions, staggered" },
+  },
+]
+
 export const routes = [
-  { path: "/composables", component: ComposablesPage },
+  { path: "/composables", component: RouteIndex, props: { title: "Composables", routes: composable_routes } },
   ...composable_routes,
-  { path: "/directives", component: DirectivesPage },
+  { path: "/directives", component: RouteIndex, props: { title: "Directives", routes: directive_routes } },
   ...directive_routes,
+  { path: "/components", component: RouteIndex, props: { title: "Components", routes: component_routes } },
+  ...component_routes,
+  // Pages embedded in an iframe by a section, rendered without the nav bar
+  { path: "/frames/anime-scope", component: AnimeScopeResponsiveFrame, meta: { bare: true } },
   { path: "/", redirect: "/composables" },
 ]
 

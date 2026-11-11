@@ -1,6 +1,6 @@
 # Nuxt
 
-vue-animejs works in Nuxt as-is: install it and import composables and directives like in any Vue app. Every composable and directive is [SSR-safe](/guide/guidelines#ssr), so nothing needs a `<ClientOnly>` wrapper.
+vue-animejs works in Nuxt as-is: install it and import composables, directives and components like in any Vue app. Everything is [SSR-safe](/guide/guidelines#ssr), so nothing needs a `<ClientOnly>` wrapper.
 
 The sections below are optional and use only Nuxt's own configuration: auto-importing the composables, and registering the directives globally.
 

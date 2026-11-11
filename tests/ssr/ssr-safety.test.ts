@@ -14,6 +14,10 @@ import {
   waapi,
 } from "animejs"
 import {
+  AnimeLayout,
+  AnimeScope,
+  AnimeTransition,
+  AnimeTransitionGroup,
   useAnimatable,
   useAnimate,
   useDraggable,
@@ -29,7 +33,8 @@ import {
   useTimer,
   useWaapi,
 } from "@lib"
-import { renderSSR } from "../utils"
+import { h } from "vue"
+import { renderSSR, renderSSRApp } from "../utils"
 
 vi.mock("animejs", () => ({
   animate: vi.fn(() => ({ cancel: vi.fn(), revert: vi.fn() })),
@@ -88,6 +93,11 @@ describe("SSR safety", () => {
     expect(result.layout.value).toBeUndefined()
   })
 
+  it("AnimeLayout does not create a layout during SSR", async () => {
+    await renderSSRApp(() => h(AnimeLayout, { options: { duration: 300 } }))
+    expect(mock_createLayout).not.toHaveBeenCalled()
+  })
+
   it("useScroll does not attach scroll listeners for non-ref selector container/target", async () => {
     const result = await renderSSR(() => useScroll(".container", ".target"))
     expect(mock_onScroll).not.toHaveBeenCalled()
@@ -122,6 +132,23 @@ describe("SSR safety", () => {
     const result = await renderSSR(() => useTimeline({ autoplay: true }))
     expect(mock_createTimeline).not.toHaveBeenCalled()
     expect(result.timeline.value).toBeUndefined()
+  })
+
+  it("AnimeScope does not create a scope during SSR", async () => {
+    await renderSSRApp(() => h(AnimeScope, { options: { mediaQueries: { narrow: "(max-width: 600px)" } } }))
+    expect(mock_createScope).not.toHaveBeenCalled()
+  })
+
+  it("AnimeTransition does not animate during SSR, even with appear", async () => {
+    await renderSSRApp(() => h(AnimeTransition, { appear: true, enter: { opacity: [0, 1] } }, () => h("p")))
+    expect(mock_animate).not.toHaveBeenCalled()
+  })
+
+  it("AnimeTransitionGroup does not animate during SSR, even with appear", async () => {
+    await renderSSRApp(() =>
+      h(AnimeTransitionGroup, { tag: "ul", appear: true, enter: { opacity: [0, 1] } }, () => [h("li", { key: "a" })])
+    )
+    expect(mock_animate).not.toHaveBeenCalled()
   })
 
   it("useScope does not create a scope during SSR", async () => {
