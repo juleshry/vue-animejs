@@ -28,3 +28,5 @@ export { AnimeLayout, type AnimeLayoutExposed, type AnimeLayoutProps } from "./c
 export { AnimeScope, type AnimeScopeExposed, type AnimeScopeProps } from "./components/anime-scope.ts"
 export { AnimeTransition, type AnimeTransitionProps } from "./components/anime-transition.ts"
 export { AnimeTransitionGroup, type AnimeTransitionGroupProps } from "./components/anime-transition-group.ts"
+export { AnimeText, type AnimeTextExposed, type AnimeTextProps } from "./components/anime-text.ts"
+export { AnimeScroll, type AnimeScrollExposed, type AnimeScrollProps } from "./components/anime-scroll.ts"

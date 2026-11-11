@@ -19,6 +19,10 @@ import {
   type AnimeLayoutExposed,
   AnimeScope,
   type AnimeScopeExposed,
+  AnimeScroll,
+  type AnimeScrollExposed,
+  AnimeText,
+  type AnimeTextExposed,
   AnimeTransition,
   AnimeTransitionGroup,
   useAnimatable,
@@ -338,6 +342,52 @@ describe("AnimeScope hydration", () => {
     expect(el.tagName).toBe("SECTION")
     expect(el.style.color).toBe("red")
     expect(scope.value?.scope?.root).toBe(el)
+  })
+})
+
+describe("AnimeText hydration", () => {
+  it("hydrates without a mismatch warning and splits the text of its root", async () => {
+    const text = ref<AnimeTextExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeText, { ref: text, as: "p", options: { words: true }, style: { color: "red" } }, () => "Hello world")
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("P")
+    expect(el.style.color).toBe("red")
+    expect(el.querySelectorAll("[data-word]").length).toBe(2)
+    expect(text.value?.words.length).toBe(2)
+  })
+
+  // splitText() replaces the root's content: patching the old vnodes would leave the old text on the page
+  it("splits the new text when the slot content changes after hydration", async () => {
+    const message = ref("Hello world")
+    const text = ref<AnimeTextExposed>()
+    const { container } = await hydrate(() =>
+      h(AnimeText, { ref: text, as: "p", options: { words: true } }, () => message.value)
+    )
+    message.value = "Goodbye cruel world"
+    await nextTick()
+    await nextTick()
+    const words = [...container.querySelectorAll("p [data-word]")].map(word => word.textContent)
+    expect(words).toEqual(["Goodbye", "cruel", "world"])
+    expect(text.value?.words.length).toBe(3)
+  })
+})
+
+describe("AnimeScroll hydration", () => {
+  it("hydrates without a mismatch warning and observes its root", async () => {
+    const scroll = ref<AnimeScrollExposed>()
+    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const { el, warn } = await hydrate(() =>
+      h(AnimeScroll, { ref: scroll, as: "section", style: { color: "red" } }, () => h("p", "item"))
+    )
+    expect(hydrationWarnings(warn)).toEqual([])
+    expect(error).not.toHaveBeenCalled()
+    expect(el.tagName).toBe("SECTION")
+    expect(el.style.color).toBe("red")
+    expect(scroll.value?.observer).toBeDefined()
   })
 })
 

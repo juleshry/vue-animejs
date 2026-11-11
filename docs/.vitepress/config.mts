@@ -148,6 +148,8 @@ export default defineConfig({
           { text: "AnimeScope", link: "/components/anime-scope" },
           { text: "AnimeTransition", link: "/components/anime-transition" },
           { text: "AnimeTransitionGroup", link: "/components/anime-transition-group" },
+          { text: "AnimeText", link: "/components/anime-text" },
+          { text: "AnimeScroll", link: "/components/anime-scroll" },
         ],
       },
     ],

@@ -102,7 +102,7 @@ const { chars, words } = useText(text_el, () => ({ [splitBy.value]: true }))
 export interface UseTextReturn {
   /** The underlying Anime.js `TextSplitter` instance. `undefined` until the target is available. */
   splitter: Readonly<ShallowRef<TextSplitter | undefined>>
-  /** Reactive array of `<span>` elements representing each line after splitting. */
+  /** Reactive array of `<span>` elements representing each line after splitting. Empty until web fonts have loaded: Anime.js waits for them to split lines. */
   lines: ComputedRef<HTMLElement[]>
   /** Reactive array of `<span>` elements representing each word after splitting. */
   words: ComputedRef<HTMLElement[]>
@@ -131,7 +131,7 @@ export declare function useText(
 ## Reactivity & Lifecycle
 
 - The text is split once the component has **mounted**, whatever form `_target` takes (template ref, selector, element), so a selector can point into the component's own template, and server-rendered text is never split before hydration.
-- `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs.
+- `lines`, `words`, and `chars` are `ComputedRef<HTMLElement[]>` — they update automatically whenever the splitter re-runs, including the splits Anime.js does on its own: once web fonts have loaded when splitting by `lines`, and when a resize changes the line breaks. Each split gives new arrays, so an animation using them as targets is re-created.
 - If `_target` or `_params` changes, the DOM is reverted and `splitText()` is called again. For `_params`, that means a new object in a ref / computed / getter, a ref inside it changing, or a property of a reactive object mutated in place.
 - On component **unmount**, the watcher is stopped and the DOM is reverted automatically.
 

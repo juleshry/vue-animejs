@@ -5,6 +5,8 @@ import * as lib from "@lib"
 import {
   AnimeLayout,
   AnimeScope,
+  AnimeScroll,
+  AnimeText,
   AnimeTransition,
   AnimeTransitionGroup,
   useAnimatable,
@@ -197,6 +199,12 @@ const cases: Case[] = [
     component: () => h(AnimeScope, { as: "section", options: { defaults: { duration: 300 } } }, () => h("p", "item")),
     html: "<section><p>item</p></section>",
   },
+  {
+    export: "AnimeScroll",
+    name: "component",
+    component: () => h(AnimeScroll, { as: "section", options: { sync: true } }, () => h("p", "item")),
+    html: "<section><p>item</p></section>",
+  },
   { export: "useScroll", name: "template ref", component: withTarget(t => useScroll(t, t)), html: box },
   { export: "useScroll", name: "selector", component: withoutTarget(() => useScroll("#target", "#target")), html: box },
   { export: "useSvg", name: "no target", component: withoutTarget(() => useSvg()), html: box },
@@ -209,6 +217,12 @@ const cases: Case[] = [
   },
   { export: "useText", name: "template ref", component: withTarget(t => useText(t)), html: box },
   { export: "useText", name: "selector", component: withoutTarget(() => useText("#target")), html: box },
+  {
+    export: "AnimeText",
+    name: "component",
+    component: () => h(AnimeText, { as: "h1", options: { chars: true } }, () => ["Hello, ", h("em", "world")]),
+    html: "<h1>Hello, <em>world</em></h1>",
+  },
   {
     export: "useTimeline",
     name: "no target",
