@@ -1,19 +1,17 @@
 <script setup lang="ts">
-  import { type Target } from "animejs"
-  import { computed, ref, useTemplateRef } from "vue"
+  import { stagger } from "animejs"
+  import { ref, useTemplateRef } from "vue"
   import { AnimeText, useAnimate } from "@juleshry/vue-animejs"
 
   const messages = ["Hello, vue-animejs!", "Split by AnimeText.", "New content, new split."]
   const index = ref(0)
   const text = useTemplateRef("text")
 
-  const chars = computed(() => text.value?.chars ?? [])
-
-  const { restart } = useAnimate(chars, {
+  const { restart } = useAnimate(() => text.value?.chars, {
     translateY: [-24, 0],
     opacity: [0, 1],
     duration: 700,
-    delay: (_: Target, i: number) => i * 40,
+    delay: stagger(40),
     ease: "outExpo",
   })
 

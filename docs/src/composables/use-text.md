@@ -12,7 +12,7 @@ Wraps Anime.js [`splitText()`](https://animejs.com/documentation/split-text) int
 
 ```vue
 <script setup lang="ts">
-import { type Target } from "animejs"
+import { stagger } from "animejs"
 import { useTemplateRef } from "vue"
 import { useAnimate, useText } from "@juleshry/vue-animejs"
 
@@ -23,7 +23,7 @@ const { play, restart } = useAnimate(chars, {
   translateY: [-24, 0],
   opacity: [0, 1],
   duration: 700,
-  delay: (_: Target, i: number) => i * 50,
+  delay: stagger(50),
   ease: "outExpo",
 })
 </script>
@@ -41,7 +41,7 @@ Use `words` instead of `chars` to animate word by word.
 
 ```vue
 <script setup lang="ts">
-import { type Target } from "animejs"
+import { stagger } from "animejs"
 import { useTemplateRef } from "vue"
 import { useAnimate, useText } from "@juleshry/vue-animejs"
 
@@ -52,7 +52,7 @@ const { play } = useAnimate(words, {
   opacity: [0, 1],
   translateX: [-16, 0],
   duration: 500,
-  delay: (_: Target, i: number) => i * 80,
+  delay: stagger(80),
   ease: "outCubic",
 })
 </script>

@@ -10,21 +10,20 @@ Wraps [`useText`](/composables/use-text) into a component: renders a root elemen
 
 ### Animating the split characters
 
-Put a template ref on `AnimeText`: it exposes the `useText` controls, with `lines`, `words` and `chars` unwrapped to plain arrays. Read them in a `computed` and pass it to [`useAnimate`](/composables/use-animate): every new split gives new arrays, so the animation is re-created on the new elements.
+Put a template ref on `AnimeText`: it exposes the `useText` controls, with `lines`, `words` and `chars` unwrapped to plain arrays. Pass a getter reading them to [`useAnimate`](/composables/use-animate): every new split gives new arrays, so the animation is re-created on the new elements.
 
 ```vue
 <script setup lang="ts">
-import { type Target } from "animejs"
-import { computed, useTemplateRef } from "vue"
+import { stagger } from "animejs"
+import { useTemplateRef } from "vue"
 import { AnimeText, useAnimate } from "@juleshry/vue-animejs"
 
 const text = useTemplateRef("text")
-const chars = computed(() => text.value?.chars ?? [])
 
-const { restart } = useAnimate(chars, {
+const { restart } = useAnimate(() => text.value?.chars, {
   translateY: [-24, 0],
   opacity: [0, 1],
-  delay: (_: Target, i: number) => i * 40,
+  delay: stagger(40),
   ease: "outExpo",
 })
 </script>

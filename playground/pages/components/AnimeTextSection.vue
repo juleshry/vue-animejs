@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import { type Target } from "animejs"
-  import { computed, ref, useTemplateRef } from "vue"
+  import { stagger } from "animejs"
+  import { ref, useTemplateRef } from "vue"
   import { AnimeText, useAnimate } from "@lib"
   import SectionWrapper from "../../components/SectionWrapper.vue"
 
@@ -8,14 +8,12 @@
   const split_by = ref<"chars" | "words">("chars")
   const text = useTemplateRef("text")
 
-  // A new array after every split (new content or options), so the animation is re-created and plays again
-  const targets = computed(() => (split_by.value === "chars" ? text.value?.chars : text.value?.words) ?? [])
-
-  const { restart } = useAnimate(targets, {
+  // A getter target: a new array after every split (new content or options), so the animation is re-created and plays again
+  const { restart } = useAnimate(() => (split_by.value === "chars" ? text.value?.chars : text.value?.words), {
     translateY: [-24, 0],
     opacity: [0, 1],
     duration: 700,
-    delay: (_: Target, i: number) => i * 50,
+    delay: stagger(50),
     ease: "outExpo",
   })
 </script>
