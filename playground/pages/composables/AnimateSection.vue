@@ -43,6 +43,23 @@
     alternate: true,
   })
 
+  // A getter target: the animation follows the picked box, and the previous one is reverted
+  const pick_boxes = useTemplateRef<HTMLDivElement[]>("pickBoxes")
+  const picked = ref(0)
+
+  useAnimate(() => pick_boxes.value?.[picked.value], {
+    translateY: -20,
+    backgroundColor: "#ff3e00",
+    duration: 600,
+    ease: "outExpo",
+    loop: true,
+    alternate: true,
+  })
+
+  function pickNext() {
+    picked.value = (picked.value + 1) % 3
+  }
+
   // useScroll's `autoplay` merges into a plain useAnimate options object just like any other
   // animate param, alongside translateX/backgroundColor/duration.
   const scrollContainerEl = useTemplateRef<HTMLDivElement>("scrollContainer")
@@ -87,6 +104,15 @@
       <div ref="groupBox3" class="group-box" />
     </div>
     <button @click="restartGroup">Restart animation</button>
+  </SectionWrapper>
+
+  <SectionWrapper>
+    <template #title>Getter Target</template>
+    <div class="group">
+      <div v-for="i in 3" :key="i" ref="pickBoxes" class="group-box" />
+    </div>
+    <button @click="pickNext">Animate the next box</button>
+    <p>Picked: box {{ picked + 1 }}</p>
   </SectionWrapper>
 
   <SectionWrapper>
