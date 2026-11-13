@@ -73,6 +73,7 @@ const deferred = deferMount<HTMLElement, VTextSplitValue | undefined>((el, bindi
  * on the client (text can only be split in the browser).
  *
  * @example
+ * <!-- stagger from @juleshry/vue-animejs: recomputed per split -->
  * <p v-text-split="{ words: true, animation: { translateY: [20, 0], opacity: [0, 1], delay: stagger(60) } }">Hello</p>
  * <p v-text-split="{ chars: true, animation: { opacity: [0, 1], delay: stagger(30) } }">Hello</p>
  * <p v-text-split="{ lines: true, animation: { translateX: [-20, 0], delay: stagger(100) } }">Hello</p>

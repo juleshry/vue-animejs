@@ -44,6 +44,10 @@ const list = useTemplateRef("list") // a child component that exposes `items: HT
 useAnimate(() => list.value?.items, { opacity: [0, 1], delay: stagger(40) })
 ```
 
+::: tip
+When the target count can change, as with a getter or ref target, use our [`stagger`](/helpers/stagger) rather than Anime.js's: Anime.js's computes its spread once, for the first animation, so targets added later start without a delay.
+:::
+
 All of these forms, and arrays of them, make up the exported `AnimationTargets` type, which the composables take as their target.
 
 ::: warning
@@ -73,6 +77,7 @@ The exported `MaybeRefOptions<T>` type describes such an options object, if you 
 - **One level deep.** Only refs that are direct properties of the options object are unwrapped. A ref nested in a tween object (`translateX: { to: distance }`), a keyframe array or a draggable's `x: { snap }` is passed to Anime.js as-is: build those options in a getter or a `computed` instead.
 - **Getters inside options aren't unwrapped.** A function-valued option already means something to Anime.js: a [function-based value](https://animejs.com/documentation/animation/tween-value-types/function-based) (`translateX: (el, i) => i * 50`), a callback, an `ease` or a `modifier`. So `translateX: () => distance.value` is a function-based value, read once per target when the animation is created, not a reactive getter. Use `translateX: distance`, or a getter for the whole object.
 - **`useTimeline`'s `add` / `set` params** accept the same shapes, but they're read when the timeline is (re)built, not watched.
+- **A rebuild reuses your function values.** Anime.js's `stagger()` keeps the spread of the first animation it ran in, so after a rebuild on more targets, the extra ones start without a delay. Use our [`stagger`](/helpers/stagger), which computes it per animation. It also takes refs, read on each rebuild (changing one doesn't rebuild by itself).
 
 ::: warning
 Changing reactive options recreates the underlying Anime.js instance from scratch. The animation restarts from the element's current position with the new parameters.
@@ -208,7 +213,7 @@ const options = computed(() => ({ translateX: 200, duration: duration.value }))
 ```
 
 ::: warning
-Changing the binding value recreates the underlying Anime.js instance from scratch, same as changing a composable's reactive options. The value is compared by content, so an inline object that re-renders with the same values doesn't restart anything. Functions with the same source (e.g. an inline `stagger(60)`) count as unchanged, so changing only a stagger's argument needs a `:key` on the element to take effect.
+Changing the binding value recreates the underlying Anime.js instance from scratch, same as changing a composable's reactive options. The value is compared by content, so an inline object that re-renders with the same values doesn't restart anything. Other functions with the same source count as unchanged, except our [`stagger`](/helpers/stagger), compared by its arguments: changing `stagger(60)` to `stagger(80)` re-creates the animation. With Anime.js's own `stagger()`, changing only its argument needs a `:key` on the element to take effect.
 :::
 
 Reach for a directive when the animation has no imperative control needs (no `play` / `pause` / `restart` from script) and the options can be expressed inline. Reach for the composable instead when you need to control playback, read animation state, or share the instance across multiple elements.

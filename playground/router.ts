@@ -23,6 +23,7 @@ import AnimeScopeSection from "./pages/components/AnimeScopeSection.vue"
 import AnimeScopeResponsiveFrame from "./pages/components/AnimeScopeResponsiveFrame.vue"
 import AnimeTransitionSection from "./pages/components/AnimeTransitionSection.vue"
 import AnimeTransitionGroupSection from "./pages/components/AnimeTransitionGroupSection.vue"
+import StaggerSection from "./pages/helpers/StaggerSection.vue"
 
 export const composable_routes = [
   {
@@ -143,6 +144,14 @@ export const component_routes = [
   },
 ]
 
+export const helper_routes = [
+  {
+    path: "/helpers/stagger",
+    component: StaggerSection,
+    meta: { label: "stagger", description: "Anime.js's stagger, computed per animation" },
+  },
+]
+
 export const routes = [
   { path: "/composables", component: RouteIndex, props: { title: "Composables", routes: composable_routes } },
   ...composable_routes,
@@ -150,6 +159,8 @@ export const routes = [
   ...directive_routes,
   { path: "/components", component: RouteIndex, props: { title: "Components", routes: component_routes } },
   ...component_routes,
+  { path: "/helpers", component: RouteIndex, props: { title: "Helpers", routes: helper_routes } },
+  ...helper_routes,
   // Pages embedded in an iframe by a section, rendered without the nav bar
   { path: "/frames/anime-scope", component: AnimeScopeResponsiveFrame, meta: { bare: true } },
   { path: "/", redirect: "/composables" },
