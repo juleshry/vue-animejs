@@ -12,8 +12,7 @@ Splits the element's text into chars, words, or lines directly from a template a
 
 ```vue
 <script setup lang="ts">
-import { stagger } from "animejs"
-import { vTextSplit } from "@juleshry/vue-animejs"
+import { stagger, vTextSplit } from "@juleshry/vue-animejs"
 
 const options = {
   chars: true,
@@ -42,8 +41,7 @@ Line detection waits for `document.fonts.ready` before animating, since line bre
 
 ```vue
 <script setup lang="ts">
-import { stagger } from "animejs"
-import { vTextSplit } from "@juleshry/vue-animejs"
+import { stagger, vTextSplit } from "@juleshry/vue-animejs"
 
 const word_options = {
   words: true,
@@ -104,8 +102,7 @@ The text can't be split on the server because:
 
 ```vue
 <script setup lang="ts">
-import { stagger } from "animejs"
-import { vTextSplit } from "@juleshry/vue-animejs"
+import { stagger, vTextSplit } from "@juleshry/vue-animejs"
 </script>
 
 <template>
@@ -126,8 +123,7 @@ Changing options reverts the current split and re-runs it from scratch. Any in-p
 ```vue
 <script setup lang="ts">
 import { ref, computed } from "vue"
-import { stagger } from "animejs"
-import { vTextSplit } from "@juleshry/vue-animejs"
+import { stagger, vTextSplit } from "@juleshry/vue-animejs"
 
 const duration = ref(500)
 
@@ -172,6 +168,7 @@ export interface VTextSplitValue extends TextSplitterParams {
  * on the client (text can only be split in the browser).
  *
  * @example
+ * <!-- stagger from @juleshry/vue-animejs: recomputed per split -->
  * <p v-text-split="{ words: true, animation: { translateY: [20, 0], opacity: [0, 1], delay: stagger(60) } }">Hello</p>
  * <p v-text-split="{ chars: true, animation: { opacity: [0, 1], delay: stagger(30) } }">Hello</p>
  * <p v-text-split="{ lines: true, animation: { translateX: [-20, 0], delay: stagger(100) } }">Hello</p>
@@ -185,7 +182,7 @@ export declare const vTextSplit: Directive<HTMLElement, VTextSplitValue | undefi
 
 - On **mount**, the text is split. If `animation` is provided, it's applied to the resulting spans — for `lines`, the animation waits for `document.fonts.ready` first. It runs once the mount flush has finished, so the `onMounted` hooks of the surrounding components (including ones whose root is this element) still see the DOM as rendered. That's still before the browser paints.
 - On **update**, if the binding value changed, the previous split is **reverted** and its animation **cancelled**, then the text is split and animated again from the new value.
-- The binding value is compared by **content**, not by reference: an inline object (`v-text-split="{ … }"`) that re-renders with the same values doesn't restart anything. Functions count as unchanged when their source is the same, so an inline `stagger(60)` doesn't restart on every render either, but changing only its argument isn't picked up. Add a `:key` to the element to force a fresh start in that case.
+- The binding value is compared by **content**, not by reference: an inline object (`v-text-split="{ … }"`) that re-renders with the same values doesn't restart anything. Functions count as unchanged when their source is the same, so an inline arrow callback doesn't restart on every render either. Our [`stagger`](/helpers/stagger) is compared by its arguments, so changing `stagger(60)` to `stagger(80)` restarts the animation; with Anime.js's own `stagger()`, changing only its argument isn't picked up, so add a `:key` to the element to force a fresh start.
 - On **unmount**, the animation is cancelled and the split is reverted, restoring the original text content.
 - During **SSR**, the text is rendered unsplit. With `ssrHidden: true`, the element also gets `visibility: hidden`, removed on the client right after the animation is created (after `document.fonts.ready` for `lines`), or right after the split when there's no `animation`.
 

@@ -28,6 +28,7 @@ import AnimeScopeDemo from "./components/demo/anime-scope/AnimeScopeDemo.vue"
 import AnimeScopeDemoInner from "./components/demo/anime-scope/AnimeScopeDemoInner.vue"
 import AnimeTransitionDemo from "./components/demo/AnimeTransitionDemo.vue"
 import AnimeTransitionGroupDemo from "./components/demo/AnimeTransitionGroupDemo.vue"
+import StaggerDemo from "./components/demo/StaggerDemo.vue"
 import { demoParent } from "./demo-parents"
 import "./style.css"
 
@@ -68,5 +69,6 @@ export default {
     app.component("AnimeScopeDemoInner", AnimeScopeDemoInner)
     app.component("AnimeTransitionDemo", AnimeTransitionDemo)
     app.component("AnimeTransitionGroupDemo", AnimeTransitionGroupDemo)
+    app.component("StaggerDemo", StaggerDemo)
   },
 } satisfies Theme

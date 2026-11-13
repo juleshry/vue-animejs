@@ -150,6 +150,10 @@ export default defineConfig({
           { text: "AnimeTransitionGroup", link: "/components/anime-transition-group" },
         ],
       },
+      {
+        text: "Helpers",
+        items: [{ text: "stagger", link: "/helpers/stagger" }],
+      },
     ],
   },
 })

@@ -108,6 +108,12 @@ useAnimate(el, { translateX: 250, duration: 800 })
 | `AnimeTransition` | Vue `<Transition>` with Anime.js enter / leave animations, `appear` included under SSR |
 | `AnimeTransitionGroup` | Vue `<TransitionGroup>` with Anime.js enter / leave animations, staggered |
 
+**Helpers** — plain functions:
+
+| Helper    | Description                                              |
+|-----------|----------------------------------------------------------|
+| `stagger` | Anime.js's `stagger`, computed per animation: stays right when a rebuilt animation has more or fewer targets |
+
 ## 🚀 Usage
 
 For full API docs and live demos, see **[the doc here](https://vue-animejs.juleshry.dev)**.

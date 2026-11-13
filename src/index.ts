@@ -28,3 +28,4 @@ export { AnimeLayout, type AnimeLayoutExposed, type AnimeLayoutProps } from "./c
 export { AnimeScope, type AnimeScopeExposed, type AnimeScopeProps } from "./components/anime-scope.ts"
 export { AnimeTransition, type AnimeTransitionProps } from "./components/anime-transition.ts"
 export { AnimeTransitionGroup, type AnimeTransitionGroupProps } from "./components/anime-transition-group.ts"
+export { stagger, type StaggerValue } from "./helpers/stagger.ts"

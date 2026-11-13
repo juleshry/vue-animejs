@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vite-plus/test"
-import { reactive } from "vue"
+import { reactive, ref } from "vue"
+import { stagger as animeStagger } from "animejs"
 import { isSameBinding } from "@src/utils/same-binding.ts"
+import { stagger } from "@src/helpers/stagger.ts"
+import { setBindingKey } from "@src/utils/binding-key.ts"
 
 describe("isSameBinding", () => {
   it("treats equal primitives as the same, NaN included", () => {
@@ -29,6 +32,43 @@ describe("isSameBinding", () => {
     const make = () => (_el: unknown, i: number) => i * 60
     expect(isSameBinding({ delay: make() }, { delay: make() })).toBe(true)
     expect(isSameBinding({ delay: (i: number) => i * 60 }, { delay: (i: number) => i * 30 })).toBe(false)
+  })
+
+  it("compares our stagger() by its arguments", () => {
+    expect(isSameBinding({ delay: stagger(60) }, { delay: stagger(60) })).toBe(true)
+    expect(
+      isSameBinding(stagger(60, { from: "center", ease: "out" }), stagger(60, { from: "center", ease: "out" }))
+    ).toBe(true)
+    expect(isSameBinding({ delay: stagger(60) }, { delay: stagger(80) })).toBe(false)
+    expect(isSameBinding(stagger(60), stagger(60, { from: "last" }))).toBe(false)
+    expect(isSameBinding(stagger([0, 100]), stagger([0, 200]))).toBe(false)
+    expect(isSameBinding(stagger(60), (_el: unknown, i: number) => i * 60)).toBe(false)
+  })
+
+  it("treats a stagger() without params and with empty params as the same", () => {
+    expect(isSameBinding(stagger(60), stagger(60, {}))).toBe(true)
+  })
+
+  it("compares any function with a binding key by that key, an undefined key included", () => {
+    const make = (key: unknown) => {
+      const fn = () => 0
+      setBindingKey(fn, key)
+      return fn
+    }
+    expect(isSameBinding(make([1, { a: 2 }]), make([1, { a: 2 }]))).toBe(true)
+    expect(isSameBinding(make(1), make(2))).toBe(false)
+    expect(isSameBinding(make(undefined), make(undefined))).toBe(true)
+    expect(isSameBinding(make(undefined), () => 0)).toBe(false)
+  })
+
+  it("compares our stagger()'s ref arguments by reference", () => {
+    const step = ref(60)
+    expect(isSameBinding(stagger(step), stagger(step))).toBe(true)
+    expect(isSameBinding(stagger(step), stagger(ref(60)))).toBe(false)
+  })
+
+  it("still compares Anime.js's own stagger() by source", () => {
+    expect(isSameBinding(animeStagger(60), animeStagger(80))).toBe(true)
   })
 
   it("compares elements and other non-plain objects by reference", () => {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vite-plus/test"
 import { animate, stagger, type AnimationParams } from "animejs"
 import { reactive, ref } from "vue"
+import { stagger as ourStagger } from "@src/helpers/stagger.ts"
 import { asPrimitive, getFrom, getInitialStyle, isNumeric, transformUnit, withUnit } from "@src/utils/initial-style.ts"
 
 describe("getInitialStyle", () => {
@@ -30,6 +31,7 @@ describe("getInitialStyle", () => {
       ["a function `from` in an array", { opacity: [() => 0, 1] }],
       ["a function `from` in an object", { opacity: { from: () => 0 } }],
       ["stagger()", { translateX: stagger(10) }],
+      ["our stagger()", { translateX: ourStagger(10) }],
       ["a value keyframes array", { opacity: [0, 0.5, 1] }],
       ["a keyframes array of objects", { opacity: [{ to: 0 }, { to: 1 }] }],
       ["top-level keyframes", { keyframes: [{ opacity: 0 }, { opacity: 1 }] }],

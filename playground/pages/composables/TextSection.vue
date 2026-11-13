@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { useTemplateRef } from "vue"
-  import { useAnimate, useText } from "@lib"
-  import { stagger, type Target } from "animejs"
+  import { stagger, useAnimate, useText } from "@lib"
+  import { type Target } from "animejs"
   import SectionWrapper from "../../components/SectionWrapper.vue"
 
   const text = useTemplateRef("text")

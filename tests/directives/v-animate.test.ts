@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vite-plus/test"
 import { defineComponent, nextTick, ref } from "vue"
-import { vAnimate } from "@lib"
+import { stagger, vAnimate } from "@lib"
 import { makeAnimationMock } from "../mocks"
 import { mountDirective } from "../utils"
 import { animate } from "animejs"
@@ -111,6 +111,23 @@ describe("vAnimate", () => {
     distance.value = 200
     await nextTick()
     expect(mock_animate).toHaveBeenCalledWith(wrapper.element, { translateX: 200 })
+  })
+
+  it("recreates animation when an inline stagger()'s argument changes", async () => {
+    const step = ref(60)
+    await mountDirective(
+      defineComponent({
+        directives: { animate: vAnimate },
+        template: '<div v-animate="{ opacity: [0, 1], delay: stagger(step) }" />',
+        setup() {
+          return { step, stagger }
+        },
+      })
+    )
+    mock_animate.mockClear()
+    step.value = 80
+    await nextTick()
+    expect(mock_animate).toHaveBeenCalledTimes(1)
   })
 
   it("cancels and reverts previous animation before recreating", async () => {
